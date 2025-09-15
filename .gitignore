@@ -1,0 +1,5 @@
+# SPA
+spa/*.tsbuildinfo
+spa/.env
+spa/node_modules
+spa/dist
