@@ -5,8 +5,19 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: "pip"
     directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "10:00"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "infhyroyage"
+    labels: []
+
+  - package-ecosystem: "npm"
+    directory: "/spa"
     schedule:
       interval: "weekly"
       day: "thursday"
@@ -29,7 +40,7 @@ updates:
   #   schedule:
   #     interval: "weekly"
   #     day: "thursday"
-  #     time: "11:30"
+  #     time: "11:00"
   #     timezone: "Asia/Tokyo"
   #   assignees:
   #     - "infhyroyage"
