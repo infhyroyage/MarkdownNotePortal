@@ -8,7 +8,7 @@
 
 ### 1.2 ソリューション概要
 
-ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は AWS Lambda で行う。
+ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は、Node.js 製の AWS Lambda で行う。
 
 ## 2. アーキテクチャ
 
@@ -46,6 +46,7 @@
 | `mkmemoportal-lambda-delete-memo` | AWS Lambda         | \[DELETE\] /memo/{memoId} のバックエンド処理を行う Lambda 関数 |
 | `mkmemoportal-lambda-get-memo`    | AWS Lambda         | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`  | AWS Lambda         | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
+| `mkmemoportal-lambda-update-memo` | AWS Lambda         | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-stack`              | AWS CloudFormation | フロントエンド・バックエンドの AWS リソースを管理するスタック  |
 | `mkmemoportal-waf`                | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL        |
 
@@ -85,12 +86,19 @@ API Gateway で以下の API エンドポイントを管理する。
 
 - [GET] /memo/{memoId}
 
-  - 概要: 指定した 1 件のメモのタイトルと内容(Markdown 文字列)を返す
+  - 概要: 指定した 1 件の保存済みのメモのタイトルと内容(Markdown 文字列)を返す。
   - 成功レスポンス: `200 OK` `{ "memoId": string, "title": string, "content": string }`
   - 取得不可: `404 Not Found`
 
+- [PUT] /memo/{memoId}
+
+  - 概要: 指定した 1 件の保存済みのメモのタイトルと内容(Markdown 文字列)を更新する。
+  - リクエストボディ: `{ "title": string, "content": string }`
+  - 成功レスポンス: `200 OK` `{ "memoId": string, "title": string, "content": string }`
+  - バリデーション: `title` は 1〜200 文字、`content` は Markdown 文字列
+
 - [DELETE] /memo/{memoId}
-  - 概要: 指定した 1 件のメモを削除する。
+  - 概要: 指定した 1 件の保存済みのメモを削除する。
   - 成功レスポンス: `204 No Content`
   - 取得不可: `404 Not Found`
 
