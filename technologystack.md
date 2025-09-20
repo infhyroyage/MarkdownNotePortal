@@ -33,13 +33,22 @@
 
 ### 2.2 AWS リソース構成
 
-以下の表は、本システムで使用する主要な AWS リソースとその役割を示している:
+以下の表は、本システムのフロントエンド/バックエンドで使用する主要な AWS リソースとその役割を示している:
+
+#### フロントエンド
+
+| AWS リソース名 (論理 ID)      | AWS サービス       | 概要                                                    |
+| ----------------------------- | ------------------ | ------------------------------------------------------- |
+| (ユーザー指定)                | Amazon S3          | SPA のビルドアーティファクトを保存するバケット          |
+| `mkmemoportal-cloudfront`     | Amazon CloudFront  | SPA を配信する CDN                                      |
+| `mkmemoportal-stack-frontend` | AWS CloudFormation | フロントエンドの AWS リソースを管理するスタック         |
+| `mkmemoportal-waf`            | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL |
+
+#### バックエンド
 
 | AWS リソース名 (論理 ID)          | AWS サービス       | 概要                                                           |
 | --------------------------------- | ------------------ | -------------------------------------------------------------- |
-| (ユーザー指定)                    | Amazon S3          | SPA のビルドアーティファクトを保存するバケット                 |
 | `mkmemoportal-apig`               | Amazon API Gateway | Cognito User Pool オーソライザーを適用した API エンドポイント  |
-| `mkmemoportal-cloudfront`         | Amazon CloudFront  | SPA を配信する CDN                                             |
 | `mkmemoportal-cognito`            | Amazon Cognito     | ユーザー管理、認証・認可を行うユーザープール                   |
 | `mkmemoportal-dynamodb`           | Amazon DynamoDB    | メモを保存するテーブル (PK: `user_id`, SK: `memo_id`)          |
 | `mkmemoportal-lambda-create-memo` | AWS Lambda         | \[POST\] /memo のバックエンド処理を行う Lambda 関数            |
@@ -47,8 +56,7 @@
 | `mkmemoportal-lambda-get-memo`    | AWS Lambda         | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`  | AWS Lambda         | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo` | AWS Lambda         | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-stack`              | AWS CloudFormation | フロントエンド・バックエンドの AWS リソースを管理するスタック  |
-| `mkmemoportal-waf`                | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL        |
+| `mkmemoportal-stack-backend`      | AWS CloudFormation | バックエンドの AWS リソースを管理するスタック                  |
 
 ### 2.3 AWS アーキテクチャー図
 
@@ -105,13 +113,7 @@ API Gateway で以下の API エンドポイントを管理する。
 API Gateway には Cognito User Pool オーソライザーが設定されており、フロントエンドから付与したヘッダー `Authorization: Bearer <JWT>` の検証により、API の認可を強制する。
 リクエストは全てログインユーザー単位でスコープされ、バックエンドはトークンの `sub` を `user_id` として用いてデータの分離を保証する。レスポンスは `application/json`とする。
 
-### 3.3 状態管理
-
-以下の Jotai での Atom を用いた状態管理により、コンポーネント間でのデータ共有を実現する。
-
-TODO
-
-### 3.4 UI/UX 設計
+### 3.3 UI/UX 設計
 
 レスポンシブデザインに対応した Web アプリケーションを実現するために、Tailwind CSS によるモバイルファースト設計を採用する。
 Tailwind CSS ベースな UI を統一的に提供するために、daisyUI を採用する。
