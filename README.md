@@ -10,11 +10,15 @@
 
 ## AWS 環境構築手順・削除手順
 
-TODO
+[awssetup.md](awssetup.md) 参照。
+
+## ローカル環境構築手順・削除手順
+
+[localsetup.md](localsetup.md) 参照。
 
 ## Contribution Guide
 
-TODO
+[CONTRIBUTING.md](CONTRIBUTING.md) 参照。
 
 ## ライセンス
 

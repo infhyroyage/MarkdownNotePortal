@@ -35,13 +35,13 @@ updates:
       - dependency-name: "typescript"
     labels: []
 
-  # - package-ecosystem: "github-actions"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #     day: "thursday"
-  #     time: "11:00"
-  #     timezone: "Asia/Tokyo"
-  #   assignees:
-  #     - "infhyroyage"
-  #   labels: []
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "11:00"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "infhyroyage"
+    labels: []
