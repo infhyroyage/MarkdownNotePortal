@@ -22,7 +22,7 @@
   - Amazon CloudWatch (ログ・モニタリング)
   - Amazon Cognito (ユーザープールによる認証機能の提供)
   - Amazon DynamoDB (保存したメモの管理)
-  - Amazon S3 (フロントエンドのビルドファイルの格納)
+  - Amazon S3 (フロントエンド・バックエンドのビルドアーティファクト格納)
   - AWS CloudFormation (スタック管理)
   - AWS IAM (権限管理)
   - AWS Lambda (バックエンドのロジック実装)
@@ -48,6 +48,7 @@
 
 | AWS リソース名 (論理 ID)          | AWS サービス       | 概要                                                           |
 | --------------------------------- | ------------------ | -------------------------------------------------------------- |
+| (ユーザー指定)                    | Amazon S3          | Lambda 関数のビルドアーティファクトを保存するバケット          |
 | `mkmemoportal-apig`               | Amazon API Gateway | Cognito User Pool オーソライザーを適用した API エンドポイント  |
 | `mkmemoportal-cognito`            | Amazon Cognito     | ユーザー管理、認証・認可を行うユーザープール                   |
 | `mkmemoportal-dynamodb`           | Amazon DynamoDB    | メモを保存するテーブル (PK: `user_id`, SK: `memo_id`)          |
