@@ -24,8 +24,8 @@
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
 - ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、目的に応じて以下の CloudFormation テンプレートファイルを使用する:
-  - **`frontend.yaml`**: フロントエンドの AWS リソースを定義
-  - **`backend.yaml`**: バックエンドの AWS リソースを定義
+  - **`resources/frontend.yaml`**: フロントエンドの AWS リソースを定義
+  - **`resources/backend.yaml`**: バックエンドの AWS リソースを定義
 - フロントエンド・バックエンドのそれぞれの AWS リソースのデプロイは、GitHub Actions と連携した CI/CD パイプラインを実行して AWS CloudFormation スタックの構築・更新により行う。この CI/CD パイプラインは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
 - AWS Lambda 関数の Python のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは、以下のコマンドで実行する。
   ```bash
@@ -34,7 +34,7 @@
 - AWS Lambda 関数間で共通する処理は Lambda レイヤーとして lambdas/layer に実装し、コードの重複を避ける。
 - AWS Lambda 関数は Python を用いてコーディングし、.pylintrc に記載した例外を除き、必ず Pylint の警告・エラーをすべて解消するように、コード品質を担保する。Pylint の静的解析は、以下のコマンドで実行する。
   ```bash
-  pylint lambdas/**/*.py --disable=import-error
+  pylint lambdas/**/*.py
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
   - **`.github/workflows/deploy-frontend.yaml`**: フロントエンドの AWS リソースのデプロイ
@@ -52,7 +52,7 @@
   ```
 - [ ] 以下のコマンドを実行して、Pylint の警告・エラーをすべて解消する:
   ```bash
-  pylint lambdas/**/*.py --disable=import-error
+  pylint lambdas/**/*.py
   ```
 - [ ] ターゲットを main ブランチに設定している。
 
