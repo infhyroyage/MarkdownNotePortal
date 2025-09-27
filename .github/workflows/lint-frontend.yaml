@@ -28,14 +28,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Restore cache
+      - name: Restore Cache
         uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-markdown-note-portal-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: ${{ runner.os }}-markdown-note-portal-${{ hashFiles('**/package-lock.json') }}-
 
-      - name: Lint
+      - name: Run Lint
         uses: reviewdog/action-eslint@v1
         with:
           fail_level: error
