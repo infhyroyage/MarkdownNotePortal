@@ -37,8 +37,8 @@
   pylint lambdas/**/*.py
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
-  - **`.github/workflows/deploy-frontend.yaml`**: フロントエンドの AWS リソースのデプロイ
-  - **`.github/workflows/build-and-deploy-backend.yaml`**: AWS Lambda 関数のユニットテスト、およびバックエンドの AWS リソースのデプロイ
+  - **`.github/workflows/build-and-deploy-frontend.yaml`**: フロントエンドの AWS リソースのビルド・デプロイ
+  - **`.github/workflows/build-and-deploy-backend.yaml`**: AWS Lambda 関数のユニットテスト、およびバックエンドの AWS リソースのビルド・デプロイ
   - **`.github/workflows/lint-frontend.yaml`**: Pull Request 発行時の ESLint 実行
   - **`.github/workflows/test-lint-backend.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・Pylint 実行
 
