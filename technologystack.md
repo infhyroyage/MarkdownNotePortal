@@ -41,7 +41,7 @@
 | ----------------------------- | ------------------ | ------------------------------------------------------- |
 | (ユーザー指定)                | Amazon S3          | SPA のビルドアーティファクトを保存するバケット          |
 | `mkmemoportal-cloudfront`     | Amazon CloudFront  | SPA を配信する CDN                                      |
-| `mkmemoportal-stack-frontend` | AWS CloudFormation | フロントエンドの AWS リソースを管理するスタック         |
+| `mkmemoportal-stack` | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック |
 | `mkmemoportal-waf`            | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL |
 
 #### バックエンド
@@ -57,7 +57,7 @@
 | `mkmemoportal-lambda-get-memo`    | AWS Lambda         | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`  | AWS Lambda         | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo` | AWS Lambda         | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-stack-backend`      | AWS CloudFormation | バックエンドの AWS リソースを管理するスタック                  |
+| `mkmemoportal-stack`      | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック                  |
 
 ### 2.3 AWS アーキテクチャー図
 

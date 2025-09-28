@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Markdown Note Portal - AWS Resources (Unified Stack) [Deprecated template - use resources/mkmemoportal-stack.yaml]
+Description: Markdown Note Portal - AWS Resources (Unified Stack)
 
 Parameters:
   S3BackendBucketName:
@@ -344,3 +344,4 @@ Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL for mkmemoportal-apig
     Value: !GetAtt MkmemoportalApig.ApiEndpoint
+
