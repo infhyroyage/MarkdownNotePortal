@@ -58,6 +58,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create S3 Bucket if not exists
+        run: |
+          aws s3 mb s3://${{ vars.S3_BACKEND_BUCKET_NAME }}
+
       - name: Deploy Lambda Functions and Layer codes
         run: |
           aws s3 cp create_memo.zip s3://${{ vars.S3_BACKEND_BUCKET_NAME }}/create_memo.zip
