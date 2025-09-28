@@ -44,12 +44,12 @@ jobs:
 
       - name: Build Lambda Functions and Layer codes
         run: |
-          cd lambdas/create_memo && zip -r ../../create_memo.zip app.py __init__.py
-          cd lambdas/delete_memo && zip -r ../../delete_memo.zip app.py __init__.py
-          cd lambdas/get_memo && zip -r ../../get_memo.zip app.py __init__.py
-          cd lambdas/list_memos && zip -r ../../list_memos.zip app.py __init__.py
-          cd lambdas/update_memo && zip -r ../../update_memo.zip app.py __init__.py
-          cd lambdas/layer && zip -r ../../layer.zip python
+          cd lambdas/create_memo && zip -r ../../create_memo.zip app.py __init__.py && cd ../../
+          cd lambdas/delete_memo && zip -r ../../delete_memo.zip app.py __init__.py && cd ../../
+          cd lambdas/get_memo && zip -r ../../get_memo.zip app.py __init__.py && cd ../../
+          cd lambdas/list_memos && zip -r ../../list_memos.zip app.py __init__.py && cd ../../
+          cd lambdas/update_memo && zip -r ../../update_memo.zip app.py __init__.py && cd ../../
+          cd lambdas/layer && zip -r ../../layer.zip python && cd ../../
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
