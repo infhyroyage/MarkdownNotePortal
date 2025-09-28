@@ -1,0 +1,346 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Markdown Note Portal - Backend AWS Resources
+
+Parameters:
+  S3BackendBucketName:
+    Type: String
+    Description: S3 bucket that stores Lambda deployment artifacts
+
+Resources:
+  # DynamoDB
+  MkmemoportalDynamodb:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: mkmemoportal-dynamodb
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: memo_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: memo_id
+          KeyType: RANGE
+
+  # Cognito
+  MkmemoportalCognito:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: mkmemoportal-cognito
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+
+  MkmemoportalCognitoClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: mkmemoportal-cognito-client
+      UserPoolId: !Ref MkmemoportalCognito
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+
+  # IAM Role
+  MkmemoportalIAMRoleLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: mkmemoportal-iam-role-lambda
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: mkmemoportal-dynamodb-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !GetAtt MkmemoportalDynamodb.Arn
+
+  # Lambda Layer
+  MkmemoportalLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: mkmemoportal-lambda-layer
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: layer.zip
+      Description: Shared utilities for Markdown Note Portal Lambdas
+
+  # Lambda Functions
+  CreateMemoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: mkmemoportal-lambda-create-memo
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
+      Code:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: create_memo.zip
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MkmemoportalDynamodb
+      Layers:
+        - !Ref MkmemoportalLambdaLayer
+
+  DeleteMemoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: mkmemoportal-lambda-delete-memo
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
+      Code:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: delete_memo.zip
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MkmemoportalDynamodb
+      Layers:
+        - !Ref MkmemoportalLambdaLayer
+
+  GetMemoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: mkmemoportal-lambda-get-memo
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
+      Code:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: get_memo.zip
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MkmemoportalDynamodb
+      Layers:
+        - !Ref MkmemoportalLambdaLayer
+
+  ListMemosFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: mkmemoportal-lambda-list-memos
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
+      Code:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: list_memos.zip
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MkmemoportalDynamodb
+      Layers:
+        - !Ref MkmemoportalLambdaLayer
+
+  UpdateMemoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: mkmemoportal-lambda-update-memo
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
+      Code:
+        S3Bucket: !Ref S3BackendBucketName
+        S3Key: update_memo.zip
+      Timeout: 10
+      MemorySize: 256
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MkmemoportalDynamodb
+      Layers:
+        - !Ref MkmemoportalLambdaLayer
+
+  # API Gateway
+  MkmemoportalApig:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: mkmemoportal-apig
+      ProtocolType: HTTP
+
+  MkmemoportalApigStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      StageName: $default
+      AutoDeploy: true
+
+  MkmemoportalApigAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      AuthorizerType: JWT
+      Name: mkmemoportal-cognito-authorizer
+      IdentitySource:
+        - "$request.header.Authorization"
+      JwtConfiguration:
+        Audience:
+          - !Ref MkmemoportalCognitoClient
+        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MkmemoportalCognito}
+
+  CreateMemoIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateMemoFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  DeleteMemoIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteMemoFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  GetMemoIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetMemoFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  ListMemosIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListMemosFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  UpdateMemoIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateMemoFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  PostMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: POST /memo
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${CreateMemoIntegration}
+
+  GetMemosRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: GET /memo
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${ListMemosIntegration}
+
+  GetMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: GET /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${GetMemoIntegration}
+
+  PutMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: PUT /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${UpdateMemoIntegration}
+
+  DeleteMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: DELETE /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${DeleteMemoIntegration}
+
+  CreateMemoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CreateMemoFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${MkmemoportalApig}/*/*
+
+  DeleteMemoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref DeleteMemoFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${MkmemoportalApig}/*/*
+
+  GetMemoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref GetMemoFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${MkmemoportalApig}/*/*
+
+  ListMemosPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ListMemosFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${MkmemoportalApig}/*/*
+
+  UpdateMemoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref UpdateMemoFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${MkmemoportalApig}/*/*
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL for mkmemoportal-apig
+    Value: !GetAtt MkmemoportalApig.ApiEndpoint
