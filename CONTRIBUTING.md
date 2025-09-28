@@ -24,9 +24,8 @@
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
 - ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、目的に応じて以下の CloudFormation テンプレートファイルを使用する:
-  - **`resources/frontend.yaml`**: フロントエンドの AWS リソースを定義
-  - **`resources/backend.yaml`**: バックエンドの AWS リソースを定義
-- フロントエンド・バックエンドのそれぞれの AWS リソースのデプロイは、GitHub Actions と連携した CI/CD パイプラインを実行して AWS CloudFormation スタックの構築・更新により行う。この CI/CD パイプラインは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
+  - **`resources/mkmemoportal-stack.yaml`**: フロントエンド・バックエンドの AWS リソースを統合的に定義
+- AWS リソースのデプロイは、GitHub Actions と連携した CI/CD パイプラインを実行して、統合 CloudFormation スタックの構築・更新により行う。この CI/CD パイプラインは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
 - AWS Lambda 関数の Python のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは、以下のコマンドで実行する。
   ```bash
   pytest --cov=lambdas --cov-report=term-missing --cov-fail-under=80 lambdas/tests
@@ -37,8 +36,7 @@
   pylint lambdas/**/*.py
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
-  - **`.github/workflows/build-and-deploy-frontend.yaml`**: フロントエンドの AWS リソースのビルド・デプロイ
-  - **`.github/workflows/build-and-deploy-backend.yaml`**: AWS Lambda 関数のユニットテスト、およびバックエンドの AWS リソースのビルド・デプロイ
+  - **`.github/workflows/build-and-deploy.yaml`**: 統合スタックのビルド・デプロイ
   - **`.github/workflows/lint-frontend.yaml`**: Pull Request 発行時の ESLint 実行
   - **`.github/workflows/test-lint-backend.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・Pylint 実行
 

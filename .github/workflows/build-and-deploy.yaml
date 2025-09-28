@@ -1,4 +1,4 @@
-name: Build and Deploy Backend
+name: Build and Deploy
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-1
-  AWS_STACK_NAME: mkmemoportal-stack-backend
+  AWS_STACK_NAME: mkmemoportal-stack
   PYTHON_VERSION: "3.12"
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
             --cov-fail-under=80 \
             lambdas/tests
 
-  build-and-deploy-backend:
+  build-and-deploy:
     runs-on: ubuntu-latest
     needs: test-backend
     steps:
@@ -62,7 +62,7 @@ jobs:
         run: |
           aws s3 mb s3://${{ vars.S3_BACKEND_BUCKET_NAME }}
 
-      - name: Deploy Lambda Functions and Layer codes
+      - name: Upload Lambda Functions and Layer artifacts
         run: |
           aws s3 cp create_memo.zip s3://${{ vars.S3_BACKEND_BUCKET_NAME }}/create_memo.zip
           aws s3 cp delete_memo.zip s3://${{ vars.S3_BACKEND_BUCKET_NAME }}/delete_memo.zip
@@ -71,11 +71,12 @@ jobs:
           aws s3 cp update_memo.zip s3://${{ vars.S3_BACKEND_BUCKET_NAME }}/update_memo.zip
           aws s3 cp layer.zip s3://${{ vars.S3_BACKEND_BUCKET_NAME }}/layer.zip
 
-      - name: Deploy Backend AWS Resources
+      - name: Deploy AWS Resources (Unified Stack)
         run: |
           aws cloudformation deploy \
-            --template-file resources/backend.yaml \
+            --template-file resources/mkmemoportal-stack.yaml \
             --stack-name ${AWS_STACK_NAME} \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
               S3BackendBucketName=${{ vars.S3_BACKEND_BUCKET_NAME }}
+
