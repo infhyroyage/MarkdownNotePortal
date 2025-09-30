@@ -1,10 +1,11 @@
-name: Run Lint in Frontend before Merging Pull Request
+name: Run Lint in SPA before Merging Pull Request
 
 on:
   pull_request:
     branches:
       - main
     paths:
+      - .github/workflows/lint-spa.yaml
       - spa/**
 
 env:
@@ -16,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  lint-frontend:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

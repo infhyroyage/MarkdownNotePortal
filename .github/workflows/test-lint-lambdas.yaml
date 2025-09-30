@@ -1,12 +1,13 @@
-name: Run Tests and Lint in Backend before Merging Pull Request
+name: Run Tests and Lint in Lambda Functions before Merging Pull Request
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - lambdas/**
+      - .github/workflows/test-lint-lambdas.yaml
       - .pylintrc
+      - lambdas/**
       - pytest.ini
       - requirements.txt
 
@@ -19,26 +20,7 @@ permissions:
   contents: write
 
 jobs:
-  lint-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Lint
-        run: pylint lambdas/**/*.py
-
-  test-backend:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -61,3 +43,22 @@ jobs:
             --cov-report=xml:lambdas/coverage.xml \
             --cov-fail-under=80 \
             lambdas/tests
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Lint
+        run: pylint lambdas/**/*.py
