@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Markdown Note Portal - AWS Resources (Unified Stack)
 
 Parameters:
-  S3BackendBucketName:
+  S3BucketName:
     Type: String
     Description: S3 bucket that stores Lambda deployment artifacts
 
@@ -24,35 +24,35 @@ Resources:
         - AttributeName: memo_id
           KeyType: RANGE
 
-  # Cognito
-  MkmemoportalCognito:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: mkmemoportal-cognito
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: true
-      Schema:
-        - Name: email
-          Required: true
-          Mutable: false
-      UsernameAttributes:
-        - email
-      AutoVerifiedAttributes:
-        - email
+  # # Cognito
+  # MkmemoportalCognito:
+  #   Type: AWS::Cognito::UserPool
+  #   Properties:
+  #     UserPoolName: mkmemoportal-cognito
+  #     AdminCreateUserConfig:
+  #       AllowAdminCreateUserOnly: true
+  #     Schema:
+  #       - Name: email
+  #         Required: true
+  #         Mutable: false
+  #     UsernameAttributes:
+  #       - email
+  #     AutoVerifiedAttributes:
+  #       - email
 
-  MkmemoportalCognitoClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: mkmemoportal-cognito-client
-      UserPoolId: !Ref MkmemoportalCognito
-      GenerateSecret: false
-      AllowedOAuthFlowsUserPoolClient: true
-      AllowedOAuthFlows:
-        - code
-      AllowedOAuthScopes:
-        - email
-        - openid
-        - profile
+  # MkmemoportalCognitoClient:
+  #   Type: AWS::Cognito::UserPoolClient
+  #   Properties:
+  #     ClientName: mkmemoportal-cognito-client
+  #     UserPoolId: !Ref MkmemoportalCognito
+  #     GenerateSecret: false
+  #     AllowedOAuthFlowsUserPoolClient: true
+  #     AllowedOAuthFlows:
+  #       - code
+  #     AllowedOAuthScopes:
+  #       - email
+  #       - openid
+  #       - profile
 
   # IAM Role
   MkmemoportalIAMRoleLambda:
@@ -93,7 +93,7 @@ Resources:
       CompatibleRuntimes:
         - python3.12
       Content:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: layer.zip
       Description: Shared utilities for Markdown Note Portal Lambdas
 
@@ -106,7 +106,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: create_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -124,7 +124,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: delete_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -142,7 +142,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: get_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -160,7 +160,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: list_memos.zip
       Timeout: 10
       MemorySize: 256
@@ -178,7 +178,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BackendBucketName
+        S3Bucket: !Ref S3BucketName
         S3Key: update_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -202,18 +202,18 @@ Resources:
       StageName: $default
       AutoDeploy: true
 
-  MkmemoportalApigAuthorizer:
-    Type: AWS::ApiGatewayV2::Authorizer
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      AuthorizerType: JWT
-      Name: mkmemoportal-cognito-authorizer
-      IdentitySource:
-        - "$request.header.Authorization"
-      JwtConfiguration:
-        Audience:
-          - !Ref MkmemoportalCognitoClient
-        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MkmemoportalCognito}
+  # MkmemoportalApigAuthorizer:
+  #   Type: AWS::ApiGatewayV2::Authorizer
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     AuthorizerType: JWT
+  #     Name: mkmemoportal-cognito-authorizer
+  #     IdentitySource:
+  #       - "$request.header.Authorization"
+  #     JwtConfiguration:
+  #       Audience:
+  #         - !Ref MkmemoportalCognitoClient
+  #       Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MkmemoportalCognito}
 
   CreateMemoIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -255,50 +255,50 @@ Resources:
       IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateMemoFunction.Arn}/invocations
       PayloadFormatVersion: "2.0"
 
-  PostMemoRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      RouteKey: POST /memo
-      AuthorizationType: JWT
-      AuthorizerId: !Ref MkmemoportalApigAuthorizer
-      Target: !Sub integrations/${CreateMemoIntegration}
+  # PostMemoRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     RouteKey: POST /memo
+  #     AuthorizationType: JWT
+  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
+  #     Target: !Sub integrations/${CreateMemoIntegration}
 
-  GetMemosRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      RouteKey: GET /memo
-      AuthorizationType: JWT
-      AuthorizerId: !Ref MkmemoportalApigAuthorizer
-      Target: !Sub integrations/${ListMemosIntegration}
+  # GetMemosRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     RouteKey: GET /memo
+  #     AuthorizationType: JWT
+  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
+  #     Target: !Sub integrations/${ListMemosIntegration}
 
-  GetMemoRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      RouteKey: GET /memo/{memoId}
-      AuthorizationType: JWT
-      AuthorizerId: !Ref MkmemoportalApigAuthorizer
-      Target: !Sub integrations/${GetMemoIntegration}
+  # GetMemoRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     RouteKey: GET /memo/{memoId}
+  #     AuthorizationType: JWT
+  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
+  #     Target: !Sub integrations/${GetMemoIntegration}
 
-  PutMemoRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      RouteKey: PUT /memo/{memoId}
-      AuthorizationType: JWT
-      AuthorizerId: !Ref MkmemoportalApigAuthorizer
-      Target: !Sub integrations/${UpdateMemoIntegration}
+  # PutMemoRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     RouteKey: PUT /memo/{memoId}
+  #     AuthorizationType: JWT
+  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
+  #     Target: !Sub integrations/${UpdateMemoIntegration}
 
-  DeleteMemoRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref MkmemoportalApig
-      RouteKey: DELETE /memo/{memoId}
-      AuthorizationType: JWT
-      AuthorizerId: !Ref MkmemoportalApigAuthorizer
-      Target: !Sub integrations/${DeleteMemoIntegration}
+  # DeleteMemoRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref MkmemoportalApig
+  #     RouteKey: DELETE /memo/{memoId}
+  #     AuthorizationType: JWT
+  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
+  #     Target: !Sub integrations/${DeleteMemoIntegration}
 
   CreateMemoPermission:
     Type: AWS::Lambda::Permission
@@ -344,4 +344,3 @@ Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL for mkmemoportal-apig
     Value: !GetAtt MkmemoportalApig.ApiEndpoint
-

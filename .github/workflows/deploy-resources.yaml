@@ -1,0 +1,56 @@
+name: Deploy AWS Resources
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - resources/**
+      - .github/workflows/deploy-aws-resources.yaml
+
+env:
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create S3 Bucket if not exists
+        run: |
+          aws s3 mb s3://${{ vars.S3_BUCKET_NAME }}
+
+      - name: Deploy Stack
+        run: |
+          aws cloudformation deploy \
+            --template-file resources/cfn.yaml \
+            --stack-name mkmemoportal-stack \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              S3BucketName=${{ vars.S3_BUCKET_NAME }}
+
+      - name: Describe Stack Events on Failure
+        if: failure()
+        run: |
+          echo "=== CloudFormation Stack Events (Recent) ==="
+          aws cloudformation describe-stack-events \
+            --stack-name mkmemoportal-stack \
+            --max-items 50 \
+            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || ResourceStatus==`DELETE_FAILED` || ResourceStatus==`ROLLBACK_IN_PROGRESS`].[Timestamp,ResourceType,LogicalResourceId,ResourceStatus,ResourceStatusReason]' \
+            --output table || true
+
+          echo ""
+          echo "=== Full Stack Description ==="
+          aws cloudformation describe-stacks \
+            --stack-name mkmemoportal-stack \
+            --query 'Stacks[0].[StackStatus,StackStatusReason]' \
+            --output table || true
