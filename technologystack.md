@@ -33,23 +33,13 @@
 
 ### 2.2 AWS リソース構成
 
-以下の表は、本システムのフロントエンド/バックエンドで使用する主要な AWS リソースとその役割を示している:
-
-#### フロントエンド
-
-| AWS リソース名 (論理 ID)      | AWS サービス       | 概要                                                    |
-| ----------------------------- | ------------------ | ------------------------------------------------------- |
-| (ユーザー指定)                | Amazon S3          | SPA のビルドアーティファクトを保存するバケット          |
-| `mkmemoportal-cloudfront`     | Amazon CloudFront  | SPA を配信する CDN                                      |
-| `mkmemoportal-stack` | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック |
-| `mkmemoportal-waf`            | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL |
-
-#### バックエンド
+以下の表は、本システムのフロントエンド・バックエンドで使用する主要な AWS リソースとその役割を示している:
 
 | AWS リソース名 (論理 ID)          | AWS サービス       | 概要                                                           |
 | --------------------------------- | ------------------ | -------------------------------------------------------------- |
-| (ユーザー指定)                    | Amazon S3          | Lambda 関数のビルドアーティファクトを保存するバケット          |
+| (ユーザー指定)                    | Amazon S3          | SPA・Lambda 関数 のビルドアーティファクトを保存するバケット    |
 | `mkmemoportal-apig`               | Amazon API Gateway | Cognito User Pool オーソライザーを適用した API エンドポイント  |
+| `mkmemoportal-cloudfront`         | Amazon CloudFront  | SPA を配信する CDN                                             |
 | `mkmemoportal-cognito`            | Amazon Cognito     | ユーザー管理、認証・認可を行うユーザープール                   |
 | `mkmemoportal-dynamodb`           | Amazon DynamoDB    | メモを保存するテーブル (PK: `user_id`, SK: `memo_id`)          |
 | `mkmemoportal-lambda-create-memo` | AWS Lambda         | \[POST\] /memo のバックエンド処理を行う Lambda 関数            |
@@ -57,7 +47,8 @@
 | `mkmemoportal-lambda-get-memo`    | AWS Lambda         | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`  | AWS Lambda         | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo` | AWS Lambda         | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-stack`      | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック                  |
+| `mkmemoportal-stack`              | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック              |
+| `mkmemoportal-waf`                | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL        |
 
 ### 2.3 AWS アーキテクチャー図
 
@@ -71,6 +62,7 @@ TODO
 
 Amazon Cognito User Pool を用いて、以下の方式により認証・認可を行う。
 
+- Authorization Code (PKCE) フローでのサインイン方式を採用する。
 - Web アプリケーションでのセルフサインアップは無効化し、初期セットアップ時に管理者が手動でユーザー登録する。
 - フロントエンドのログインページ(ルート)ではサインインを行うことができ、サインイン後はワークスペースページにリダイレクトする。
 - サインイン時に取得するアクセストークンはブラウザの Session Storage で管理し、 `Authorization` ヘッダーにアクセストークン付与して API を呼び出す。

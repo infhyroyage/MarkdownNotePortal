@@ -23,8 +23,7 @@
 
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
-- ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、目的に応じて以下の CloudFormation テンプレートファイルを使用する:
-  - **`resources/mkmemoportal-stack.yaml`**: フロントエンド・バックエンドの AWS リソースを統合的に定義
+- ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、フロントエンド・バックエンドの AWS リソースを統合的に定義する CloudFormation テンプレートファイル`resources/cfn.yaml`を使用する。
 - AWS リソースのデプロイは、GitHub Actions と連携した CI/CD パイプラインを実行して、統合 CloudFormation スタックの構築・更新により行う。この CI/CD パイプラインは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
 - AWS Lambda 関数の Python のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは、以下のコマンドで実行する。
   ```bash
@@ -36,9 +35,11 @@
   pylint lambdas/**/*.py
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
-  - **`.github/workflows/build-and-deploy.yaml`**: 統合スタックのビルド・デプロイ
-  - **`.github/workflows/lint-frontend.yaml`**: Pull Request 発行時の ESLint 実行
-  - **`.github/workflows/test-lint-backend.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・Pylint 実行
+  - **`.github/workflows/build-and-deploy-lambdas.yaml`**: AWS Lambda 関数のユニットテスト実行・ビルド・デプロイ
+  - **`.github/workflows/build-and-deploy-spa.yaml`**: SPA のビルド・デプロイ
+  - **`.github/workflows/deploy-resources.yaml`**: CloudFormation スタックでの AWS リソースのデプロイ
+  - **`.github/workflows/lint-spa.yaml`**: Pull Request 発行時の SPA の ESLint 実行
+  - **`.github/workflows/test-lint-lambdas.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・Pylint 実行
 
 ## プルリクエストの要件
 
@@ -51,6 +52,10 @@
 - [ ] 以下のコマンドを実行して、Pylint の警告・エラーをすべて解消する:
   ```bash
   pylint lambdas/**/*.py
+  ```
+- [ ] 以下のコマンドを実行して、ESLint の警告・エラーをすべて解消する:
+  ```bash
+  cd spa && npm run lint && cd ..
   ```
 - [ ] ターゲットを main ブランチに設定している。
 
