@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/deploy-resources.yaml
       - resources/**
-      - .github/workflows/deploy-aws-resources.yaml
 
 env:
   AWS_REGION: ap-northeast-1
