@@ -13,39 +13,12 @@ env:
 
 jobs:
   build-and-deploy-lambdas:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Build Lambda Functions and Layer codes
-        run: |
-          cd lambdas/create_memo && zip -r ../../create_memo.zip app.py __init__.py && cd ../../
-          cd lambdas/delete_memo && zip -r ../../delete_memo.zip app.py __init__.py && cd ../../
-          cd lambdas/get_memo && zip -r ../../get_memo.zip app.py __init__.py && cd ../../
-          cd lambdas/list_memos && zip -r ../../list_memos.zip app.py __init__.py && cd ../../
-          cd lambdas/update_memo && zip -r ../../update_memo.zip app.py __init__.py && cd ../../
-          cd lambdas/layer && zip -r ../../layer.zip python && cd ../../
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Create S3 Bucket if not exists
-        run: |
-          aws s3 mb s3://${{ vars.S3_BUCKET_NAME }}
-
-      - name: Upload Lambda Functions and Layer artifacts
-        run: |
-          aws s3 cp create_memo.zip s3://${{ vars.S3_BUCKET_NAME }}/create_memo.zip
-          aws s3 cp delete_memo.zip s3://${{ vars.S3_BUCKET_NAME }}/delete_memo.zip
-          aws s3 cp get_memo.zip s3://${{ vars.S3_BUCKET_NAME }}/get_memo.zip
-          aws s3 cp list_memos.zip s3://${{ vars.S3_BUCKET_NAME }}/list_memos.zip
-          aws s3 cp update_memo.zip s3://${{ vars.S3_BUCKET_NAME }}/update_memo.zip
-          aws s3 cp layer.zip s3://${{ vars.S3_BUCKET_NAME }}/layer.zip
+    uses: ./.github/workflows/reusable-build-and-deploy-lambdas.yaml
+    with:
+      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   deploy-stack:
     needs: build-and-deploy-lambdas
