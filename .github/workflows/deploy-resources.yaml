@@ -41,8 +41,8 @@ jobs:
             --stack-name mkmemoportal-stack \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
-              CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }}
-              S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }}
+              CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }} \
+              S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }} \
               S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }}
 
       - name: Describe Stack Events on Failure
