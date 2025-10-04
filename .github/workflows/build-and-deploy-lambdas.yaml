@@ -44,7 +44,7 @@ jobs:
     needs: test
     uses: ./.github/workflows/reusable-build-and-deploy-lambdas.yaml
     with:
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

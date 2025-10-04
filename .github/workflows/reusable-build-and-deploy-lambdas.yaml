@@ -3,7 +3,7 @@ name: Build and Deploy Lambda Functions (Reusable Workflow)
 on:
   workflow_call:
     inputs:
-      S3_BUCKET_NAME:
+      S3_LAMBDA_BUCKET_NAME:
         required: true
         type: string
     secrets:
@@ -40,15 +40,15 @@ jobs:
 
       - name: Create S3 Bucket if not exists
         run: |
-          if ! aws s3 ls s3://${{ inputs.S3_BUCKET_NAME }} > /dev/null 2>&1; then
-            aws s3 mb s3://${{ inputs.S3_BUCKET_NAME }}
+          if ! aws s3 ls s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }} > /dev/null 2>&1; then
+            aws s3 mb s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}
           fi
 
       - name: Upload Lambda Functions and Layer artifacts
         run: |
-          aws s3 cp create_memo.zip s3://${{ inputs.S3_BUCKET_NAME }}/create_memo.zip
-          aws s3 cp delete_memo.zip s3://${{ inputs.S3_BUCKET_NAME }}/delete_memo.zip
-          aws s3 cp get_memo.zip s3://${{ inputs.S3_BUCKET_NAME }}/get_memo.zip
-          aws s3 cp list_memos.zip s3://${{ inputs.S3_BUCKET_NAME }}/list_memos.zip
-          aws s3 cp update_memo.zip s3://${{ inputs.S3_BUCKET_NAME }}/update_memo.zip
-          aws s3 cp layer.zip s3://${{ inputs.S3_BUCKET_NAME }}/layer.zip
+          aws s3 cp create_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/create_memo.zip
+          aws s3 cp delete_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/delete_memo.zip
+          aws s3 cp get_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/get_memo.zip
+          aws s3 cp list_memos.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/list_memos.zip
+          aws s3 cp update_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/update_memo.zip
+          aws s3 cp layer.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/layer.zip
