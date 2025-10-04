@@ -8,9 +8,6 @@ on:
       - .github/workflows/deploy-resources.yaml
       - resources/**
 
-env:
-  AWS_REGION: ap-northeast-1
-
 jobs:
   build-and-deploy-lambdas:
     uses: ./.github/workflows/reusable-build-and-deploy-lambdas.yaml
@@ -20,8 +17,40 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-  deploy-stack:
+  deploy-stack-waf:
     needs: build-and-deploy-lambdas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials for us-east-1
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy Stack with WAF
+        run: |
+          aws cloudformation deploy \
+            --template-file resources/cfn-waf.yaml \
+            --stack-name mkmemoportal-stack-waf \
+            --region us-east-1
+
+      - name: Describe Stack with WAF Events on Failure
+        if: failure()
+        run: |
+          echo "=== CloudFormation Stack with WAF Events (Recent) ==="
+          aws cloudformation describe-stack-events \
+            --stack-name mkmemoportal-stack-waf \
+            --region us-east-1 \
+            --max-items 50 \
+            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || ResourceStatus==`DELETE_FAILED` || ResourceStatus==`ROLLBACK_IN_PROGRESS`].[Timestamp,ResourceType,LogicalResourceId,ResourceStatus,ResourceStatusReason]' \
+            --output table || true
+
+  deploy-stack:
+    needs: deploy-stack-waf
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,32 +61,33 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-northeast-1
 
-      - name: Deploy Stack
+      - name: Deploy Stack without WAF
         run: |
+          WAF_WEB_ACL_ARN=$(aws cloudformation describe-stacks \
+            --stack-name mkmemoportal-stack-waf \
+            --region us-east-1 \
+            --query 'Stacks[0].Outputs[?OutputKey==`WafWebAclArn`].OutputValue' \
+            --output text)
           aws cloudformation deploy \
             --template-file resources/cfn.yaml \
             --stack-name mkmemoportal-stack \
+            --region ap-northeast-1 \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
               CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }} \
               S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }} \
-              S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }}
+              S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }} \
+              WafWebAclArn=${WAF_WEB_ACL_ARN}
 
-      - name: Describe Stack Events on Failure
+      - name: Describe Stack without WAF Events on Failure
         if: failure()
         run: |
-          echo "=== CloudFormation Stack Events (Recent) ==="
+          echo "=== CloudFormation Stack without WAF Events (Recent) ==="
           aws cloudformation describe-stack-events \
             --stack-name mkmemoportal-stack \
+            --region ap-northeast-1 \
             --max-items 50 \
             --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || ResourceStatus==`DELETE_FAILED` || ResourceStatus==`ROLLBACK_IN_PROGRESS`].[Timestamp,ResourceType,LogicalResourceId,ResourceStatus,ResourceStatusReason]' \
-            --output table || true
-
-          echo ""
-          echo "=== Full Stack Description ==="
-          aws cloudformation describe-stacks \
-            --stack-name mkmemoportal-stack \
-            --query 'Stacks[0].[StackStatus,StackStatusReason]' \
             --output table || true

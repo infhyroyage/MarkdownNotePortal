@@ -11,6 +11,9 @@ Parameters:
   S3SpaBucketName:
     Type: String
     Description: S3 bucket that hosts SPA static files
+  WafWebAclArn:
+    Type: String
+    Description: WAF Web ACL ARN in us-east-1
 
 Resources:
   # S3 Bucket(SPA)
@@ -108,45 +111,6 @@ Resources:
       Domain: !Ref CognitoHostedUISubDomain
       UserPoolId: !Ref MkmemoportalCognito
 
-  # WAF
-  MkmemoportalWaf:
-    Type: AWS::WAFv2::WebACL
-    Properties:
-      Name: mkmemoportal-waf
-      Scope: CLOUDFRONT
-      Description: Web ACL for CloudFront distribution
-      DefaultAction:
-        Allow: {}
-      Rules:
-        - Name: AWSManagedRulesCommonRuleSet
-          Priority: 1
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesCommonRuleSetMetric
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesCommonRuleSet
-        - Name: AWSManagedRulesKnownBadInputsRuleSet
-          Priority: 2
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesKnownBadInputsRuleSet
-      VisibilityConfig:
-        SampledRequestsEnabled: true
-        CloudWatchMetricsEnabled: true
-        MetricName: MkmemoportalWafMetric
-
   # CloudFront
   MkmemoportalCloudfrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
@@ -163,7 +127,7 @@ Resources:
       DistributionConfig:
         Enabled: true
         DefaultRootObject: index.html
-        WebACLId: !GetAtt MkmemoportalWaf.Arn
+        WebACLId: !Ref WafWebAclArn
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt MkmemoportalSpaBucket.RegionalDomainName
@@ -509,6 +473,3 @@ Outputs:
   CloudFrontDomainName:
     Description: CloudFront Distribution Domain Name
     Value: !GetAtt MkmemoportalCloudfront.DomainName
-  WafWebAclArn:
-    Description: WAF Web ACL ARN
-    Value: !GetAtt MkmemoportalWaf.Arn

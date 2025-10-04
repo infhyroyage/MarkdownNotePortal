@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Markdown Memo Portal - WAF in us-east-1
+
+Resources:
+  # WAF
+  MkmemoportalWaf:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: mkmemoportal-waf
+      Scope: CLOUDFRONT
+      Description: Web ACL for CloudFront distribution
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSetMetric
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: MkmemoportalWafMetric
+
+Outputs:
+  WafWebAclArn:
+    Description: WAF Web ACL ARN in us-east-1
+    Value: !GetAtt MkmemoportalWaf.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-WafWebAclArn

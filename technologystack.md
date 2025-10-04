@@ -35,21 +35,22 @@
 
 以下の表は、本システムのフロントエンド・バックエンドで使用する主要な AWS リソースとその役割を示している:
 
-| AWS リソース名 (論理 ID)          | AWS サービス       | 概要                                                           |
-| --------------------------------- | ------------------ | -------------------------------------------------------------- |
-| (ユーザー指定)                    | Amazon S3          | Lambda 関数 のビルドアーティファクトを保存するバケット         |
-| (ユーザー指定)                    | Amazon S3          | SPA のビルドアーティファクトを保存するバケット                 |
-| `mkmemoportal-apig`               | Amazon API Gateway | Cognito User Pool オーソライザーを適用した API エンドポイント  |
-| `mkmemoportal-cloudfront`         | Amazon CloudFront  | SPA を配信する CDN                                             |
-| `mkmemoportal-cognito`            | Amazon Cognito     | ユーザー管理、認証・認可を行うユーザープール                   |
-| `mkmemoportal-dynamodb`           | Amazon DynamoDB    | メモを保存するテーブル (PK: `user_id`, SK: `memo_id`)          |
-| `mkmemoportal-lambda-create-memo` | AWS Lambda         | \[POST\] /memo のバックエンド処理を行う Lambda 関数            |
-| `mkmemoportal-lambda-delete-memo` | AWS Lambda         | \[DELETE\] /memo/{memoId} のバックエンド処理を行う Lambda 関数 |
-| `mkmemoportal-lambda-get-memo`    | AWS Lambda         | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-lambda-list-memos`  | AWS Lambda         | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
-| `mkmemoportal-lambda-update-memo` | AWS Lambda         | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-stack`              | AWS CloudFormation | システム全体の AWS リソースを管理する統合スタック              |
-| `mkmemoportal-waf`                | AWS WAF            | CloudFront ディストリビューションにアタッチする Web ACL        |
+| AWS リソース名 (論理 ID)          | AWS サービス       | リージョン     | 概要                                                           |
+| --------------------------------- | ------------------ | -------------- | -------------------------------------------------------------- |
+| (ユーザー指定)                    | Amazon S3          | ap-northeast-1 | Lambda 関数のビルドアーティファクトを保存するバケット          |
+| (ユーザー指定)                    | Amazon S3          | ap-northeast-1 | SPA のビルドアーティファクトを保存するバケット                 |
+| `mkmemoportal-apig`               | Amazon API Gateway | ap-northeast-1 | Cognito User Pool オーソライザーを適用した API エンドポイント  |
+| `mkmemoportal-cloudfront`         | Amazon CloudFront  | ap-northeast-1 | SPA を配信する CDN                                             |
+| `mkmemoportal-cognito`            | Amazon Cognito     | ap-northeast-1 | ユーザー管理、認証・認可を行うユーザープール                   |
+| `mkmemoportal-dynamodb`           | Amazon DynamoDB    | ap-northeast-1 | メモを保存するテーブル (PK: `user_id`, SK: `memo_id`)          |
+| `mkmemoportal-lambda-create-memo` | AWS Lambda         | ap-northeast-1 | \[POST\] /memo のバックエンド処理を行う Lambda 関数            |
+| `mkmemoportal-lambda-delete-memo` | AWS Lambda         | ap-northeast-1 | \[DELETE\] /memo/{memoId} のバックエンド処理を行う Lambda 関数 |
+| `mkmemoportal-lambda-get-memo`    | AWS Lambda         | ap-northeast-1 | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
+| `mkmemoportal-lambda-list-memos`  | AWS Lambda         | ap-northeast-1 | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
+| `mkmemoportal-lambda-update-memo` | AWS Lambda         | ap-northeast-1 | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
+| `mkmemoportal-stack`              | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
+| `mkmemoportal-stack`              | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
+| `mkmemoportal-waf`                | AWS WAF            | us-east-1      | CloudFront ディストリビューションにアタッチする Web ACL        |
 
 ### 2.3 AWS アーキテクチャー図
 
