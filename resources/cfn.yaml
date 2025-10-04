@@ -105,7 +105,7 @@ Resources:
   MkmemoportalCognitoDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
-      Domain: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
+      Domain: !Ref CognitoHostedUISubDomain
       UserPoolId: !Ref MkmemoportalCognito
 
   # CloudFront
