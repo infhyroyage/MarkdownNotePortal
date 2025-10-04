@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Resources
+Description: Markdown Memo Portal - AWS Resources
 
 Parameters:
   CognitoHostedUISubDomain:
@@ -108,6 +108,45 @@ Resources:
       Domain: !Ref CognitoHostedUISubDomain
       UserPoolId: !Ref MkmemoportalCognito
 
+  # WAF
+  MkmemoportalWaf:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: mkmemoportal-waf
+      Scope: CLOUDFRONT
+      Description: Web ACL for CloudFront distribution
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSetMetric
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: MkmemoportalWafMetric
+
   # CloudFront
   MkmemoportalCloudfrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
@@ -124,6 +163,7 @@ Resources:
       DistributionConfig:
         Enabled: true
         DefaultRootObject: index.html
+        WebACLId: !GetAtt MkmemoportalWaf.Arn
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt MkmemoportalSpaBucket.RegionalDomainName
@@ -469,3 +509,6 @@ Outputs:
   CloudFrontDomainName:
     Description: CloudFront Distribution Domain Name
     Value: !GetAtt MkmemoportalCloudfront.DomainName
+  WafWebAclArn:
+    Description: WAF Web ACL ARN
+    Value: !GetAtt MkmemoportalWaf.Arn
