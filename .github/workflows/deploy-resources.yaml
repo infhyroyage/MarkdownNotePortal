@@ -15,7 +15,7 @@ jobs:
   build-and-deploy-lambdas:
     uses: ./.github/workflows/reusable-build-and-deploy-lambdas.yaml
     with:
-      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -41,7 +41,9 @@ jobs:
             --stack-name mkmemoportal-stack \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
-              S3BucketName=${{ vars.S3_BUCKET_NAME }}
+              CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }}
+              S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }}
+              S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }}
 
       - name: Describe Stack Events on Failure
         if: failure()

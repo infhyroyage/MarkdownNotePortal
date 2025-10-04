@@ -1,12 +1,46 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Markdown Note Portal - AWS Resources (Unified Stack)
+Description: AWS Resources
 
 Parameters:
-  S3BucketName:
+  CognitoHostedUISubDomain:
+    Type: String
+    Description: Subdomain for Cognito Hosted UI
+  S3LambdaBucketName:
     Type: String
     Description: S3 bucket that stores Lambda deployment artifacts
+  S3SpaBucketName:
+    Type: String
+    Description: S3 bucket that hosts SPA static files
 
 Resources:
+  # S3 Bucket(SPA)
+  MkmemoportalSpaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3SpaBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  MkmemoportalSpaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MkmemoportalSpaBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${MkmemoportalSpaBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${MkmemoportalCloudfront}
+
   # DynamoDB
   MkmemoportalDynamodb:
     Type: AWS::DynamoDB::Table
@@ -24,35 +58,106 @@ Resources:
         - AttributeName: memo_id
           KeyType: RANGE
 
-  # # Cognito
-  # MkmemoportalCognito:
-  #   Type: AWS::Cognito::UserPool
-  #   Properties:
-  #     UserPoolName: mkmemoportal-cognito
-  #     AdminCreateUserConfig:
-  #       AllowAdminCreateUserOnly: true
-  #     Schema:
-  #       - Name: email
-  #         Required: true
-  #         Mutable: false
-  #     UsernameAttributes:
-  #       - email
-  #     AutoVerifiedAttributes:
-  #       - email
+  # Cognito
+  MkmemoportalCognito:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: mkmemoportal-cognito
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED
 
-  # MkmemoportalCognitoClient:
-  #   Type: AWS::Cognito::UserPoolClient
-  #   Properties:
-  #     ClientName: mkmemoportal-cognito-client
-  #     UserPoolId: !Ref MkmemoportalCognito
-  #     GenerateSecret: false
-  #     AllowedOAuthFlowsUserPoolClient: true
-  #     AllowedOAuthFlows:
-  #       - code
-  #     AllowedOAuthScopes:
-  #       - email
-  #       - openid
-  #       - profile
+  MkmemoportalCognitoClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: mkmemoportal-cognito-client
+      UserPoolId: !Ref MkmemoportalCognito
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs:
+        - !Sub https://${MkmemoportalCloudfront.DomainName}/
+      SupportedIdentityProviders:
+        - COGNITO
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+  MkmemoportalCognitoDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
+      UserPoolId: !Ref MkmemoportalCognito
+
+  # CloudFront
+  MkmemoportalCloudfrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: mkmemoportal-cloudfront-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  MkmemoportalCloudfront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt MkmemoportalSpaBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt MkmemoportalCloudfrontOAC.Id
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          Compress: true
+          MinTTL: 0
+          DefaultTTL: 86400
+          MaxTTL: 31536000
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
 
   # IAM Role
   MkmemoportalIAMRoleLambda:
@@ -93,9 +198,8 @@ Resources:
       CompatibleRuntimes:
         - python3.12
       Content:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: layer.zip
-      Description: Shared utilities for Markdown Note Portal Lambdas
 
   # Lambda Functions
   CreateMemoFunction:
@@ -106,7 +210,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: create_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -124,7 +228,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: delete_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -142,7 +246,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: get_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -160,7 +264,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: list_memos.zip
       Timeout: 10
       MemorySize: 256
@@ -178,7 +282,7 @@ Resources:
       Handler: app.lambda_handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
-        S3Bucket: !Ref S3BucketName
+        S3Bucket: !Ref S3LambdaBucketName
         S3Key: update_memo.zip
       Timeout: 10
       MemorySize: 256
@@ -194,6 +298,18 @@ Resources:
     Properties:
       Name: mkmemoportal-apig
       ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - !Sub https://${MkmemoportalCloudfront.DomainName}
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - "*"
+        MaxAge: 300
 
   MkmemoportalApigStage:
     Type: AWS::ApiGatewayV2::Stage
@@ -202,18 +318,18 @@ Resources:
       StageName: $default
       AutoDeploy: true
 
-  # MkmemoportalApigAuthorizer:
-  #   Type: AWS::ApiGatewayV2::Authorizer
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     AuthorizerType: JWT
-  #     Name: mkmemoportal-cognito-authorizer
-  #     IdentitySource:
-  #       - "$request.header.Authorization"
-  #     JwtConfiguration:
-  #       Audience:
-  #         - !Ref MkmemoportalCognitoClient
-  #       Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MkmemoportalCognito}
+  MkmemoportalApigAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      AuthorizerType: JWT
+      Name: mkmemoportal-cognito-authorizer
+      IdentitySource:
+        - "$request.header.Authorization"
+      JwtConfiguration:
+        Audience:
+          - !Ref MkmemoportalCognitoClient
+        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MkmemoportalCognito}
 
   CreateMemoIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -255,50 +371,50 @@ Resources:
       IntegrationUri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateMemoFunction.Arn}/invocations
       PayloadFormatVersion: "2.0"
 
-  # PostMemoRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     RouteKey: POST /memo
-  #     AuthorizationType: JWT
-  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
-  #     Target: !Sub integrations/${CreateMemoIntegration}
+  PostMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: POST /memo
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${CreateMemoIntegration}
 
-  # GetMemosRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     RouteKey: GET /memo
-  #     AuthorizationType: JWT
-  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
-  #     Target: !Sub integrations/${ListMemosIntegration}
+  GetMemosRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: GET /memo
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${ListMemosIntegration}
 
-  # GetMemoRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     RouteKey: GET /memo/{memoId}
-  #     AuthorizationType: JWT
-  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
-  #     Target: !Sub integrations/${GetMemoIntegration}
+  GetMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: GET /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${GetMemoIntegration}
 
-  # PutMemoRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     RouteKey: PUT /memo/{memoId}
-  #     AuthorizationType: JWT
-  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
-  #     Target: !Sub integrations/${UpdateMemoIntegration}
+  PutMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: PUT /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${UpdateMemoIntegration}
 
-  # DeleteMemoRoute:
-  #   Type: AWS::ApiGatewayV2::Route
-  #   Properties:
-  #     ApiId: !Ref MkmemoportalApig
-  #     RouteKey: DELETE /memo/{memoId}
-  #     AuthorizationType: JWT
-  #     AuthorizerId: !Ref MkmemoportalApigAuthorizer
-  #     Target: !Sub integrations/${DeleteMemoIntegration}
+  DeleteMemoRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref MkmemoportalApig
+      RouteKey: DELETE /memo/{memoId}
+      AuthorizationType: JWT
+      AuthorizerId: !Ref MkmemoportalApigAuthorizer
+      Target: !Sub integrations/${DeleteMemoIntegration}
 
   CreateMemoPermission:
     Type: AWS::Lambda::Permission
@@ -344,3 +460,12 @@ Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL for mkmemoportal-apig
     Value: !GetAtt MkmemoportalApig.ApiEndpoint
+  CognitoClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref MkmemoportalCognitoClient
+  CognitoDomain:
+    Description: Cognito Hosted UI Domain
+    Value: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
+  CloudFrontDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt MkmemoportalCloudfront.DomainName
