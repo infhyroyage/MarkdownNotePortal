@@ -38,7 +38,7 @@ jobs:
       - name: Create S3 Bucket if not exists
         run: |
           if ! aws s3 ls s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }} > /dev/null 2>&1; then
-            aws s3 mb s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}
+            aws s3 mb s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }} --region ap-northeast-1
           fi
 
       - name: Upload Lambda Functions and Layer artifacts
