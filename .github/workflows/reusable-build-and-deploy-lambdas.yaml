@@ -12,9 +12,6 @@ on:
       AWS_SECRET_ACCESS_KEY:
         required: true
 
-env:
-  AWS_REGION: ap-northeast-1
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -36,7 +33,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-northeast-1
 
       - name: Create S3 Bucket if not exists
         run: |
