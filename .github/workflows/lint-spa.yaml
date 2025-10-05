@@ -28,13 +28,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-
-      - name: Restore Cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-markdown-note-portal-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: ${{ runner.os }}-markdown-note-portal-${{ hashFiles('**/package-lock.json') }}-
+          cache-dependency-path: spa/package-lock.json
 
       - name: Run Lint
         uses: reviewdog/action-eslint@v1
