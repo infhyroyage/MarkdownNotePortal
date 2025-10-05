@@ -470,6 +470,10 @@ Outputs:
   CognitoDomain:
     Description: Cognito Hosted UI Domain
     Value: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
-  CloudFrontDomainName:
-    Description: CloudFront Distribution Domain Name
-    Value: !GetAtt MkmemoportalCloudfront.DomainName
+  CognitoLoginUrl:
+    Description: Cognito Hosted UI Login URL
+    Value: !Sub
+      - https://${CognitoDomain}/login?client_id=${CognitoClientId}&redirect_uri=https://${CloudFrontDomainName}/&response_type=code&scope=openid+email+profile
+      - CognitoDomain: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
+        CognitoClientId: !Ref MkmemoportalCognitoClient
+        CloudFrontDomainName: !GetAtt MkmemoportalCloudfront.DomainName
