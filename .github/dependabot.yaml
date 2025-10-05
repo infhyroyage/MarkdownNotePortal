@@ -31,7 +31,6 @@ updates:
       - dependency-name: "@types/react-dom"
       - dependency-name: "react"
       - dependency-name: "react-dom"
-      - dependency-name: "react-router"
       - dependency-name: "typescript"
     labels: []
 
