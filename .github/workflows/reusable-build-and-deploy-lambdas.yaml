@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Build Lambda Functions and Layer codes
+      - name: Build Lambda Functions and Layer Codes
         run: |
           cd lambdas/create_memo && zip -r ../../create_memo.zip app.py __init__.py && cd ../../
           cd lambdas/delete_memo && zip -r ../../delete_memo.zip app.py __init__.py && cd ../../
@@ -35,17 +35,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
 
-      - name: Create S3 Bucket if not exists
+      - name: Create S3 Bucket if Not Exists
         run: |
           if ! aws s3 ls s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }} > /dev/null 2>&1; then
             aws s3 mb s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }} --region ap-northeast-1
           fi
 
-      - name: Upload Lambda Functions and Layer artifacts
+      - name: Upload Lambda Functions and Layer Artifacts
         run: |
-          aws s3 cp create_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/create_memo.zip
-          aws s3 cp delete_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/delete_memo.zip
-          aws s3 cp get_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/get_memo.zip
-          aws s3 cp list_memos.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/list_memos.zip
-          aws s3 cp update_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/update_memo.zip
-          aws s3 cp layer.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/layer.zip
+          aws s3 cp create_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/create_memo.zip --region ap-northeast-1
+          aws s3 cp delete_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/delete_memo.zip --region ap-northeast-1
+          aws s3 cp get_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/get_memo.zip --region ap-northeast-1
+          aws s3 cp list_memos.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/list_memos.zip --region ap-northeast-1
+          aws s3 cp update_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/update_memo.zip --region ap-northeast-1
+          aws s3 cp layer.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/layer.zip --region ap-northeast-1
