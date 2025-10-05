@@ -1,0 +1,49 @@
+name: Build and Deploy SPA (Reusable Workflow)
+
+on:
+  workflow_call:
+    inputs:
+      S3_SPA_BUCKET_NAME:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+
+env:
+  NODE_VERSION: "22.17.1"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: spa/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: spa
+        run: npm ci
+
+      - name: Build SPA
+        working-directory: spa
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Upload SPA Artifacts
+        run: |
+          aws s3 sync spa/dist/ s3://${{ inputs.S3_SPA_BUCKET_NAME }}/ --delete --region ap-northeast-1
