@@ -8,7 +8,7 @@
 
 ### 1.2 ソリューション概要
 
-ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は、Node.js 製の AWS Lambda で行う。
+ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は、Python3.12 製の AWS Lambda で行う。
 
 ## 2. アーキテクチャ
 
@@ -68,6 +68,7 @@ Amazon Cognito User Pool を用いて、以下の方式により認証・認可�
 - Cognito Hosted UI・SPA でのセルフサインアップは無効化し、サインアップは初期セットアップ時に管理者が手動で AWS マネジメントコンソール経由で登録する運用とする。
 - ログインページは Cognito Hosted UI を採用し、ログイン成功後に CloudFront から配信された SPA のルートページにコールバックする。
 - ログイン成功時に取得するアクセストークンはブラウザの Session Storage で管理し、アクセストークンの有効期限は 60 分とする。
+- SPA のルートページの遷移時に、アクセストークンが有効かどうかチェックし、有効でない場合は Cognito Hosted UI のログインページにリダイレクトする。
 - SPA からの API 呼び出しには、 `Authorization` ヘッダーにアクセストークン付与を必須とすることで、API の認証を行う。API の認証に失敗した場合は、Cognito Hosted UI のログインページにリダイレクトする。
 - SPA からサインアウトを行うことができ、サインアウト後は Cognito Hosted UI のログインページにリダイレクトする。
 
