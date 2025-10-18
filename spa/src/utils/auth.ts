@@ -1,14 +1,14 @@
 import axios, { type AxiosResponse } from "axios";
 
 /**
- * Cognito Hosted UIのドメイン
- */
-const COGNITO_DOMAIN: string = import.meta.env.VITE_COGNITO_DOMAIN;
-
-/**
  * Cognito Hosted UIのクライアントID
  */
 const COGNITO_CLIENT_ID: string = import.meta.env.VITE_COGNITO_CLIENT_ID;
+
+/**
+ * Cognito Hosted UIのドメイン
+ */
+const COGNITO_DOMAIN: string = import.meta.env.VITE_COGNITO_DOMAIN;
 
 /**
  * アクセストークンをSession Storageに保存するためのキー
