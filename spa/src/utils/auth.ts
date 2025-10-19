@@ -155,7 +155,7 @@ export function getLogoutUrl(): string {
 
   const params: URLSearchParams = new URLSearchParams({
     client_id: COGNITO_CLIENT_ID,
-    logout_uri: window.location.origin + "/",
+    redirect_uri: window.location.origin + "/",
   });
   return `https://${COGNITO_DOMAIN}/logout?${params.toString()}`;
 }
