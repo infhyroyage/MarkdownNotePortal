@@ -1,0 +1,55 @@
+services:
+  # [POST] /memo
+  create-memo:
+    image: public.ecr.aws/lambda/python:3.12
+    command: ["app.lambda_handler"]
+    restart: always
+    volumes:
+      - ./lambdas/create_memo:/var/task
+      - ./lambdas/layer/python:/opt/python
+    ports:
+      - "9001:8080"
+
+  # [GET] /memo
+  list-memos:
+    image: public.ecr.aws/lambda/python:3.12
+    command: ["app.lambda_handler"]
+    restart: always
+    volumes:
+      - ./lambdas/list_memos:/var/task
+      - ./lambdas/layer/python:/opt/python
+    ports:
+      - "9002:8080"
+
+  # [GET] /memo/{memoId}
+  get-memo:
+    image: public.ecr.aws/lambda/python:3.12
+    command: ["app.lambda_handler"]
+    restart: always
+    volumes:
+      - ./lambdas/get_memo:/var/task
+      - ./lambdas/layer/python:/opt/python
+    ports:
+      - "9003:8080"
+
+  # [PUT] /memo/{memoId}
+  update-memo:
+    image: public.ecr.aws/lambda/python:3.12
+    command: ["app.lambda_handler"]
+    restart: always
+    volumes:
+      - ./lambdas/update_memo:/var/task
+      - ./lambdas/layer/python:/opt/python
+    ports:
+      - "9004:8080"
+
+  # [DELETE] /memo/{memoId}
+  delete-memo:
+    image: public.ecr.aws/lambda/python:3.12
+    command: ["app.lambda_handler"]
+    restart: always
+    volumes:
+      - ./lambdas/delete_memo:/var/task
+      - ./lambdas/layer/python:/opt/python
+    ports:
+      - "9005:8080"
