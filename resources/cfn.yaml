@@ -94,6 +94,8 @@ Resources:
         - profile
       CallbackURLs:
         - !Sub https://${MkmemoportalCloudfront.DomainName}/
+      LogoutURLs:
+        - !Sub https://${MkmemoportalCloudfront.DomainName}/
       SupportedIdentityProviders:
         - COGNITO
       AccessTokenValidity: 60
