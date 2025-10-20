@@ -18,4 +18,11 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  // 外部ライブラリの型定義不足のため、vite.config.tsのみLintの設定を緩めている
+  {
+    files: ["vite.config.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
