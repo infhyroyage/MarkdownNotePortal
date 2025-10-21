@@ -1,4 +1,15 @@
 services:
+  # DynamoDB Local
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    ports:
+      - "9000:8000"
+    volumes:
+      - ./docker/dynamodb:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+
   # [POST] /memo
   create-memo:
     image: public.ecr.aws/lambda/python:3.12
@@ -9,6 +20,9 @@ services:
       - ./lambdas/layer/python:/opt/python
     ports:
       - "9001:8080"
+    environment:
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_NAME=mkmemoportal-dynamodb
 
   # [GET] /memo
   list-memos:
@@ -20,6 +34,9 @@ services:
       - ./lambdas/layer/python:/opt/python
     ports:
       - "9002:8080"
+    environment:
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_NAME=mkmemoportal-dynamodb
 
   # [GET] /memo/{memoId}
   get-memo:
@@ -31,6 +48,9 @@ services:
       - ./lambdas/layer/python:/opt/python
     ports:
       - "9003:8080"
+    environment:
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_NAME=mkmemoportal-dynamodb
 
   # [PUT] /memo/{memoId}
   update-memo:
@@ -42,6 +62,9 @@ services:
       - ./lambdas/layer/python:/opt/python
     ports:
       - "9004:8080"
+    environment:
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_NAME=mkmemoportal-dynamodb
 
   # [DELETE] /memo/{memoId}
   delete-memo:
@@ -53,3 +76,6 @@ services:
       - ./lambdas/layer/python:/opt/python
     ports:
       - "9005:8080"
+    environment:
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - DYNAMODB_TABLE_NAME=mkmemoportal-dynamodb
