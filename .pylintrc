@@ -1,2 +1,5 @@
 [MESSAGES CONTROL]
-disable=R0801,W0613
+disable=R0801,W0613,E0401,R0911
+
+[MASTER]
+init-hook='import sys; sys.path.append("lambdas/layer/python")'
