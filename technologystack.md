@@ -77,30 +77,22 @@ Amazon Cognito User Pool を用いて、以下の方式により認証・認可�
 API Gateway で以下の API エンドポイントを管理する。
 
 - [POST] /memo
-
   - 概要: 1 件のメモを保存する。
   - リクエストボディ: `{ "title": string, "content": string }`
   - 成功レスポンス: `201 Created` `{ "memoId": string, "title": string }`
   - バリデーション: `title` は 1〜200 文字、`content` は Markdown 文字列
-
 - [GET] /memo
-
   - 概要: 保存済みメモの一覧を返す。
   - 成功レスポンス: `200 OK` `{ "items": [{ "memoId": string, "title": string }] }`
-
 - [GET] /memo/{memoId}
-
   - 概要: 指定した 1 件の保存済みのメモのタイトルと内容(Markdown 文字列)を返す。
   - 成功レスポンス: `200 OK` `{ "memoId": string, "title": string, "content": string }`
   - 取得不可: `404 Not Found`
-
 - [PUT] /memo/{memoId}
-
   - 概要: 指定した 1 件の保存済みのメモのタイトルと内容(Markdown 文字列)を更新する。
   - リクエストボディ: `{ "title": string, "content": string }`
   - 成功レスポンス: `200 OK` `{ "memoId": string, "title": string, "content": string }`
   - バリデーション: `title` は 1〜200 文字、`content` は Markdown 文字列
-
 - [DELETE] /memo/{memoId}
   - 概要: 指定した 1 件の保存済みのメモを削除する。
   - 成功レスポンス: `204 No Content`
@@ -109,7 +101,25 @@ API Gateway で以下の API エンドポイントを管理する。
 API Gateway には Cognito User Pool オーソライザーが設定されており、フロントエンドから付与したヘッダー `Authorization: Bearer <JWT>` の検証により、API の認可を強制する。
 リクエストは全てログインユーザー単位でスコープされ、バックエンドはトークンの `sub` を `user_id` として用いてデータの分離を保証する。レスポンスは `application/json`とする。
 
-### 3.3 UI/UX 設計
+### 3.3 DynamoDB テーブル仕様
+
+以下の属性定義を持つ DynamoDB テーブル `mkmemoportal-dynamodb` を構築して、メモデータを管理する。
+
+| 属性名       | データ型 | 必須 | キー               | 説明                                                           |
+| ------------ | -------- | ---- | ------------------ | -------------------------------------------------------------- |
+| `user_id`    | String   | ✓    | パーティションキー | ユーザー識別子 (Cognito JWT トークンの `sub` クレーム)         |
+| `memo_id`    | String   | ✓    | ソートキー         | メモ識別子 (UUID 形式、システムが自動生成)                     |
+| `title`      | String   | ✓    |                    | メモのタイトル (1〜200 文字)                                   |
+| `content`    | String   | ✓    |                    | メモの内容 (Markdown 形式の文字列)                             |
+| `created_at` | String   | ✓    |                    | メモの作成日時 (ISO 8601 形式、例: `2024-01-01T12:00:00Z`)     |
+| `updated_at` | String   |      |                    | メモの最終更新日時 (ISO 8601 形式、例: `2024-01-01T12:00:00Z`) |
+
+パーティションキー`user_id`、ソートキー`memo_id`とする構成により、以下の API アクセス時にメモデータを効率的に取得できる。
+
+- [GET] /memo: `user_id`を指定して Query の DynamoDB API を実行して、特定のユーザーでのすべてのメモを取得
+- [GET] /memo/{memoId}: `user_id` と `memo_id` を組み合わせて指定して GetItem の DynamoDB API を実行して、特定のユーザーでの特定のメモを取得
+
+### 3.4 UI/UX 設計
 
 レスポンシブデザインに対応した Web アプリケーションを実現するために、Tailwind CSS によるモバイルファースト設計を採用する。
 Tailwind CSS ベースな UI を統一的に提供するために、daisyUI を採用する。
