@@ -61,4 +61,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Lint
-        run: pylint lambdas/**/*.py
+        run: pylint lambdas/**/*.py docker/**/*.py
