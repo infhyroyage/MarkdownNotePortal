@@ -87,7 +87,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"message": "サーバーエラーが発生しました"}),
         }
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         logger.error("予期しないエラー: %s", str(e))
         return {
             "statusCode": 500,
