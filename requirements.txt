@@ -1,4 +1,4 @@
 boto3==1.40.55
-pylint==4.0.1
+pylint==4.0.2
 pytest==8.4.2
 pytest-cov==7.0.0
