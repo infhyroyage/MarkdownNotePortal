@@ -23,16 +23,22 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         Dict[str, Any]: API Gatewayレスポンス
     """
     try:
-        # user_idの取得（Cognito JWTトークンのsubクレームから）
-        authorizer = event.get("requestContext", {}).get("authorizer", {})
-        user_id = authorizer.get("claims", {}).get("sub")
+        # user_idの取得(Cognito JWTトークンのsubクレームから)
+        # ローカル環境の場合は認証をスキップ
+        is_local = os.environ.get("IS_LOCAL", "false").lower() == "true"
+        
+        if is_local:
+            user_id = "local_user"
+        else:
+            authorizer = event.get("requestContext", {}).get("authorizer", {})
+            user_id = authorizer.get("claims", {}).get("sub")
 
-        if not user_id:
-            return {
-                "statusCode": 401,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "認証が必要です"}),
-            }
+            if not user_id:
+                return {
+                    "statusCode": 401,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"message": "認証が必要です"}),
+                }
 
         # memo_idの取得
         path_parameters = event.get("pathParameters", {})
