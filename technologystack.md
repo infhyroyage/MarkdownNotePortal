@@ -72,6 +72,8 @@ Amazon Cognito User Pool を用いて、以下の方式により認証・認可�
 - SPA からの API 呼び出しには、 `Authorization` ヘッダーにアクセストークン付与を必須とすることで、API の認証を行う。API の認証に失敗した場合は、Cognito Hosted UI のログインページにリダイレクトする。
 - SPA からサインアウトを行うことができ、サインアウト後は Cognito Hosted UI のログインページにリダイレクトする。
 
+なお、ローカル環境の場合、認証・認可は何も行わず、`Authorization` ヘッダーによる API の認証も何も行わない。
+
 ### 3.2 API 仕様
 
 API Gateway で以下の API エンドポイントを管理する。
