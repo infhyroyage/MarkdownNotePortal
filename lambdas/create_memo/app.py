@@ -50,7 +50,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # user_idの取得(Cognito JWTトークンのsubクレームから)
         # ローカル環境の場合は認証をスキップ
         is_local = os.environ.get("IS_LOCAL", "false").lower() == "true"
-        
+
         if is_local:
             user_id = "local_user"
         else:
