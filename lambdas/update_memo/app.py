@@ -2,11 +2,14 @@
 
 import json
 import logging
-import os
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from lambdas.layer.python.utils import get_dynamodb_client
+from lambdas.layer.python.utils import (
+    AuthenticationError,
+    get_dynamodb_client,
+    get_user_id,
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -24,29 +27,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         Dict[str, Any]: API Gatewayレスポンス
     """
     try:
-        # user_idの取得(Cognito JWTトークンのsubクレームから)
-        # ローカル環境の場合は認証をスキップ
-        if os.environ.get("IS_LOCAL", "false").lower() == "true":
-            user_id = "local_user"
-        else:
-            authorizer = event.get("requestContext", {}).get("authorizer", {})
-            user_id = authorizer.get("claims", {}).get("sub")
-
-            if not user_id:
-                return {
-                    "statusCode": 401,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "Not authenticated"}),
-                }
-
-        # memo_idの取得
-        memo_id = event.get("pathParameters", {}).get("memoId")
-        if not memo_id:
-            return {
-                "statusCode": 400,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "memoId is required"}),
-            }
+        user_id = get_user_id(event)
 
         # リクエストボディの取得とパース
         body = json.loads(event.get("body", "{}"))
@@ -70,8 +51,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "body": json.dumps({"message": "content must be a string"}),
             }
 
-        # 更新日時の生成
-        updated_at = datetime.now(timezone.utc).isoformat()
+        # memo_idの取得
+        memo_id = event.get("pathParameters", {}).get("memoId")
+        if not memo_id:
+            return {
+                "statusCode": 400,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "memoId is required"}),
+            }
 
         # メモが見つからない場合は404エラーをレスポンス
         dynamodb = get_dynamodb_client()
@@ -95,7 +82,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             ExpressionAttributeValues={
                 ":title": {"S": title},
                 ":content": {"S": content},
-                ":updated_at": {"S": updated_at},
+                ":updated_at": {"S": datetime.now(timezone.utc).isoformat()},
             },
         )
 
@@ -113,6 +100,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"message": "Request body is invalid"}),
+        }
+    except AuthenticationError as e:
+        logger.error("Authentication error: %s", str(e))
+        return {
+            "statusCode": 401,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"message": "Not authenticated"}),
         }
     except ValueError as e:
         logger.error("Validation error: %s", str(e))

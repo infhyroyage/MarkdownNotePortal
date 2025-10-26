@@ -4,14 +4,19 @@ import json
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
+from lambdas.layer.python.utils import AuthenticationError
 from lambdas.update_memo.app import lambda_handler
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
 @patch("lambdas.update_memo.app.datetime")
-def test_lambda_handler_success(mock_datetime, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_success(
+    mock_datetime, mock_get_dynamodb_client, mock_get_user_id
+) -> None:
     """正常系: メモの更新が成功する"""
     # モックの設定
+    mock_get_user_id.return_value = "test-user-id"
     mock_datetime.now.return_value.isoformat.return_value = "2024-01-01T00:00:00Z"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {
@@ -27,7 +32,6 @@ def test_lambda_handler_success(mock_datetime, mock_get_dynamodb_client) -> None
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
         "body": json.dumps({"title": "新しいタイトル", "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -44,10 +48,12 @@ def test_lambda_handler_success(mock_datetime, mock_get_dynamodb_client) -> None
     mock_dynamodb.update_item.assert_called_once()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_not_found(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: メモが見つからない場合"""
     # モックの設定
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {}
     mock_get_dynamodb_client.return_value = mock_dynamodb
@@ -56,7 +62,6 @@ def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "non-existent-id"},
         "body": json.dumps({"title": "新しいタイトル", "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -71,16 +76,19 @@ def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     mock_dynamodb.update_item.assert_not_called()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_missing_title(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_missing_title(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
     """異常系: titleが空の場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
         "body": json.dumps({"title": "", "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -93,9 +101,13 @@ def test_lambda_handler_missing_title(mock_get_dynamodb_client) -> None:
     mock_dynamodb.update_item.assert_not_called()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_title_too_long(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_title_too_long(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
     """異常系: titleが200文字を超える場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
@@ -103,7 +115,6 @@ def test_lambda_handler_title_too_long(mock_get_dynamodb_client) -> None:
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
         "body": json.dumps({"title": long_title, "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -116,16 +127,17 @@ def test_lambda_handler_title_too_long(mock_get_dynamodb_client) -> None:
     mock_dynamodb.update_item.assert_not_called()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_no_memo_id(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_memo_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: memoIdが指定されていない場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {},
         "body": json.dumps({"title": "新しいタイトル", "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -138,16 +150,17 @@ def test_lambda_handler_no_memo_id(mock_get_dynamodb_client) -> None:
     mock_dynamodb.update_item.assert_not_called()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_user_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: user_idが取得できない場合"""
+    mock_get_user_id.side_effect = AuthenticationError("Not authenticated")
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
         "body": json.dumps({"title": "新しいタイトル", "content": "# 新しい内容"}),
-        "requestContext": {"authorizer": {}},
     }
     context: Any = None
 
@@ -160,16 +173,19 @@ def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
     mock_dynamodb.update_item.assert_not_called()
 
 
+@patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
-def test_lambda_handler_invalid_json(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_invalid_json(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
     """異常系: 不正なJSONの場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
         "body": "invalid json",
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 

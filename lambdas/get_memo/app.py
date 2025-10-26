@@ -2,10 +2,13 @@
 
 import json
 import logging
-import os
 from typing import Any, Dict
 
-from lambdas.layer.python.utils import get_dynamodb_client
+from lambdas.layer.python.utils import (
+    AuthenticationError,
+    get_dynamodb_client,
+    get_user_id,
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,19 +26,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         Dict[str, Any]: API Gatewayレスポンス
     """
     try:
-        # user_idの取得(Cognito JWTトークンのsubクレームから)
-        # ローカル環境の場合は認証をスキップ
-        if os.environ.get("IS_LOCAL", "false").lower() == "true":
-            user_id = "local_user"
-        else:
-            authorizer = event.get("requestContext", {}).get("authorizer", {})
-            user_id = authorizer.get("claims", {}).get("sub")
-            if not user_id:
-                return {
-                    "statusCode": 401,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "Not authenticated"}),
-                }
+        user_id = get_user_id(event)
 
         # memo_idの取得
         memo_id = event.get("pathParameters", {}).get("memoId")
@@ -61,11 +52,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
 
         # レスポンスの整形
-        item = response["Item"]
-        memo = {
-            "memoId": item.get("memo_id", {}).get("S", ""),
-            "title": item.get("title", {}).get("S", ""),
-            "content": item.get("content", {}).get("S", ""),
+        item = {
+            "memoId": response["Item"].get("memo_id", {}).get("S", ""),
+            "title": response["Item"].get("title", {}).get("S", ""),
+            "content": response["Item"].get("content", {}).get("S", ""),
         }
 
         logger.info("Memo retrieved: user_id=%s, memo_id=%s", user_id, memo_id)
@@ -73,9 +63,16 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(memo),
+            "body": json.dumps(item),
         }
 
+    except AuthenticationError as e:
+        logger.error("Authentication error: %s", str(e))
+        return {
+            "statusCode": 401,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"message": "Not authenticated"}),
+        }
     except ValueError as e:
         logger.error("Validation error: %s", str(e))
         return {

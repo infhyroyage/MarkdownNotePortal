@@ -5,12 +5,15 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 from lambdas.get_memo.app import lambda_handler
+from lambdas.layer.python.utils import AuthenticationError
 
 
+@patch("lambdas.get_memo.app.get_user_id")
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-def test_lambda_handler_success(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_success(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """正常系: メモの取得が成功する"""
     # モックの設定
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {
         "Item": {
@@ -24,7 +27,6 @@ def test_lambda_handler_success(mock_get_dynamodb_client) -> None:
     # イベントの作成
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -40,10 +42,12 @@ def test_lambda_handler_success(mock_get_dynamodb_client) -> None:
     mock_dynamodb.get_item.assert_called_once()
 
 
+@patch("lambdas.get_memo.app.get_user_id")
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_not_found(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: メモが見つからない場合"""
     # モックの設定
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {}
     mock_get_dynamodb_client.return_value = mock_dynamodb
@@ -51,7 +55,6 @@ def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     # イベントの作成
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "non-existent-id"},
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -65,15 +68,16 @@ def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     mock_dynamodb.get_item.assert_called_once()
 
 
+@patch("lambdas.get_memo.app.get_user_id")
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-def test_lambda_handler_no_memo_id(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_memo_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: memoIdが指定されていない場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {},
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -85,15 +89,16 @@ def test_lambda_handler_no_memo_id(mock_get_dynamodb_client) -> None:
     mock_dynamodb.get_item.assert_not_called()
 
 
+@patch("lambdas.get_memo.app.get_user_id")
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_user_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: user_idが取得できない場合"""
+    mock_get_user_id.side_effect = AuthenticationError("Not authenticated")
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
-        "requestContext": {"authorizer": {}},
     }
     context: Any = None
 
@@ -105,16 +110,19 @@ def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
     mock_dynamodb.get_item.assert_not_called()
 
 
+@patch("lambdas.get_memo.app.get_user_id")
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-def test_lambda_handler_dynamodb_error(mock_get_dynamodb_client) -> None:
+def test_lambda_handler_dynamodb_error(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
     """異常系: DynamoDBエラーが発生した場合"""
+    mock_get_user_id.return_value = "test-user-id"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.side_effect = Exception("DynamoDB error")
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
-        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 

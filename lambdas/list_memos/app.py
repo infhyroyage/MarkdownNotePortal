@@ -2,10 +2,13 @@
 
 import json
 import logging
-import os
 from typing import Any, Dict, List
 
-from lambdas.layer.python.utils import get_dynamodb_client
+from lambdas.layer.python.utils import (
+    AuthenticationError,
+    get_dynamodb_client,
+    get_user_id,
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,22 +26,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         Dict[str, Any]: API Gatewayレスポンス
     """
     try:
-        # user_idの取得(Cognito JWTトークンのsubクレームから)
-        # ローカル環境の場合は認証をスキップ
-        if os.environ.get("IS_LOCAL", "false").lower() == "true":
-            user_id = "local_user"
-        else:
-            authorizer = event.get("requestContext", {}).get("authorizer", {})
-            user_id = authorizer.get("claims", {}).get("sub")
+        user_id = get_user_id(event)
 
-            if not user_id:
-                return {
-                    "statusCode": 401,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "Not authenticated"}),
-                }
-
-        # DynamoDBからメモ一覧を取得
+        # メモ一覧を取得
         dynamodb = get_dynamodb_client()
         response = dynamodb.query(
             TableName="mkmemoportal-dynamodb",
@@ -65,6 +55,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "body": json.dumps({"items": items}),
         }
 
+    except AuthenticationError as e:
+        logger.error("Authentication error: %s", str(e))
+        return {
+            "statusCode": 401,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"message": "Not authenticated"}),
+        }
     except ValueError as e:
         logger.error("Validation error: %s", str(e))
         return {
