@@ -25,9 +25,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         # user_idの取得(Cognito JWTトークンのsubクレームから)
         # ローカル環境の場合は認証をスキップ
-        is_local = os.environ.get("IS_LOCAL", "false").lower() == "true"
-
-        if is_local:
+        if os.environ.get("IS_LOCAL", "false").lower() == "true":
             user_id = "local_user"
         else:
             authorizer = event.get("requestContext", {}).get("authorizer", {})
@@ -41,13 +39,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
 
         # DynamoDBからメモ一覧を取得
-        table_name = os.environ.get("TABLE_NAME")
-        if not table_name:
-            raise ValueError("TABLE_NAME環境変数が設定されていません")
-
         dynamodb = get_dynamodb_client()
         response = dynamodb.query(
-            TableName=table_name,
+            TableName="mkmemoportal-dynamodb",
             KeyConditionExpression="user_id = :user_id",
             ExpressionAttributeValues={":user_id": {"S": user_id}},
             ProjectionExpression="memo_id, title",

@@ -25,14 +25,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         # user_idの取得(Cognito JWTトークンのsubクレームから)
         # ローカル環境の場合は認証をスキップ
-        is_local = os.environ.get("IS_LOCAL", "false").lower() == "true"
-
-        if is_local:
+        if os.environ.get("IS_LOCAL", "false").lower() == "true":
             user_id = "local_user"
         else:
             authorizer = event.get("requestContext", {}).get("authorizer", {})
             user_id = authorizer.get("claims", {}).get("sub")
-
             if not user_id:
                 return {
                     "statusCode": 401,
@@ -41,9 +38,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
 
         # memo_idの取得
-        path_parameters = event.get("pathParameters", {})
-        memo_id = path_parameters.get("memoId")
-
+        memo_id = event.get("pathParameters", {}).get("memoId")
         if not memo_id:
             return {
                 "statusCode": 400,
@@ -51,20 +46,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "body": json.dumps({"message": "memoIdが指定されていません"}),
             }
 
-        # DynamoDBからメモを取得して存在確認
-        table_name = os.environ.get("TABLE_NAME")
-        if not table_name:
-            raise ValueError("TABLE_NAME環境変数が設定されていません")
-
+        # メモが見つからない場合は404エラーをレスポンス
         dynamodb = get_dynamodb_client()
-
-        # メモの存在確認
-        get_response = dynamodb.get_item(
-            TableName=table_name,
+        response = dynamodb.get_item(
+            TableName="mkmemoportal-dynamodb",
             Key={"user_id": {"S": user_id}, "memo_id": {"S": memo_id}},
         )
-
-        if "Item" not in get_response:
+        if "Item" not in response:
             logger.info(
                 "メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id
             )
@@ -76,7 +64,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         # メモを削除
         dynamodb.delete_item(
-            TableName=table_name,
+            TableName="mkmemoportal-dynamodb",
             Key={"user_id": {"S": user_id}, "memo_id": {"S": memo_id}},
         )
 

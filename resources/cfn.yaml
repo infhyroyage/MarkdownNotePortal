@@ -220,9 +220,6 @@ Resources:
         S3Key: create_memo.zip
       Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref MkmemoportalDynamodb
       Layers:
         - !Ref MkmemoportalLambdaLayer
 
@@ -238,9 +235,6 @@ Resources:
         S3Key: delete_memo.zip
       Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref MkmemoportalDynamodb
       Layers:
         - !Ref MkmemoportalLambdaLayer
 
@@ -256,9 +250,6 @@ Resources:
         S3Key: get_memo.zip
       Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref MkmemoportalDynamodb
       Layers:
         - !Ref MkmemoportalLambdaLayer
 
@@ -274,9 +265,6 @@ Resources:
         S3Key: list_memos.zip
       Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref MkmemoportalDynamodb
       Layers:
         - !Ref MkmemoportalLambdaLayer
 
@@ -292,9 +280,6 @@ Resources:
         S3Key: update_memo.zip
       Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref MkmemoportalDynamodb
       Layers:
         - !Ref MkmemoportalLambdaLayer
 

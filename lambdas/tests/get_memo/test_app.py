@@ -8,11 +8,9 @@ from lambdas.get_memo.app import lambda_handler
 
 
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-@patch("lambdas.get_memo.app.os.environ.get")
-def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_success(mock_get_dynamodb_client) -> None:
     """正常系: メモの取得が成功する"""
     # モックの設定
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {
         "Item": {
@@ -26,9 +24,7 @@ def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
     # イベントの作成
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -45,11 +41,9 @@ def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
 
 
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-@patch("lambdas.get_memo.app.os.environ.get")
-def test_lambda_handler_not_found(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     """異常系: メモが見つからない場合"""
     # モックの設定
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.return_value = {}
     mock_get_dynamodb_client.return_value = mock_dynamodb
@@ -57,9 +51,7 @@ def test_lambda_handler_not_found(mock_env_get, mock_get_dynamodb_client) -> Non
     # イベントの作成
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "non-existent-id"},
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -74,18 +66,14 @@ def test_lambda_handler_not_found(mock_env_get, mock_get_dynamodb_client) -> Non
 
 
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-@patch("lambdas.get_memo.app.os.environ.get")
-def test_lambda_handler_no_memo_id(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_memo_id(mock_get_dynamodb_client) -> None:
     """異常系: memoIdが指定されていない場合"""
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {},
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -98,10 +86,8 @@ def test_lambda_handler_no_memo_id(mock_env_get, mock_get_dynamodb_client) -> No
 
 
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-@patch("lambdas.get_memo.app.os.environ.get")
-def test_lambda_handler_no_user_id(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
     """異常系: user_idが取得できない場合"""
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
@@ -120,21 +106,15 @@ def test_lambda_handler_no_user_id(mock_env_get, mock_get_dynamodb_client) -> No
 
 
 @patch("lambdas.get_memo.app.get_dynamodb_client")
-@patch("lambdas.get_memo.app.os.environ.get")
-def test_lambda_handler_dynamodb_error(
-    mock_env_get, mock_get_dynamodb_client
-) -> None:
+def test_lambda_handler_dynamodb_error(mock_get_dynamodb_client) -> None:
     """異常系: DynamoDBエラーが発生した場合"""
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.get_item.side_effect = Exception("DynamoDB error")
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
         "pathParameters": {"memoId": "test-memo-id"},
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 

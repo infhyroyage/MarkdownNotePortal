@@ -8,11 +8,9 @@ from lambdas.list_memos.app import lambda_handler
 
 
 @patch("lambdas.list_memos.app.get_dynamodb_client")
-@patch("lambdas.list_memos.app.os.environ.get")
-def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_success(mock_get_dynamodb_client) -> None:
     """正常系: メモ一覧の取得が成功する"""
     # モックの設定
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.query.return_value = {
         "Items": [
@@ -30,9 +28,7 @@ def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
 
     # イベントの作成
     event: Dict[str, Any] = {
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -51,20 +47,16 @@ def test_lambda_handler_success(mock_env_get, mock_get_dynamodb_client) -> None:
 
 
 @patch("lambdas.list_memos.app.get_dynamodb_client")
-@patch("lambdas.list_memos.app.os.environ.get")
-def test_lambda_handler_empty_list(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_empty_list(mock_get_dynamodb_client) -> None:
     """正常系: メモが0件の場合"""
     # モックの設定
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.query.return_value = {"Items": []}
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     # イベントの作成
     event: Dict[str, Any] = {
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
@@ -79,10 +71,8 @@ def test_lambda_handler_empty_list(mock_env_get, mock_get_dynamodb_client) -> No
 
 
 @patch("lambdas.list_memos.app.get_dynamodb_client")
-@patch("lambdas.list_memos.app.os.environ.get")
-def test_lambda_handler_no_user_id(mock_env_get, mock_get_dynamodb_client) -> None:
+def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
     """異常系: user_idが取得できない場合"""
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
@@ -100,20 +90,14 @@ def test_lambda_handler_no_user_id(mock_env_get, mock_get_dynamodb_client) -> No
 
 
 @patch("lambdas.list_memos.app.get_dynamodb_client")
-@patch("lambdas.list_memos.app.os.environ.get")
-def test_lambda_handler_dynamodb_error(
-    mock_env_get, mock_get_dynamodb_client
-) -> None:
+def test_lambda_handler_dynamodb_error(mock_get_dynamodb_client) -> None:
     """異常系: DynamoDBエラーが発生した場合"""
-    mock_env_get.return_value = "test-table"
     mock_dynamodb = MagicMock()
     mock_dynamodb.query.side_effect = Exception("DynamoDB error")
     mock_get_dynamodb_client.return_value = mock_dynamodb
 
     event: Dict[str, Any] = {
-        "requestContext": {
-            "authorizer": {"claims": {"sub": "test-user-id"}}
-        },
+        "requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}},
     }
     context: Any = None
 
