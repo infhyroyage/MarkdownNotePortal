@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Any, Dict, List
 
-from utils import get_dynamodb_client
+from lambdas.layer.python.utils import get_dynamodb_client
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

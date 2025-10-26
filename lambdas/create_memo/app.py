@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from utils import get_dynamodb_client
+from lambdas.layer.python.utils import get_dynamodb_client
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

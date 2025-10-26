@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Any, Dict
 
-from utils import get_dynamodb_client
+from lambdas.layer.python.utils import get_dynamodb_client
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -65,7 +65,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         )
 
         if "Item" not in get_response:
-            logger.info("メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id)
+            logger.info(
+                "メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id
+            )
             return {
                 "statusCode": 404,
                 "headers": {"Content-Type": "application/json"},

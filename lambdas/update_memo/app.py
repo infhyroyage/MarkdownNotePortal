@@ -6,7 +6,7 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from utils import get_dynamodb_client
+from lambdas.layer.python.utils import get_dynamodb_client
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -91,7 +91,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         )
 
         if "Item" not in get_response:
-            logger.info("メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id)
+            logger.info(
+                "メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id
+            )
             return {
                 "statusCode": 404,
                 "headers": {"Content-Type": "application/json"},
@@ -115,9 +117,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(
-                {"memoId": memo_id, "title": title, "content": content}
-            ),
+            "body": json.dumps({"memoId": memo_id, "title": title, "content": content}),
         }
 
     except json.JSONDecodeError as e:
