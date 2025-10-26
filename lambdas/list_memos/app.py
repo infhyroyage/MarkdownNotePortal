@@ -35,7 +35,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     "statusCode": 401,
                     "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "認証が必要です"}),
+                    "body": json.dumps({"message": "Not authenticated"}),
                 }
 
         # DynamoDBからメモ一覧を取得
@@ -57,7 +57,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 }
             )
 
-        logger.info("メモ一覧を取得しました: user_id=%s, count=%d", user_id, len(items))
+        logger.info("Memo list retrieved: user_id=%s, count=%d", user_id, len(items))
 
         return {
             "statusCode": 200,
@@ -66,16 +66,16 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
 
     except ValueError as e:
-        logger.error("バリデーションエラー: %s", str(e))
+        logger.error("Validation error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Internal server error"}),
         }
     except Exception as e:
-        logger.error("予期しないエラー: %s", str(e))
+        logger.error("Unexpected error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Internal server error"}),
         }

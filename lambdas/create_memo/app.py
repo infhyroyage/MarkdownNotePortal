@@ -36,7 +36,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
                 "body": json.dumps(
-                    {"message": "titleは1〜200文字である必要があります"}
+                    {"message": "title must be between 1 and 200 characters"}
                 ),
             }
 
@@ -44,7 +44,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "contentは文字列である必要があります"}),
+                "body": json.dumps({"message": "content must be a string"}),
             }
 
         # user_idの取得(Cognito JWTトークンのsubクレームから)
@@ -58,7 +58,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     "statusCode": 401,
                     "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "認証が必要です"}),
+                    "body": json.dumps({"message": "Not authenticated"}),
                 }
 
         # メモIDの生成
@@ -77,8 +77,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "created_at": {"S": created_at},
             },
         )
-
-        logger.info("メモを作成しました: user_id=%s, memo_id=%s", user_id, memo_id)
+        logger.info("Memo created: user_id=%s, memo_id=%s", user_id, memo_id)
 
         return {
             "statusCode": 201,
@@ -87,23 +86,23 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
 
     except json.JSONDecodeError as e:
-        logger.error("JSONパースエラー: %s", str(e))
+        logger.error("JSON parse error: %s", str(e))
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "リクエストボディが不正です"}),
+            "body": json.dumps({"message": "Request body is invalid"}),
         }
     except ValueError as e:
-        logger.error("バリデーションエラー: %s", str(e))
+        logger.error("Validation error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Internal server error"}),
         }
     except Exception as e:
-        logger.error("予期しないエラー: %s", str(e))
+        logger.error("Unexpected error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Internal server error"}),
         }

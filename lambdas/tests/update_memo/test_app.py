@@ -66,7 +66,7 @@ def test_lambda_handler_not_found(mock_get_dynamodb_client) -> None:
     # 検証
     assert response["statusCode"] == 404
     response_body = json.loads(response["body"])
-    assert "見つかりません" in response_body["message"]
+    assert "not found" in response_body["message"]
     mock_dynamodb.get_item.assert_called_once()
     mock_dynamodb.update_item.assert_not_called()
 
@@ -155,7 +155,7 @@ def test_lambda_handler_no_user_id(mock_get_dynamodb_client) -> None:
 
     assert response["statusCode"] == 401
     response_body = json.loads(response["body"])
-    assert "認証" in response_body["message"]
+    assert "Not authenticated" in response_body["message"]
     mock_dynamodb.get_item.assert_not_called()
     mock_dynamodb.update_item.assert_not_called()
 
@@ -177,6 +177,6 @@ def test_lambda_handler_invalid_json(mock_get_dynamodb_client) -> None:
 
     assert response["statusCode"] == 400
     response_body = json.loads(response["body"])
-    assert "不正" in response_body["message"]
+    assert "invalid" in response_body["message"]
     mock_dynamodb.get_item.assert_not_called()
     mock_dynamodb.update_item.assert_not_called()

@@ -36,7 +36,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 return {
                     "statusCode": 401,
                     "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"message": "認証が必要です"}),
+                    "body": json.dumps({"message": "Not authenticated"}),
                 }
 
         # memo_idの取得
@@ -45,7 +45,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "memoIdが指定されていません"}),
+                "body": json.dumps({"message": "memoId is required"}),
             }
 
         # リクエストボディの取得とパース
@@ -59,7 +59,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
                 "body": json.dumps(
-                    {"message": "titleは1〜200文字である必要があります"}
+                    {"message": "title must be between 1 and 200 characters"}
                 ),
             }
 
@@ -67,7 +67,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return {
                 "statusCode": 400,
                 "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "contentは文字列である必要があります"}),
+                "body": json.dumps({"message": "content must be a string"}),
             }
 
         # 更新日時の生成
@@ -80,13 +80,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             Key={"user_id": {"S": user_id}, "memo_id": {"S": memo_id}},
         )
         if "Item" not in response:
-            logger.info(
-                "メモが見つかりません: user_id=%s, memo_id=%s", user_id, memo_id
-            )
+            logger.info("Memo not found: user_id=%s, memo_id=%s", user_id, memo_id)
             return {
                 "statusCode": 404,
                 "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({"message": "メモが見つかりません"}),
+                "body": json.dumps({"message": "Memo not found"}),
             }
 
         # メモを更新
@@ -101,7 +99,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             },
         )
 
-        logger.info("メモを更新しました: user_id=%s, memo_id=%s", user_id, memo_id)
+        logger.info("Memo updated: user_id=%s, memo_id=%s", user_id, memo_id)
 
         return {
             "statusCode": 200,
@@ -110,23 +108,23 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         }
 
     except json.JSONDecodeError as e:
-        logger.error("JSONパースエラー: %s", str(e))
+        logger.error("JSON parse error: %s", str(e))
         return {
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "リクエストボディが不正です"}),
+            "body": json.dumps({"message": "Request body is invalid"}),
         }
     except ValueError as e:
-        logger.error("バリデーションエラー: %s", str(e))
+        logger.error("Validation error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Internal server error"}),
         }
     except Exception as e:
-        logger.error("予期しないエラー: %s", str(e))
+        logger.error("Unexpected error: %s", str(e))
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "サーバーエラーが発生しました"}),
+            "body": json.dumps({"message": "Unexpected error"}),
         }
