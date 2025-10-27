@@ -62,13 +62,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"message": "Not authenticated"}),
         }
-    except ValueError as e:
-        logger.error("Validation error: %s", str(e))
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "Internal server error"}),
-        }
     except Exception as e:
         logger.error("Unexpected error: %s", str(e))
         return {

@@ -91,6 +91,29 @@ def test_lambda_handler_title_too_long(
 
 @patch("lambdas.create_memo.app.get_user_id")
 @patch("lambdas.create_memo.app.get_dynamodb_client")
+def test_lambda_handler_content_not_string_number(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
+    """異常系: contentが文字列ではない場合"""
+    mock_get_user_id.return_value = "test-user-id"
+    mock_dynamodb = MagicMock()
+    mock_get_dynamodb_client.return_value = mock_dynamodb
+
+    event: Dict[str, Any] = {
+        "body": json.dumps({"title": "テストメモ", "content": 123}),
+    }
+    context: Any = None
+
+    response = lambda_handler(event, context)
+
+    assert response["statusCode"] == 400
+    response_body = json.loads(response["body"])
+    assert "content must be a string" in response_body["message"]
+    mock_dynamodb.put_item.assert_not_called()
+
+
+@patch("lambdas.create_memo.app.get_user_id")
+@patch("lambdas.create_memo.app.get_dynamodb_client")
 def test_lambda_handler_no_user_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: user_idが取得できない場合"""
     mock_get_user_id.side_effect = AuthenticationError("Not authenticated")

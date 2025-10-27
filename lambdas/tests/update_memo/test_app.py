@@ -129,6 +129,31 @@ def test_lambda_handler_title_too_long(
 
 @patch("lambdas.update_memo.app.get_user_id")
 @patch("lambdas.update_memo.app.get_dynamodb_client")
+def test_lambda_handler_content_not_string_number(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
+    """異常系: contentが文字列ではない場合"""
+    mock_get_user_id.return_value = "test-user-id"
+    mock_dynamodb = MagicMock()
+    mock_get_dynamodb_client.return_value = mock_dynamodb
+
+    event: Dict[str, Any] = {
+        "pathParameters": {"memoId": "test-memo-id"},
+        "body": json.dumps({"title": "新しいタイトル", "content": 123}),
+    }
+    context: Any = None
+
+    response = lambda_handler(event, context)
+
+    assert response["statusCode"] == 400
+    response_body = json.loads(response["body"])
+    assert "content must be a string" in response_body["message"]
+    mock_dynamodb.get_item.assert_not_called()
+    mock_dynamodb.update_item.assert_not_called()
+
+
+@patch("lambdas.update_memo.app.get_user_id")
+@patch("lambdas.update_memo.app.get_dynamodb_client")
 def test_lambda_handler_no_memo_id(mock_get_dynamodb_client, mock_get_user_id) -> None:
     """異常系: memoIdが指定されていない場合"""
     mock_get_user_id.return_value = "test-user-id"
@@ -195,4 +220,30 @@ def test_lambda_handler_invalid_json(
     response_body = json.loads(response["body"])
     assert "invalid" in response_body["message"]
     mock_dynamodb.get_item.assert_not_called()
+    mock_dynamodb.update_item.assert_not_called()
+
+
+@patch("lambdas.update_memo.app.get_user_id")
+@patch("lambdas.update_memo.app.get_dynamodb_client")
+def test_lambda_handler_dynamodb_error(
+    mock_get_dynamodb_client, mock_get_user_id
+) -> None:
+    """異常系: DynamoDBエラーが発生した場合"""
+    mock_get_user_id.return_value = "test-user-id"
+    mock_dynamodb = MagicMock()
+    mock_dynamodb.get_item.side_effect = Exception("DynamoDB error")
+    mock_get_dynamodb_client.return_value = mock_dynamodb
+
+    event: Dict[str, Any] = {
+        "pathParameters": {"memoId": "test-memo-id"},
+        "body": json.dumps({"title": "新しいタイトル", "content": "# 新しい内容"}),
+    }
+    context: Any = None
+
+    response = lambda_handler(event, context)
+
+    assert response["statusCode"] == 500
+    response_body = json.loads(response["body"])
+    assert "error" in response_body["message"]
+    mock_dynamodb.get_item.assert_called_once()
     mock_dynamodb.update_item.assert_not_called()

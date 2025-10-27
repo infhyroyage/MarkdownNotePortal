@@ -34,7 +34,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         title = body.get("title", "").strip()
         content = body.get("content", "")
 
-        # バリデーション
+        # バリデーションチェック
         if not title or len(title) < 1 or len(title) > 200:
             return {
                 "statusCode": 400,
@@ -43,7 +43,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     {"message": "title must be between 1 and 200 characters"}
                 ),
             }
-
         if not isinstance(content, str):
             return {
                 "statusCode": 400,
@@ -107,13 +106,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "statusCode": 401,
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"message": "Not authenticated"}),
-        }
-    except ValueError as e:
-        logger.error("Validation error: %s", str(e))
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"message": "Internal server error"}),
         }
     except Exception as e:
         logger.error("Unexpected error: %s", str(e))
