@@ -4,7 +4,8 @@ import json
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
-from lambdas.layer.python.utils import AuthenticationError
+from utils import AuthenticationError
+
 from lambdas.update_memo.app import lambda_handler
 
 

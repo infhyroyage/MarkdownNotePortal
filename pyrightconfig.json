@@ -1,0 +1,14 @@
+{
+  "include": ["lambdas"],
+  "exclude": ["**/node_modules", "**/__pycache__", "**/venv"],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["lambdas/layer/python"]
+    }
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportAttributeAccessIssue": false,
+  "pythonVersion": "3.12"
+}

@@ -4,11 +4,7 @@ import json
 import logging
 from typing import Any, Dict
 
-from lambdas.layer.python.utils import (
-    AuthenticationError,
-    get_dynamodb_client,
-    get_user_id,
-)
+from utils import AuthenticationError, get_dynamodb_client, get_user_id
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
