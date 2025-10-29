@@ -38,9 +38,9 @@
   pylint lambdas/**/*.py docker/**/*.py
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
-  - **`.github/workflows/build-and-deploy-lambdas.yaml`**: AWS Lambda 関数のユニットテスト実行・ビルド・デプロイ
+  - **`.github/workflows/build-and-deploy-lambdas.yaml`**: AWS Lambda 関数のテスト・ビルド・デプロイ
   - **`.github/workflows/build-and-deploy-spa.yaml`**: SPA のビルド・デプロイ
-  - **`.github/workflows/deploy-resources.yaml`**: CloudFormation スタックでの AWS リソースのデプロイ
+  - **`.github/workflows/deploy-resources.yaml`**: CloudFormation スタックでの AWS リソースのデプロイ、AWS Lambda 関数のテスト・ビルド・デプロイ、SPA のビルド・デプロイ
   - **`.github/workflows/lint-spa.yaml`**: Pull Request 発行時の SPA の ESLint 実行
   - **`.github/workflows/test-lint-lambdas.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・Pylint 実行
 
