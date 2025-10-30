@@ -1,4 +1,6 @@
+import type { JSX } from "react";
 import { useCallback, useEffect, useState } from "react";
+import MarkdownEditor from "./components/MarkdownEditor";
 import {
   getLoginUrl,
   getLogoutUrl,
@@ -7,19 +9,18 @@ import {
   SESSION_STORAGE_CODE_VERIFIER_KEY,
   SESSION_STORAGE_TOKEN_KEY,
 } from "./utils/auth";
-import MarkdownEditor from "./components/MarkdownEditor";
 
 /**
  * アプリケーションのエントリーポイント
- * @returns アプリケーションのエントリーポイント
+ * @returns {JSX.Element} アプリケーションのエントリーポイント
  */
-export default function App() {
+export default function App(): JSX.Element {
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
 
   // アクセストークンが有効ではない場合は、Cognito Hosted UIのログインページにリダイレクト
   useEffect(() => {
     (async () => {
-      // 開発環境ではスキップ
+      // ローカル環境ではスキップ
       if (import.meta.env.DEV) {
         setIsAuthenticating(false);
         return;
@@ -81,7 +82,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* 上部固定バー */}
       <header className="navbar bg-base-200 shadow-md sticky top-0 z-10">
         <div className="flex-1">
           <h1 className="text-xl font-bold px-4">Markdown Note Portal</h1>
@@ -95,8 +95,6 @@ export default function App() {
           )}
         </div>
       </header>
-
-      {/* メインコンテンツエリア */}
       <main className="flex-1 overflow-hidden">
         {isAuthenticating ? (
           <div className="flex items-center justify-center h-full">

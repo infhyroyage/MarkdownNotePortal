@@ -1,12 +1,8 @@
+import type { JSX } from "react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-/**
- * Markdownエディタ/プレビューアコンポーネント
- * 左側にMarkdown入力エリア、右側にプレビューエリアを表示
- */
-export default function MarkdownEditor() {
-  const [markdown, setMarkdown] = useState<string>(`# Welcome to Markdown Editor
+const INITIAL_MARKDOWN_CONTENT: string = `# Welcome to Markdown Editor
 
 ## Features
 
@@ -54,31 +50,31 @@ function hello() {
 ---
 
 Start editing to see your changes!
-`);
+`;
+
+/**
+ * Markdown入力エリア(左側)とプレビューエリア(右側)を表示するコンポーネント
+ * @returns {JSX.Element} Markdown入力エリア(左側)とプレビューエリア(右側)を表示するコンポーネント
+ */
+export default function MarkdownEditor(): JSX.Element {
+  const [markdownContent, setMarkdownContent] = useState<string>(
+    INITIAL_MARKDOWN_CONTENT
+  );
 
   return (
     <div className="flex h-full">
-      {/* 左側：Markdown入力エリア */}
       <div className="w-1/2 flex flex-col border-r border-base-300">
-        <div className="bg-base-200 px-4 py-2 border-b border-base-300">
-          <h2 className="text-lg font-semibold">Markdown</h2>
-        </div>
         <textarea
           className="flex-1 w-full p-4 font-mono text-sm resize-none focus:outline-none bg-base-100"
-          value={markdown}
-          onChange={(e) => setMarkdown(e.target.value)}
+          value={markdownContent}
+          onChange={(e) => setMarkdownContent(e.target.value)}
           placeholder="Enter your markdown here..."
         />
       </div>
-
-      {/* 右側：プレビューエリア */}
       <div className="w-1/2 flex flex-col">
-        <div className="bg-base-200 px-4 py-2 border-b border-base-300">
-          <h2 className="text-lg font-semibold">Preview</h2>
-        </div>
         <div className="flex-1 overflow-auto">
           <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4">
-            <ReactMarkdown>{markdown}</ReactMarkdown>
+            <ReactMarkdown>{markdownContent}</ReactMarkdown>
           </div>
         </div>
       </div>
