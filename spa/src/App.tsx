@@ -1,4 +1,6 @@
+import type { JSX } from "react";
 import { useCallback, useEffect, useState } from "react";
+import MarkdownEditor from "./components/MarkdownEditor";
 import {
   getLoginUrl,
   getLogoutUrl,
@@ -10,15 +12,15 @@ import {
 
 /**
  * アプリケーションのエントリーポイント
- * @returns アプリケーションのエントリーポイント
+ * @returns {JSX.Element} アプリケーションのエントリーポイント
  */
-export default function App() {
+export default function App(): JSX.Element {
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
 
   // アクセストークンが有効ではない場合は、Cognito Hosted UIのログインページにリダイレクト
   useEffect(() => {
     (async () => {
-      // 開発環境ではスキップ
+      // ローカル環境ではスキップ
       if (import.meta.env.DEV) {
         setIsAuthenticating(false);
         return;
@@ -79,19 +81,32 @@ export default function App() {
   }, []);
 
   return (
-    <>
-      <h1>Markdown Note Portal</h1>
-      {isAuthenticating ? (
-        <p>認証中...</p>
-      ) : (
-        <>
-          <div>HelloWorld</div>
+    <div className="flex flex-col h-screen">
+      <header className="navbar bg-base-200 shadow-md sticky top-0 z-10">
+        <div className="flex-1">
+          <h1 className="text-xl font-bold px-4">Markdown Note Portal</h1>
+        </div>
+        <div className="flex-none">
           {/* ローカル環境の場合はログアウトボタンを表示しない */}
           {import.meta.env.PROD && (
-            <button onClick={onClickLogout}>ログアウト</button>
+            <button className="btn btn-ghost btn-sm" onClick={onClickLogout}>
+              ログアウト
+            </button>
           )}
-        </>
-      )}
-    </>
+        </div>
+      </header>
+      <main className="flex-1 overflow-hidden">
+        {isAuthenticating ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <span className="loading loading-spinner loading-lg"></span>
+              <p className="mt-4 text-lg">認証中...</p>
+            </div>
+          </div>
+        ) : (
+          <MarkdownEditor />
+        )}
+      </main>
+    </div>
   );
 }
