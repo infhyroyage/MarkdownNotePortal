@@ -1,9 +1,10 @@
 import type { JSX } from "react";
-import { useCallback, useEffect, useState } from "react";
-import MarkdownEditor from "./components/MarkdownEditor";
+import { useEffect, useState } from "react";
+import Header from "./components/Header";
+import NowAuthenticating from "./components/NowAuthenticating";
+import Workspace from "./components/Workspace";
 import {
   getLoginUrl,
-  getLogoutUrl,
   issueAccessToken,
   isTokenValid,
   SESSION_STORAGE_CODE_VERIFIER_KEY,
@@ -75,37 +76,11 @@ export default function App(): JSX.Element {
     })();
   }, []);
 
-  // ログアウトボタン押下時に、Cognito Hosted UIのログアウトページにリダイレクト
-  const onClickLogout = useCallback(() => {
-    window.location.href = getLogoutUrl();
-  }, []);
-
   return (
     <div className="flex flex-col h-screen">
-      <header className="navbar bg-base-200 shadow-md sticky top-0 z-10">
-        <div className="flex-1">
-          <h1 className="text-xl font-bold px-4">Markdown Note Portal</h1>
-        </div>
-        <div className="flex-none">
-          {/* ローカル環境の場合はログアウトボタンを表示しない */}
-          {import.meta.env.PROD && (
-            <button className="btn btn-ghost btn-sm" onClick={onClickLogout}>
-              ログアウト
-            </button>
-          )}
-        </div>
-      </header>
+      <Header />
       <main className="flex-1 overflow-hidden">
-        {isAuthenticating ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <span className="loading loading-spinner loading-lg"></span>
-              <p className="mt-4 text-lg">認証中...</p>
-            </div>
-          </div>
-        ) : (
-          <MarkdownEditor />
-        )}
+        {isAuthenticating ? <NowAuthenticating /> : <Workspace />}
       </main>
     </div>
   );
