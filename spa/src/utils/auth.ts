@@ -54,18 +54,21 @@ async function generateCodeChallenge(codeVerifier: string): Promise<string> {
 }
 
 /**
- * アクセストークンの有効性を検証
- * @param {string | null} accessToken アクセストークン(JWTトークン)
+ * アクセストークンの有効性を検証する
  * @returns {boolean} アクセストークンが有効の場合はtrue、無効または存在しない場合はfalse
  */
-export function isTokenValid(accessToken: string | null): boolean {
+export function isAccessTokenValid(): boolean {
+  const accessToken: string | null = sessionStorage.getItem(
+    SESSION_STORAGE_TOKEN_KEY
+  );
+
   // アクセストークンが存在しない場合は無効とする
   if (!accessToken) {
     return false;
   }
 
-  // JWTトークンのフォーマットが不正な場合は無効とする
-  const parts = accessToken.split(".");
+  // JWTトークンとしての構造が不正な場合は無効とする
+  const parts: string[] = accessToken.split(".");
   if (parts.length !== 3) {
     return false;
   }
@@ -87,15 +90,15 @@ export function isTokenValid(accessToken: string | null): boolean {
 }
 
 /**
- * アクセストークンを発行する
+ * アクセストークンを発行して、Session Storageに保存する
  * @param {string} code Authorization Code
  * @param {string} codeVerifier PKCEフロー用のcode_verifier
- * @returns {Promise<string>} アクセストークン
+ * @returns {Promise<void>}
  */
 export async function issueAccessToken(
   code: string,
   codeVerifier: string
-): Promise<string> {
+): Promise<void> {
   const response: AxiosResponse<{ access_token: string }> = await axios.post<{
     access_token: string;
   }>(
@@ -114,7 +117,12 @@ export async function issueAccessToken(
     }
   );
 
-  return response.data.access_token;
+  // アクセストークンをSession Storageに保存
+  const accessToken: string = response.data.access_token;
+  sessionStorage.setItem(SESSION_STORAGE_TOKEN_KEY, accessToken);
+
+  // PKCEフロー用のcode_verifierは用済みのため削除
+  sessionStorage.removeItem(SESSION_STORAGE_CODE_VERIFIER_KEY);
 }
 
 /**

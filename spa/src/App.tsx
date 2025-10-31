@@ -5,10 +5,9 @@ import NowAuthenticating from "./components/NowAuthenticating";
 import Workspace from "./components/Workspace";
 import {
   getLoginUrl,
+  isAccessTokenValid,
   issueAccessToken,
-  isTokenValid,
   SESSION_STORAGE_CODE_VERIFIER_KEY,
-  SESSION_STORAGE_TOKEN_KEY,
 } from "./utils/auth";
 
 /**
@@ -34,7 +33,7 @@ export default function App(): JSX.Element {
         ).get("code");
 
         if (code) {
-          // PKCEフロー用のcode_verifierを取得
+          // Authorization Codeがある場合、PKCEフロー用のcode_verifierを取得
           // 取得できない場合は、Cognito Hosted UIのログインページにリダイレクト
           const codeVerifier: string | null = sessionStorage.getItem(
             SESSION_STORAGE_CODE_VERIFIER_KEY
@@ -44,26 +43,16 @@ export default function App(): JSX.Element {
             return;
           }
 
-          // アクセストークンを取得してSession Storageに保存
-          const accessToken: string = await issueAccessToken(
-            code,
-            codeVerifier
-          );
-          sessionStorage.setItem(SESSION_STORAGE_TOKEN_KEY, accessToken);
-
-          // PKCEフロー用のcode_verifierは用済みのため削除
-          sessionStorage.removeItem(SESSION_STORAGE_CODE_VERIFIER_KEY);
+          // アクセストークンを発行してSession Storageに保存
+          await issueAccessToken(code, codeVerifier);
 
           // URLからcodeパラメータを削除してリダイレクト
           window.history.replaceState({}, document.title, "/");
           setIsAuthenticating(false);
         } else {
-          // codeがない場合、既存のアクセストークンが有効かをチェックし、
-          // 有効でない場合のみ、Cognito Hosted UIのログインページにリダイレクト
-          const accessToken: string | null = sessionStorage.getItem(
-            SESSION_STORAGE_TOKEN_KEY
-          );
-          if (isTokenValid(accessToken)) {
+          // Authorization Codeがない場合、既存のアクセストークンの有効性をチェックし、
+          // 無効であれば、Cognito Hosted UIのログインページにリダイレクト
+          if (isAccessTokenValid()) {
             setIsAuthenticating(false);
           } else {
             window.location.href = await getLoginUrl();
