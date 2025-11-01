@@ -1,7 +1,7 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useState } from "react";
-import { INITIAL_MARKDOWN_CONTENT } from "../utils/const";
-import type { Memo } from "../types/props";
+import { INITIAL_MARKDOWN_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
+import type { Memo } from "../types/state";
 import Header from "./Header";
 import MemoDrawer from "./MemoDrawer";
 import WorkspaceEditor from "./WorkspaceEditor";
@@ -15,13 +15,13 @@ export default function Workspace(): JSX.Element {
   const [memos, setMemos] = useState<Memo[]>([
     {
       id: "initial-memo",
-      title: "Initial Memo",
+      title: INITIAL_MEMO_TITLE,
       content: INITIAL_MARKDOWN_CONTENT,
     },
   ]);
 
   const [selectedMemoId, setSelectedMemoId] = useState<string>("initial-memo");
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
 
   const selectedMemo = memos.find((memo) => memo.id === selectedMemoId);
   const markdownContent = selectedMemo?.content ?? "";

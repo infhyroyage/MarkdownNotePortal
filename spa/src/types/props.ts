@@ -1,24 +1,5 @@
 import type { ChangeEvent } from "react";
-
-/**
- * メモの型定義
- */
-export interface Memo {
-  /**
-   * メモのID
-   */
-  id: string;
-
-  /**
-   * メモのタイトル
-   */
-  title: string;
-
-  /**
-   * メモのコンテンツ
-   */
-  content: string;
-}
+import type { Memo } from "./state";
 
 /**
  * ワークスペースの左側にあるMarkdownエディターを表示するコンポーネントのProps

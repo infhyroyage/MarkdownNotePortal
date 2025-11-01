@@ -47,3 +47,5 @@ function hello() {
 
 Start editing to see your changes!
 `;
+
+export const INITIAL_MEMO_TITLE: string = "Initial Memo";
