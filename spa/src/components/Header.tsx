@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { useCallback } from "react";
 import { getLogoutUrl } from "../utils/auth";
-import { useTheme } from "../utils/theme";
+import { useTheme } from "../hooks/useTheme";
 
 /**
  * ヘッダーを表示するコンポーネント
