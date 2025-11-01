@@ -1,7 +1,5 @@
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import Header from "./components/Header";
-import NowAuthenticating from "./components/NowAuthenticating";
 import Workspace from "./components/Workspace";
 import {
   getLoginUrl,
@@ -67,10 +65,13 @@ export default function App(): JSX.Element {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
-      <main className="flex-1 overflow-hidden">
-        {isAuthenticating ? <NowAuthenticating /> : <Workspace />}
-      </main>
+      {isAuthenticating ? (
+        <div className="flex items-center justify-center h-full">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : (
+        <Workspace />
+      )}
     </div>
   );
 }
