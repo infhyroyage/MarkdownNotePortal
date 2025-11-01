@@ -70,9 +70,9 @@ jobs:
       - name: Upload SPA Artifacts
         run: |
           aws s3 sync \
-            spa/dist/
-            s3://${{ inputs.S3_SPA_BUCKET_NAME }}/
-            --delete
+            spa/dist/ \
+            s3://${{ inputs.S3_SPA_BUCKET_NAME }}/ \
+            --delete \
             --region ap-northeast-1
 
       - name: Invalidate CloudFront Cache
