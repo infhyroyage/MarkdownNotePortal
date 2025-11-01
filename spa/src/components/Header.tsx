@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { useCallback } from "react";
+import ThemeButton from "./ThemeButton";
 import { getLogoutUrl } from "../utils/auth";
 
 /**
@@ -17,7 +18,8 @@ export default function Header(): JSX.Element {
       <div className="flex-1">
         <h1 className="text-xl font-bold px-4">Markdown Note Portal</h1>
       </div>
-      <div className="flex-none">
+      <div className="flex-none gap-2">
+        <ThemeButton />
         <button className="btn btn-ghost btn-sm" onClick={onClickLogout}>
           ログアウト
         </button>
