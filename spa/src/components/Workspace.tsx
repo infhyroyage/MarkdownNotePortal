@@ -1,7 +1,9 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useState } from "react";
 import { INITIAL_MARKDOWN_CONTENT } from "../utils/const";
+import type { Memo } from "../types/props";
 import Header from "./Header";
+import MemoDrawer from "./MemoDrawer";
 import WorkspaceEditor from "./WorkspaceEditor";
 import WorkspacePreview from "./WorkspacePreview";
 
@@ -10,20 +12,49 @@ import WorkspacePreview from "./WorkspacePreview";
  * @returns {JSX.Element} ワークスペースを表示するコンポーネント
  */
 export default function Workspace(): JSX.Element {
-  const [markdownContent, setMarkdownContent] = useState<string>(
-    INITIAL_MARKDOWN_CONTENT
-  );
+  const [memos, setMemos] = useState<Memo[]>([
+    {
+      id: "initial-memo",
+      title: "Initial Memo",
+      content: INITIAL_MARKDOWN_CONTENT,
+    },
+  ]);
+
+  const [selectedMemoId, setSelectedMemoId] = useState<string>("initial-memo");
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  const selectedMemo = memos.find((memo) => memo.id === selectedMemoId);
+  const markdownContent = selectedMemo?.content ?? "";
 
   const handleMarkdownContentChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
-      setMarkdownContent(e.target.value);
+      const newContent = e.target.value;
+      setMemos((prevMemos) =>
+        prevMemos.map((memo) =>
+          memo.id === selectedMemoId ? { ...memo, content: newContent } : memo
+        )
+      );
     },
-    [setMarkdownContent]
+    [selectedMemoId]
   );
+
+  const handleSelectMemo = useCallback((memoId: string) => {
+    setSelectedMemoId(memoId);
+  }, []);
+
+  const handleToggleDrawer = useCallback(() => {
+    setIsDrawerOpen((prev) => !prev);
+  }, []);
 
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      <Header onToggleDrawer={handleToggleDrawer} />
+      <MemoDrawer
+        memos={memos}
+        selectedMemoId={selectedMemoId}
+        onSelectMemo={handleSelectMemo}
+        isOpen={isDrawerOpen}
+      />
       <main className="flex-1 overflow-hidden">
         <div className="flex h-full">
           <WorkspaceEditor
