@@ -451,6 +451,9 @@ Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL for mkmemoportal-apig
     Value: !GetAtt MkmemoportalApig.ApiEndpoint
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !Ref MkmemoportalCloudfront
   CognitoClientId:
     Description: Cognito User Pool Client ID
     Value: !Ref MkmemoportalCognitoClient
