@@ -1,10 +1,8 @@
-type Theme = "light" | "dark";
-
-export const STORAGE_KEY = "theme";
+import type { Theme } from "../types/hooks";
 
 /**
  * システムのカラースキームを取得
- * @returns {Theme} システムのカラースキーム
+ * @returns {Theme} テーマ
  */
 export function getSystemTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -14,10 +12,10 @@ export function getSystemTheme(): Theme {
 
 /**
  * 保存されているテーマを取得、なければシステムのテーマを返す
- * @returns {Theme} 現在のテーマ
+ * @returns {Theme} テーマ
  */
 export function getSavedTheme(): Theme {
-  const saved = localStorage.getItem(STORAGE_KEY);
+  const saved = localStorage.getItem("theme");
   if (saved === "light" || saved === "dark") {
     return saved;
   }
@@ -26,7 +24,7 @@ export function getSavedTheme(): Theme {
 
 /**
  * テーマをHTMLに適用
- * @param {Theme} theme - 適用するテーマ
+ * @param {Theme} theme テーマ
  */
 export function applyTheme(theme: Theme): void {
   document.documentElement.setAttribute("data-theme", theme);

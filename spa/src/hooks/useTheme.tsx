@@ -1,30 +1,25 @@
-import { useEffect, useState } from "react";
-import {
-  applyTheme,
-  getSavedTheme,
-  STORAGE_KEY,
-} from "../utils/theme";
-
-type Theme = "light" | "dark";
+import { useCallback, useEffect, useState } from "react";
+import type { Theme, UseThemeReturnType } from "../types/hooks";
+import { applyTheme, getSavedTheme } from "../utils/theme";
 
 /**
  * テーマ管理用のカスタムフック
- * @returns {{ theme: Theme, toggleTheme: () => void }} 現在のテーマとトグル関数
+ * @returns {UseThemeReturnType} テーマ管理用のカスタムフックの戻り値
  */
-export function useTheme(): { theme: Theme; toggleTheme: () => void } {
-  const [theme, setTheme] = useState<Theme>(getSavedTheme);
+export default function useTheme(): UseThemeReturnType {
+  const [theme, setTheme] = useState<Theme>(getSavedTheme());
 
   // 初回マウント時とテーマ変更時にHTMLに適用
   useEffect(() => {
     applyTheme(theme);
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   // システムのカラースキーム変更を監視
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem("theme");
       // 明示的にテーマが設定されていない場合のみシステム設定に従う
       if (!saved) {
         const newTheme = e.matches ? "dark" : "light";
@@ -36,9 +31,9 @@ export function useTheme(): { theme: Theme; toggleTheme: () => void } {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  }, [setTheme]);
 
   return { theme, toggleTheme };
 }
