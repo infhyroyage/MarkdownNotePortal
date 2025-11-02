@@ -14,27 +14,22 @@ export default function MemoDrawer(props: MemoDrawerProps): JSX.Element {
       }`}
       style={{ width: "250px" }}
     >
-      <div className="flex flex-col h-full">
-        <div className="p-4 border-b border-base-300">
-          <h2 className="text-lg font-semibold">Memos</h2>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <ul className="menu">
-            {props.memos.map((memo) => (
-              <li key={memo.id}>
-                <button
-                  type="button"
-                  className={`w-full text-left ${
-                    props.selectedMemoId === memo.id ? "active" : ""
-                  }`}
-                  onClick={() => props.onSelectMemo(memo.id)}
-                >
-                  {memo.title}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="h-full overflow-y-auto">
+        <ul className="menu w-full p-0">
+          {props.memos.map((memo) => (
+            <li key={memo.id} className="w-full">
+              <button
+                type="button"
+                className={`w-full text-left px-4 py-3 rounded-none ${
+                  props.selectedMemoId === memo.id ? "active" : ""
+                }`}
+                onClick={() => props.onSelectMemo(memo.id)}
+              >
+                {memo.title}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
