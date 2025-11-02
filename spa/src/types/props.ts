@@ -29,7 +29,7 @@ export interface WorkspacePreviewProps {
 /**
  * メモドロワーコンポーネントのProps
  */
-export interface MemoDrawerProps {
+export interface DrawerProps {
   /**
    * メモのリスト
    */
@@ -49,6 +49,11 @@ export interface MemoDrawerProps {
    * ドロワーが開いているかどうか
    */
   isOpen: boolean;
+
+  /**
+   * ドロワーを閉じる関数
+   */
+  onCloseDrawer: () => void;
 }
 
 /**
@@ -64,4 +69,24 @@ export interface HeaderProps {
    * ドロワーの表示/非表示を切り替える関数
    */
   onToggleDrawer: () => void;
+
+  /**
+   * ドロワーが開いているかどうか
+   */
+  isDrawerOpen: boolean;
+}
+
+/**
+ * ハンバーガーメニューボタンを表示するコンポーネントのProps
+ */
+export interface HamburgerMenuButtonProps {
+  /**
+   * ドロワーの表示/非表示を切り替える関数
+   */
+  onToggleDrawer: () => void;
+
+  /**
+   * ドロワーが開いているかどうか
+   */
+  isDrawerOpen: boolean;
 }

@@ -2,8 +2,8 @@ import type { ChangeEvent, JSX } from "react";
 import { useCallback, useMemo, useState } from "react";
 import type { Memo } from "../types/state";
 import { INITIAL_MARKDOWN_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
+import Drawer from "./Drawer";
 import Header from "./Header";
-import MemoDrawer from "./MemoDrawer";
 import WorkspaceEditor from "./WorkspaceEditor";
 import WorkspacePreview from "./WorkspacePreview";
 
@@ -57,12 +57,14 @@ export default function Workspace(): JSX.Element {
       <Header
         title={selectedMemo?.title ?? "Markdown Note Portal"}
         onToggleDrawer={handleToggleDrawer}
+        isDrawerOpen={isDrawerOpen}
       />
-      <MemoDrawer
+      <Drawer
         memos={memos}
         selectedMemoId={selectedMemoId}
         onSelectMemo={handleSelectMemo}
         isOpen={isDrawerOpen}
+        onCloseDrawer={handleToggleDrawer}
       />
       <main className="flex-1 overflow-hidden">
         <div className="flex h-full">
