@@ -1,7 +1,7 @@
 import type { ChangeEvent, JSX } from "react";
-import { useCallback, useState } from "react";
-import { INITIAL_MARKDOWN_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
+import { useCallback, useMemo, useState } from "react";
 import type { Memo } from "../types/state";
+import { INITIAL_MARKDOWN_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
 import Header from "./Header";
 import MemoDrawer from "./MemoDrawer";
 import WorkspaceEditor from "./WorkspaceEditor";
@@ -23,11 +23,17 @@ export default function Workspace(): JSX.Element {
   const [selectedMemoId, setSelectedMemoId] = useState<string>("initial-memo");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
 
-  const selectedMemo = memos.find((memo) => memo.id === selectedMemoId);
-  const markdownContent = selectedMemo?.content ?? "";
+  const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
+    () => memos.find((memo: Memo) => memo.id === selectedMemoId),
+    [memos, selectedMemoId]
+  );
+  const markdownContent: string = useMemo<string>(
+    () => selectedMemo?.content ?? INITIAL_MARKDOWN_CONTENT,
+    [selectedMemo]
+  );
 
   const handleMarkdownContentChange = useCallback(
-    (e: ChangeEvent<HTMLTextAreaElement>) => {
+    (e: ChangeEvent<HTMLTextAreaElement>): void => {
       const newContent = e.target.value;
       setMemos((prevMemos) =>
         prevMemos.map((memo) =>
@@ -38,17 +44,20 @@ export default function Workspace(): JSX.Element {
     [selectedMemoId]
   );
 
-  const handleSelectMemo = useCallback((memoId: string) => {
+  const handleSelectMemo = useCallback((memoId: string): void => {
     setSelectedMemoId(memoId);
   }, []);
 
-  const handleToggleDrawer = useCallback(() => {
+  const handleToggleDrawer = useCallback((): void => {
     setIsDrawerOpen((prev) => !prev);
   }, []);
 
   return (
     <div className="flex flex-col h-screen">
-      <Header onToggleDrawer={handleToggleDrawer} />
+      <Header
+        title={selectedMemo?.title ?? "Markdown Note Portal"}
+        onToggleDrawer={handleToggleDrawer}
+      />
       <MemoDrawer
         memos={memos}
         selectedMemoId={selectedMemoId}

@@ -56,6 +56,11 @@ export interface MemoDrawerProps {
  */
 export interface HeaderProps {
   /**
+   * ヘッダーのタイトル
+   */
+  title: string;
+
+  /**
    * ドロワーの表示/非表示を切り替える関数
    */
   onToggleDrawer: () => void;

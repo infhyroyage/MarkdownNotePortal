@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import type { HeaderProps } from "../types/props";
-import ThemeButton from "./ThemeButton";
 import SignOutButton from "./SignOutButton";
+import ThemeButton from "./ThemeButton";
 
 /**
  * ヘッダーを表示するコンポーネント
@@ -34,7 +34,7 @@ export default function Header(props: HeaderProps): JSX.Element {
         </button>
       </div>
       <div className="flex-1">
-        <h1 className="text-xl font-bold px-4">Markdown Note Portal</h1>
+        <h1 className="text-xl font-bold px-4">{props.title}</h1>
       </div>
       <div className="flex-none gap-2">
         <ThemeButton />
