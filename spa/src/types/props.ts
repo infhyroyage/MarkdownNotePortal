@@ -54,6 +54,16 @@ export interface DrawerProps {
    * ドロワーを閉じる関数
    */
   onCloseDrawer: () => void;
+
+  /**
+   * メモを追加する関数
+   */
+  onAddMemo: () => void;
+
+  /**
+   * メモを削除する関数
+   */
+  onDeleteMemo: (memoId: string) => void;
 }
 
 /**
@@ -74,6 +84,16 @@ export interface HeaderProps {
    * ドロワーが開いているかどうか
    */
   isDrawerOpen: boolean;
+
+  /**
+   * タイトルを更新する関数
+   */
+  onUpdateTitle: (newTitle: string) => void;
+
+  /**
+   * 選択中のメモが存在するかどうか
+   */
+  hasSelectedMemo: boolean;
 }
 
 /**

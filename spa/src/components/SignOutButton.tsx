@@ -13,11 +13,7 @@ export default function SignOutButton(): JSX.Element {
   }, []);
 
   return (
-    <button
-      className="btn btn-ghost btn-sm"
-      onClick={onClickLogout}
-      aria-label="ログアウト"
-    >
+    <button className="btn btn-ghost btn-sm" onClick={onClickLogout}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

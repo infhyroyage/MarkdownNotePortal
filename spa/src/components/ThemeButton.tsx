@@ -9,11 +9,7 @@ export default function ThemeButton(): JSX.Element {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <button
-      className="btn btn-ghost btn-sm"
-      onClick={toggleTheme}
-      aria-label="テーマ切り替え"
-    >
+    <button className="btn btn-ghost btn-sm" onClick={toggleTheme}>
       {theme === "light" ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -12,13 +12,7 @@ import WorkspacePreview from "./WorkspacePreview";
  * @returns {JSX.Element} ワークスペースを表示するコンポーネント
  */
 export default function Workspace(): JSX.Element {
-  const [memos, setMemos] = useState<Memo[]>([
-    {
-      id: "initial-memo",
-      title: INITIAL_MEMO_TITLE,
-      content: INITIAL_MARKDOWN_CONTENT,
-    },
-  ]);
+  const [memos, setMemos] = useState<Memo[]>([]);
 
   const [selectedMemoId, setSelectedMemoId] = useState<string>("initial-memo");
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
@@ -27,8 +21,8 @@ export default function Workspace(): JSX.Element {
     () => memos.find((memo: Memo) => memo.id === selectedMemoId),
     [memos, selectedMemoId]
   );
-  const markdownContent: string = useMemo<string>(
-    () => selectedMemo?.content ?? INITIAL_MARKDOWN_CONTENT,
+  const markdownContent: string | undefined = useMemo<string | undefined>(
+    () => selectedMemo?.content,
     [selectedMemo]
   );
 
@@ -52,12 +46,50 @@ export default function Workspace(): JSX.Element {
     setIsDrawerOpen((prev) => !prev);
   }, []);
 
+  const handleAddMemo = useCallback((): void => {
+    const newMemoId = `memo-${Date.now()}`;
+    const newMemo: Memo = {
+      id: newMemoId,
+      title: INITIAL_MEMO_TITLE,
+      content: INITIAL_MARKDOWN_CONTENT,
+    };
+    setMemos((prevMemos) => [...prevMemos, newMemo]);
+    setSelectedMemoId(newMemoId);
+  }, []);
+
+  const handleDeleteMemo = useCallback(
+    (memoId: string): void => {
+      setMemos((prevMemos) => {
+        const filteredMemos = prevMemos.filter((memo) => memo.id !== memoId);
+        // 削除するメモが選択中の場合、別のメモを選択
+        if (memoId === selectedMemoId && filteredMemos.length > 0) {
+          setSelectedMemoId(filteredMemos[0].id);
+        }
+        return filteredMemos;
+      });
+    },
+    [selectedMemoId]
+  );
+
+  const handleUpdateTitle = useCallback(
+    (newTitle: string): void => {
+      setMemos((prevMemos) =>
+        prevMemos.map((memo) =>
+          memo.id === selectedMemoId ? { ...memo, title: newTitle } : memo
+        )
+      );
+    },
+    [selectedMemoId]
+  );
+
   return (
     <div className="flex flex-col h-screen">
       <Header
         title={selectedMemo?.title ?? "Markdown Note Portal"}
         onToggleDrawer={handleToggleDrawer}
         isDrawerOpen={isDrawerOpen}
+        onUpdateTitle={handleUpdateTitle}
+        hasSelectedMemo={selectedMemo !== undefined}
       />
       <Drawer
         memos={memos}
@@ -65,14 +97,20 @@ export default function Workspace(): JSX.Element {
         onSelectMemo={handleSelectMemo}
         isOpen={isDrawerOpen}
         onCloseDrawer={handleToggleDrawer}
+        onAddMemo={handleAddMemo}
+        onDeleteMemo={handleDeleteMemo}
       />
       <main className="flex-1 overflow-hidden">
         <div className="flex h-full">
-          <WorkspaceEditor
-            markdownContent={markdownContent}
-            handleMarkdownContentChange={handleMarkdownContentChange}
-          />
-          <WorkspacePreview markdownContent={markdownContent} />
+          {markdownContent && (
+            <>
+              <WorkspaceEditor
+                markdownContent={markdownContent}
+                handleMarkdownContentChange={handleMarkdownContentChange}
+              />
+              <WorkspacePreview markdownContent={markdownContent} />
+            </>
+          )}
         </div>
       </main>
     </div>
