@@ -21,6 +21,7 @@ export default function Header(props: HeaderProps): JSX.Element {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>(title);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
 
@@ -67,24 +68,30 @@ export default function Header(props: HeaderProps): JSX.Element {
     };
   }, [isEditing, handleSaveTitle]);
 
-  const handleTitleClick = (): void => {
+  const handleTitleClick = useCallback((): void => {
     if (hasSelectedMemo) {
       setIsEditing(true);
     }
-  };
+  }, [hasSelectedMemo]);
 
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setEditedTitle(e.target.value);
-  };
+  const handleTitleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>): void => {
+      setEditedTitle(e.target.value);
+    },
+    []
+  );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === "Enter") {
-      handleSaveTitle();
-    } else if (e.key === "Escape") {
-      setEditedTitle(title);
-      setIsEditing(false);
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>): void => {
+      if (e.key === "Enter") {
+        handleSaveTitle();
+      } else if (e.key === "Escape") {
+        setEditedTitle(title);
+        setIsEditing(false);
+      }
+    },
+    [handleSaveTitle, title]
+  );
 
   return (
     <header className="navbar bg-base-300 shadow-md sticky top-0 z-10">

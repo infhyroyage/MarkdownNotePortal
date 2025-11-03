@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import { useCallback, useEffect, useState, type JSX } from "react";
 import type { DrawerProps } from "../types/props";
 
 /**
@@ -34,20 +34,20 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     };
   }, [isOpen, onCloseDrawer]);
 
-  const handleDeleteClick = (memoId: string): void => {
+  const handleDeleteClick = useCallback((memoId: string): void => {
     setMemoToDelete(memoId);
-  };
+  }, []);
 
-  const handleConfirmDelete = (): void => {
+  const handleConfirmDelete = useCallback((): void => {
     if (memoToDelete) {
       onDeleteMemo(memoToDelete);
       setMemoToDelete(null);
     }
-  };
+  }, [memoToDelete, onDeleteMemo]);
 
-  const handleCancelDelete = (): void => {
+  const handleCancelDelete = useCallback((): void => {
     setMemoToDelete(null);
-  };
+  }, []);
 
   return (
     <>
