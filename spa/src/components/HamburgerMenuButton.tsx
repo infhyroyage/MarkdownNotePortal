@@ -9,7 +9,7 @@ import type { HamburgerMenuButtonProps } from "../types/props";
 export default function HamburgerMenuButton(
   props: HamburgerMenuButtonProps
 ): JSX.Element {
-  const { onToggleDrawer, isDrawerOpen } = props;
+  const { isDrawerOpen, onToggleDrawer } = props;
 
   return (
     <button

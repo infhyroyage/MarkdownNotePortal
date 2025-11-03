@@ -12,11 +12,11 @@ import ThemeButton from "./ThemeButton";
  */
 export default function Header(props: HeaderProps): JSX.Element {
   const {
-    onToggleDrawer,
-    isDrawerOpen,
-    title,
-    onUpdateTitle,
     hasSelectedMemo,
+    isDrawerOpen,
+    onToggleDrawer,
+    onUpdateTitle,
+    title,
   } = props;
 
   const [isEditing, setIsEditing] = useState<boolean>(false);

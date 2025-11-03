@@ -9,12 +9,12 @@ import type { DrawerProps } from "../types/props";
 export default function Drawer(props: DrawerProps): JSX.Element {
   const {
     isOpen,
-    onCloseDrawer,
     memos,
-    selectedMemoId,
-    onSelectMemo,
     onAddMemo,
+    onCloseDrawer,
     onDeleteMemo,
+    onSelectMemo,
+    selectedMemoId,
   } = props;
 
   const [memoToDelete, setMemoToDelete] = useState<string | null>(null);

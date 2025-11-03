@@ -9,7 +9,7 @@ import type { WorkspaceEditorProps } from "../types/props";
 export default function WorkspaceEditor(
   props: WorkspaceEditorProps
 ): JSX.Element {
-  const { markdownContent, handleMarkdownContentChange } = props;
+  const { handleMarkdownContentChange, markdownContent } = props;
 
   return (
     <div className="w-1/2 flex flex-col border-r border-base-300">
