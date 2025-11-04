@@ -1,37 +1,46 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
+import type {
+  CreateMemoRequest,
+  CreateMemoResponse,
+  GetMemoResponse,
+  ListMemosResponse,
+  UpdateMemoRequest,
+  UpdateMemoResponse,
+} from "../types/api";
 import { SESSION_STORAGE_TOKEN_KEY } from "./auth";
 
 /**
- * API呼び出し用のaxiosインスタンスを作成
+ * API のベース URL
  */
-const createApiClient = (): AxiosInstance => {
-  const client = axios.create({
-    baseURL: import.meta.env.DEV ? "/memo" : "/memo",
+const API_BASE_URL = "/memo";
+
+/**
+ * axios リクエストの共通設定を取得
+ * @returns axios リクエストの共通設定
+ */
+const getAxiosConfig = (): AxiosRequestConfig => {
+  const config: AxiosRequestConfig = {
     headers: {
       "Content-Type": "application/json",
     },
-  });
+  };
 
-  // リクエストインターセプター：Authorizationヘッダーを追加
-  client.interceptors.request.use((config) => {
-    // ローカル環境ではAuthorizationヘッダーを付与しない
-    if (import.meta.env.DEV) {
-      return config;
-    }
-
-    // 本番環境ではSession Storageからアクセストークンを取得して付与
-    const accessToken = sessionStorage.getItem(SESSION_STORAGE_TOKEN_KEY);
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-
+  // ローカル環境ではAuthorizationヘッダーを付与しない
+  if (import.meta.env.DEV) {
     return config;
-  });
+  }
 
-  return client;
+  // 本番環境ではSession Storageからアクセストークンを取得して付与
+  const accessToken = sessionStorage.getItem(SESSION_STORAGE_TOKEN_KEY);
+  if (accessToken) {
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${accessToken}`,
+    };
+  }
+
+  return config;
 };
-
-const apiClient = createApiClient();
 
 /**
  * API呼び出し関数
@@ -41,12 +50,11 @@ const apiClient = createApiClient();
  * メモ一覧を取得
  * @returns メモ一覧
  */
-export const listMemos = async (): Promise<{
-  items: Array<{ memoId: string; title: string }>;
-}> => {
-  const response = await apiClient.get<{
-    items: Array<{ memoId: string; title: string }>;
-  }>("");
+export const listMemos = async (): Promise<ListMemosResponse> => {
+  const response = await axios.get<ListMemosResponse>(
+    API_BASE_URL,
+    getAxiosConfig()
+  );
   return response.data;
 };
 
@@ -59,13 +67,15 @@ export const listMemos = async (): Promise<{
 export const createMemo = async (
   title: string,
   content: string
-): Promise<{ memoId: string; title: string }> => {
-  const response = await apiClient.post<{ memoId: string; title: string }>(
-    "",
-    {
-      title,
-      content,
-    }
+): Promise<CreateMemoResponse> => {
+  const requestBody: CreateMemoRequest = {
+    title,
+    content,
+  };
+  const response = await axios.post<CreateMemoResponse>(
+    API_BASE_URL,
+    requestBody,
+    getAxiosConfig()
   );
   return response.data;
 };
@@ -75,14 +85,11 @@ export const createMemo = async (
  * @param memoId メモのID
  * @returns メモの詳細
  */
-export const getMemo = async (
-  memoId: string
-): Promise<{ memoId: string; title: string; content: string }> => {
-  const response = await apiClient.get<{
-    memoId: string;
-    title: string;
-    content: string;
-  }>(`/${memoId}`);
+export const getMemo = async (memoId: string): Promise<GetMemoResponse> => {
+  const response = await axios.get<GetMemoResponse>(
+    `${API_BASE_URL}/${memoId}`,
+    getAxiosConfig()
+  );
   return response.data;
 };
 
@@ -97,15 +104,16 @@ export const updateMemo = async (
   memoId: string,
   title: string,
   content: string
-): Promise<{ memoId: string; title: string; content: string }> => {
-  const response = await apiClient.put<{
-    memoId: string;
-    title: string;
-    content: string;
-  }>(`/${memoId}`, {
+): Promise<UpdateMemoResponse> => {
+  const requestBody: UpdateMemoRequest = {
     title,
     content,
-  });
+  };
+  const response = await axios.put<UpdateMemoResponse>(
+    `${API_BASE_URL}/${memoId}`,
+    requestBody,
+    getAxiosConfig()
+  );
   return response.data;
 };
 
@@ -114,5 +122,5 @@ export const updateMemo = async (
  * @param memoId メモのID
  */
 export const deleteMemo = async (memoId: string): Promise<void> => {
-  await apiClient.delete(`/${memoId}`);
+  await axios.delete(`${API_BASE_URL}/${memoId}`, getAxiosConfig());
 };
