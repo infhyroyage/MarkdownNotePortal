@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { Memo } from "./state";
+import type { Memo, SaveStatus } from "./state";
 
 /**
  * メモドロワーコンポーネントのProps
@@ -79,6 +79,11 @@ export interface HeaderProps {
    * タイトルを更新する関数
    */
   onUpdateTitle: (newTitle: string) => void;
+
+  /**
+   * 自動保存の状態
+   */
+  saveStatus: SaveStatus;
 
   /**
    * ヘッダーのタイトル

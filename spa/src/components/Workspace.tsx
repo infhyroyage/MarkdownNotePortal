@@ -1,6 +1,6 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Memo } from "../types/state";
+import type { Memo, SaveStatus } from "../types/state";
 import { listMemos } from "../utils/api";
 import { INITIAL_MARKDOWN_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
@@ -18,6 +18,7 @@ export default function Workspace(): JSX.Element {
 
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   // 初回レンダリング時にメモ一覧を取得
   useEffect(() => {
@@ -97,11 +98,18 @@ export default function Workspace(): JSX.Element {
   const saveMemo = useCallback(
     async (memoId: string, title: string, content: string): Promise<void> => {
       try {
+        setSaveStatus("saving");
         const { updateMemo } = await import("../utils/api");
         await updateMemo(memoId, title, content);
-        console.log("Memo saved successfully");
+        setSaveStatus("saved");
+        
+        // 2秒後にsavedをidleに戻す
+        setTimeout(() => {
+          setSaveStatus("idle");
+        }, 2000);
       } catch (error) {
         console.error("Failed to save memo:", error);
+        setSaveStatus("idle");
       }
     },
     []
@@ -245,6 +253,7 @@ export default function Workspace(): JSX.Element {
         isDrawerOpen={isDrawerOpen}
         onUpdateTitle={handleUpdateTitle}
         hasSelectedMemo={selectedMemo !== undefined}
+        saveStatus={saveStatus}
       />
       <Drawer
         memos={memos}
