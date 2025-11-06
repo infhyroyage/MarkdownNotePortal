@@ -58,7 +58,7 @@ export default function Header(props: HeaderProps): JSX.Element {
           </div>
         )}
         <ThemeButton />
-        <SignOutButton />
+        {import.meta.env.PROD && <SignOutButton />}
       </div>
     </header>
   );
