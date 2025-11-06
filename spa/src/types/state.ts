@@ -17,3 +17,8 @@ export interface Memo {
    */
   content: string;
 }
+
+/**
+ * 自動保存の状態
+ */
+export type SaveStatus = "idle" | "saving" | "saved";
