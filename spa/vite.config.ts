@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import axios, { type AxiosResponse } from "axios";
 import type { IncomingMessage, ServerResponse } from "http";
 import path from "path";
 import { defineConfig, type ViteDevServer } from "vite";
@@ -74,20 +75,20 @@ const lambdaProxyMiddleware = (
   next: () => void
 ) => {
   // Lambda関数で処理するパス以外は、Lambda関数にプロキシせず、次のミドルウェアにそのまま処理を渡す
-  const url: string = req.url || "";
-  if (!url.startsWith("/memo")) {
+  const path: string = req.url || "";
+  if (!path.startsWith("/memo")) {
     return next();
   }
 
   // ルーティング先のポート番号を決定
   // ルーティング先が見つからない場合は404エラーを返す
   let targetPort: number | null = null;
-  const method = req.method || "";
-  const pathMatch: RegExpMatchArray | null = url.match(/^\/memo\/([^/]+)$/);
-  if (url === "/memo") {
-    targetPort = LAMBDA_PORTS[`${method}:/memo`] || null;
+  const httpMethod: string = req.method || "";
+  const pathMatch: RegExpMatchArray | null = path.match(/^\/memo\/([^/]+)$/);
+  if (path === "/memo") {
+    targetPort = LAMBDA_PORTS[`${httpMethod}:/memo`] || null;
   } else if (pathMatch) {
-    targetPort = LAMBDA_PORTS[`${method}:/memo/`] || null;
+    targetPort = LAMBDA_PORTS[`${httpMethod}:/memo/`] || null;
   }
   if (!targetPort) {
     res.statusCode = 404;
@@ -99,40 +100,38 @@ const lambdaProxyMiddleware = (
   const processRequest = async () => {
     try {
       // リクエストボディを読み取る
-      const body = await readRequestBody(req);
+      const body: string = await readRequestBody(req);
 
       // Lambda関数に送信するリクエストをAPI Gateway形式のイベントに変換してから、Lambda関数に送信する
-      const response: Response = await fetch(
-        `http://localhost:${targetPort}/2015-03-31/functions/function/invocations`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            httpMethod: method,
-            path: url,
+      const response: AxiosResponse<LambdaResponse> =
+        await axios.post<LambdaResponse>(
+          `http://localhost:${targetPort}/2015-03-31/functions/function/invocations`,
+          {
+            httpMethod,
+            path,
             headers: req.headers,
             pathParameters: pathMatch
               ? {
                   memoId: pathMatch[1],
                 }
               : null,
-            body: body || null,
-          }),
-        }
-      );
-      const lambdaResponse: LambdaResponse =
-        (await response.json()) as LambdaResponse;
+            body,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
       // Lambda関数のレスポンスをHTTPレスポンスに変換
-      res.statusCode = lambdaResponse.statusCode || 200;
-      if (lambdaResponse.headers) {
-        Object.entries(lambdaResponse.headers).forEach(([key, value]) => {
+      res.statusCode = response.data.statusCode || 200;
+      if (response.data.headers) {
+        Object.entries(response.data.headers).forEach(([key, value]) => {
           res.setHeader(key, value as string);
         });
       }
-      res.end(lambdaResponse.body || "");
+      res.end(response.data.body || "");
     } catch (error) {
       // レスポンスがまだ送信されていない場合のみエラーレスポンスを返す
       if (!res.headersSent) {
