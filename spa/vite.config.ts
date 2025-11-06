@@ -1,59 +1,184 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import type { ClientRequest, IncomingMessage } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, type ViteDevServer } from "vite";
 
-// https://vite.dev/config/
+/**
+ * Lambda関数からvite開発サーバーへのレスポンスの型
+ */
+interface LambdaResponse {
+  /**
+   * ステータスコード
+   */
+  statusCode: number;
+
+  /**
+   * ヘッダー
+   */
+  headers?: Record<string, string>;
+
+  /**
+   * ボディ
+   */
+  body?: string;
+}
+
+/**
+ * 各Lambda関数のパスに対するDockerコンテナのポート番号のマッピング
+ */
+const LAMBDA_PORTS: Record<string, number> = {
+  "POST:/memo": 9001,
+  "GET:/memo": 9002,
+  "GET:/memo/": 9003,
+  "PUT:/memo/": 9004,
+  "DELETE:/memo/": 9005,
+};
+
+/**
+ * Lambda Runtime Interface Emulatorで同時リクエストを処理できるようにキューイングするためのマップ
+ * キーはDockerコンテナのポート番号、値はLambda関数にリクエストを送信してレスポンスを返す非同期処理
+ */
+const requestQueues: Map<number, Promise<any>> = new Map();
+
+/**
+ * リクエストボディを読み取る
+ * @param {IncomingMessage} req リクエスト
+ * @returns {Promise<string>} リクエストボディ
+ */
+const readRequestBody = (req: IncomingMessage): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    req.on("end", () => {
+      resolve(body);
+    });
+    req.on("error", (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * HTTPリクエストを受け取り、Lambda関数にプロキシするカスタムミドルウェア
+ * @param {IncomingMessage} req リクエスト
+ * @param {ServerResponse} res レスポンス
+ * @param {() => void} next 次のミドルウェア
+ * @returns {void}
+ */
+const lambdaProxyMiddleware = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  next: () => void
+) => {
+  // Lambda関数で処理するパス以外は、Lambda関数にプロキシせず、次のミドルウェアにそのまま処理を渡す
+  const url: string = req.url || "";
+  if (!url.startsWith("/memo")) {
+    return next();
+  }
+
+  // ルーティング先のポート番号を決定
+  // ルーティング先が見つからない場合は404エラーを返す
+  let targetPort: number | null = null;
+  const method = req.method || "";
+  const pathMatch: RegExpMatchArray | null = url.match(/^\/memo\/([^/]+)$/);
+  if (url === "/memo") {
+    targetPort = LAMBDA_PORTS[`${method}:/memo`] || null;
+  } else if (pathMatch) {
+    targetPort = LAMBDA_PORTS[`${method}:/memo/`] || null;
+  }
+  if (!targetPort) {
+    res.statusCode = 404;
+    res.end(JSON.stringify({ message: "Not Found" }));
+    return;
+  }
+
+  // Lambda関数にリクエストを送信してレスポンスを返す非同期処理を定義
+  const processRequest = async () => {
+    try {
+      // リクエストボディを読み取る
+      const body = await readRequestBody(req);
+
+      // Lambda関数に送信するリクエストをAPI Gateway形式のイベントに変換してから、Lambda関数に送信する
+      const response: Response = await fetch(
+        `http://localhost:${targetPort}/2015-03-31/functions/function/invocations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            httpMethod: method,
+            path: url,
+            headers: req.headers,
+            pathParameters: pathMatch
+              ? {
+                  memoId: pathMatch[1],
+                }
+              : null,
+            body: body || null,
+          }),
+        }
+      );
+      const lambdaResponse: LambdaResponse =
+        (await response.json()) as LambdaResponse;
+
+      // Lambda関数のレスポンスをHTTPレスポンスに変換
+      res.statusCode = lambdaResponse.statusCode || 200;
+      if (lambdaResponse.headers) {
+        Object.entries(lambdaResponse.headers).forEach(([key, value]) => {
+          res.setHeader(key, value as string);
+        });
+      }
+      res.end(lambdaResponse.body || "");
+    } catch (error) {
+      // レスポンスがまだ送信されていない場合のみエラーレスポンスを返す
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
+            message: "Internal proxy error",
+            details: error instanceof Error ? error.message : String(error),
+          })
+        );
+      }
+    }
+  };
+
+  // 定義した非同期処理をキューイングして順次実行
+  // 前の非同期処理が失敗しても、そのまま次の非同期処理を実行できるようにキューイングする
+  const previousRequest = requestQueues.get(targetPort) || Promise.resolve();
+  const currentRequest = previousRequest
+    .then(() => processRequest())
+    .catch(() => processRequest());
+  requestQueues.set(targetPort, currentRequest);
+
+  // 定義した非同期処理の完了後、キューから削除
+  currentRequest.finally(() => {
+    if (requestQueues.get(targetPort) === currentRequest) {
+      requestQueues.delete(targetPort);
+    }
+  });
+};
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // Lambda関数からvite開発サーバーへのレスポンスをプロキシするカスタムミドルウェアを追加
+    {
+      name: "lambda-proxy",
+      configureServer(server: ViteDevServer) {
+        server.middlewares.use(lambdaProxyMiddleware);
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  server: {
-    proxy: {
-      // HTTPメソッドとパスに基づいて適切なLambda関数にルーティング
-      "/memo": {
-        configure: (proxy: any) => {
-          proxy.on("proxyReq", (proxyReq: ClientRequest) => {
-            // パスを Lambda Runtime Interface Emulator のエンドポイントに書き換え
-            proxyReq.path = "/2015-03-31/functions/function/invocations";
-          });
-        },
-        // @ts-expect-error - Viteの型定義にはrouterが含まれていないが、実行時にはサポートされている
-        router: (req: IncomingMessage) => {
-          const url = req.url || "";
-          const method = req.method || "";
-          const path = url.split("?")[0]; // クエリパラメータを除去
-
-          if (path === "/memo") {
-            if (method === "POST") {
-              // [POST] /memo
-              return "http://localhost:9001";
-            } else if (method === "GET") {
-              // [GET] /memo
-              return "http://localhost:9002";
-            }
-          } else if (path.match(/^\/memo\/([^/]+)$/)) {
-            if (method === "GET") {
-              // [GET] /memo/{memoId}
-              return "http://localhost:9003";
-            } else if (method === "PUT") {
-              // [PUT] /memo/{memoId}
-              return "http://localhost:9004";
-            } else if (method === "DELETE") {
-              // [DELETE] /memo/{memoId}
-              return "http://localhost:9005";
-            }
-          }
-
-          // 上記以外のパスは404エラーをレスポンスすべく、プロキシをスキップ
-          return null;
-        },
-        changeOrigin: true,
-      },
     },
   },
 });
