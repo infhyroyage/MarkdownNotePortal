@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "axios": "^1.13.1",
+    "axios": "^1.13.2",
     "daisyui": "^5.3.10",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
