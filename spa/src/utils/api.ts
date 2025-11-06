@@ -16,7 +16,7 @@ const API_BASE_URL = "/memo";
 
 /**
  * axios リクエストの共通設定を取得
- * @returns axios リクエストの共通設定
+ * @returns {AxiosRequestConfig} axios リクエストの共通設定
  */
 const getAxiosConfig = (): AxiosRequestConfig => {
   const config: AxiosRequestConfig = {
@@ -48,7 +48,7 @@ const getAxiosConfig = (): AxiosRequestConfig => {
 
 /**
  * メモ一覧を取得
- * @returns メモ一覧
+ * @returns {Promise<ListMemosResponse>} メモ一覧
  */
 export const listMemos = async (): Promise<ListMemosResponse> => {
   const response = await axios.get<ListMemosResponse>(
@@ -60,9 +60,9 @@ export const listMemos = async (): Promise<ListMemosResponse> => {
 
 /**
  * メモを作成
- * @param title メモのタイトル
- * @param content メモのコンテンツ
- * @returns 作成されたメモのIDとタイトル
+ * @param {string} title メモのタイトル
+ * @param {string} content メモのコンテンツ
+ * @returns {Promise<CreateMemoResponse>} 作成されたメモのIDとタイトル
  */
 export const createMemo = async (
   title: string,
@@ -82,8 +82,8 @@ export const createMemo = async (
 
 /**
  * メモを取得
- * @param memoId メモのID
- * @returns メモの詳細
+ * @param {string} memoId メモのID
+ * @returns {Promise<GetMemoResponse>} メモの詳細
  */
 export const getMemo = async (memoId: string): Promise<GetMemoResponse> => {
   const response = await axios.get<GetMemoResponse>(
@@ -95,10 +95,10 @@ export const getMemo = async (memoId: string): Promise<GetMemoResponse> => {
 
 /**
  * メモを更新
- * @param memoId メモのID
- * @param title メモのタイトル
- * @param content メモのコンテンツ
- * @returns 更新されたメモの詳細
+ * @param {string} memoId メモのID
+ * @param {string} title メモのタイトル
+ * @param {string} content メモのコンテンツ
+ * @returns {Promise<UpdateMemoResponse>} 更新されたメモの詳細
  */
 export const updateMemo = async (
   memoId: string,
@@ -119,7 +119,8 @@ export const updateMemo = async (
 
 /**
  * メモを削除
- * @param memoId メモのID
+ * @param {string} memoId メモのID
+ * @returns {Promise<void>}
  */
 export const deleteMemo = async (memoId: string): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/${memoId}`, getAxiosConfig());
