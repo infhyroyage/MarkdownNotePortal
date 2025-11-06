@@ -92,6 +92,26 @@ export interface HeaderProps {
 }
 
 /**
+ * タイトルエディターコンポーネントのProps
+ */
+export interface TitleEditorProps {
+  /**
+   * 選択中のメモが存在するかどうか
+   */
+  hasSelectedMemo: boolean;
+
+  /**
+   * タイトルを更新する関数
+   */
+  onUpdateTitle: (newTitle: string) => void;
+
+  /**
+   * ヘッダーのタイトル
+   */
+  title: string;
+}
+
+/**
  * ワークスペースの左側にあるMarkdownエディターを表示するコンポーネントのProps
  */
 export interface WorkspaceEditorProps {
