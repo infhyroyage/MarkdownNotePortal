@@ -1,4 +1,7 @@
-export const INITIAL_MARKDOWN_CONTENT: string = `# Welcome to Markdown Editor
+/**
+ * 初期メモのコンテンツ
+ */
+export const INITIAL_MEMO_CONTENT: string = `# Welcome to Markdown Editor
 
 ## Features
 
@@ -48,4 +51,7 @@ function hello() {
 Start editing to see your changes!
 `;
 
+/**
+ * 初期メモのタイトル
+ */
 export const INITIAL_MEMO_TITLE: string = "Initial Memo";
