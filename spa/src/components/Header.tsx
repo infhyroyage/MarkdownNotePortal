@@ -113,6 +113,7 @@ export default function Header(props: HeaderProps): JSX.Element {
             value={editedTitle}
             onChange={handleTitleChange}
             onKeyDown={handleKeyDown}
+            autoComplete="off"
             className="input input-bordered input-sm w-full max-w-md text-xl font-bold mx-4"
           />
         ) : (

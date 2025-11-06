@@ -17,6 +17,7 @@ export default function WorkspaceEditor(
         className="flex-1 w-full p-4 font-mono text-sm resize-none focus:outline-none"
         value={markdownContent}
         onChange={handleMarkdownContentChange}
+        autoComplete="off"
         placeholder="Enter your markdown here..."
       />
     </div>
