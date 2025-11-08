@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import type { HeaderProps } from "../types/props";
 import HamburgerMenuButton from "./HamburgerMenuButton";
+import LayoutToggleButton from "./LayoutToggleButton";
 import SaveStatusIcon from "./SaveStatusIcon";
 import SignOutButton from "./SignOutButton";
 import ThemeButton from "./ThemeButton";
@@ -15,7 +16,9 @@ export default function Header(props: HeaderProps): JSX.Element {
   const {
     hasSelectedMemo,
     isDrawerOpen,
+    layoutMode,
     onToggleDrawer,
+    onToggleLayout,
     onUpdateTitle,
     saveStatus,
     title,
@@ -42,6 +45,10 @@ export default function Header(props: HeaderProps): JSX.Element {
             <SaveStatusIcon saveStatus={saveStatus} />
           </div>
         )}
+        <LayoutToggleButton
+          layoutMode={layoutMode}
+          onToggleLayout={onToggleLayout}
+        />
         <ThemeButton />
         {import.meta.env.PROD && <SignOutButton />}
       </div>

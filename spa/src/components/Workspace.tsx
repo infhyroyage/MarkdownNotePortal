@@ -1,6 +1,6 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Memo, SaveStatus } from "../types/state";
+import type { LayoutMode, Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
@@ -25,6 +25,7 @@ export default function Workspace(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -264,6 +265,11 @@ export default function Workspace(): JSX.Element {
     setErrorMessage(null);
   }, []);
 
+  // レイアウトモードを切り替える関数
+  const handleToggleLayout = useCallback((): void => {
+    setLayoutMode((prev) => (prev === "horizontal" ? "vertical" : "horizontal"));
+  }, []);
+
   // リサイズ処理
   const handleMouseDown = useCallback((): void => {
     setIsDragging(true);
@@ -305,6 +311,8 @@ export default function Workspace(): JSX.Element {
         onUpdateTitle={handleUpdateTitle}
         hasSelectedMemo={selectedMemo !== undefined}
         saveStatus={saveStatus}
+        layoutMode={layoutMode}
+        onToggleLayout={handleToggleLayout}
       />
       <Drawer
         memos={memos}
@@ -316,7 +324,7 @@ export default function Workspace(): JSX.Element {
         onDeleteMemo={handleDeleteMemo}
       />
       <main className="flex-1 overflow-hidden">
-        <div className="flex h-full">
+        <div className={layoutMode === "horizontal" ? "flex h-full" : "flex flex-col h-full"}>
           {isLoadingMemos ? (
             <div className="flex items-center justify-center w-full h-full">
               <span className="loading loading-spinner loading-lg"></span>
@@ -326,16 +334,25 @@ export default function Workspace(): JSX.Element {
               <WorkspaceEditor
                 markdownContent={selectedMemo.content}
                 handleMarkdownContentChange={handleMarkdownContentChange}
-                widthPercent={editorWidthPercent}
+                layoutMode={layoutMode}
+                widthPercent={layoutMode === "horizontal" ? editorWidthPercent : 50}
               />
-              <div
-                className="w-1 bg-base-300 hover:bg-primary cursor-col-resize shrink-0 transition-colors"
-                onMouseDown={handleMouseDown}
-                role="separator"
-              />
+              {layoutMode === "horizontal" ? (
+                <div
+                  className="w-1 bg-base-300 hover:bg-primary cursor-col-resize shrink-0 transition-colors"
+                  onMouseDown={handleMouseDown}
+                  role="separator"
+                />
+              ) : (
+                <div
+                  className="h-1 bg-base-300 shrink-0"
+                  role="separator"
+                />
+              )}
               <WorkspacePreview
                 markdownContent={selectedMemo.content}
-                widthPercent={100 - editorWidthPercent}
+                layoutMode={layoutMode}
+                widthPercent={layoutMode === "horizontal" ? 100 - editorWidthPercent : 50}
               />
             </>
           ) : (
