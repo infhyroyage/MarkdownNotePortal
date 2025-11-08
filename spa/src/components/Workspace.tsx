@@ -2,11 +2,7 @@ import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
-import {
-  DEFAULT_EDITOR_WIDTH_PERCENT,
-  DEFAULT_MEMO_CONTENT,
-  DEFAULT_MEMO_TITLE,
-} from "../utils/const";
+import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
@@ -27,9 +23,7 @@ export default function Workspace(): JSX.Element {
     null
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [editorWidthPercent, setEditorWidthPercent] = useState<number>(
-    DEFAULT_EDITOR_WIDTH_PERCENT
-  );
+  const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // 選択されたメモを取得

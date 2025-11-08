@@ -1,9 +1,4 @@
 /**
- * エディターの幅(画面幅のパーセンテージ)のデフォルト値
- */
-export const DEFAULT_EDITOR_WIDTH_PERCENT: number = 50;
-
-/**
  * メモのコンテンツの初期値
  */
 export const DEFAULT_MEMO_CONTENT: string = `# Welcome to Markdown Editor
