@@ -66,7 +66,6 @@ export default function Drawer(props: DrawerProps): JSX.Element {
             : "opacity-0 pointer-events-none"
         }`}
         onClick={onCloseDrawer}
-        aria-hidden="true"
       />
       <div
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-base-100 shadow-lg transition-transform duration-300 z-20 ${

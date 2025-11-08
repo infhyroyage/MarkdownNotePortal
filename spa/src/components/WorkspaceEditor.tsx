@@ -9,10 +9,10 @@ import type { WorkspaceEditorProps } from "../types/props";
 export default function WorkspaceEditor(
   props: WorkspaceEditorProps
 ): JSX.Element {
-  const { handleMarkdownContentChange, markdownContent } = props;
+  const { handleMarkdownContentChange, markdownContent, widthPercent } = props;
 
   return (
-    <div className="w-1/2 flex flex-col border-r border-base-300">
+    <div className="flex flex-col" style={{ width: `${widthPercent}%` }}>
       <textarea
         className="flex-1 w-full p-4 font-mono text-sm resize-none focus:outline-none"
         value={markdownContent}

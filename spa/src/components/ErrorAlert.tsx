@@ -30,7 +30,6 @@ export default function ErrorAlert(props: ErrorAlertProps): JSX.Element {
           type="button"
           className="btn btn-sm btn-circle btn-ghost"
           onClick={onClose}
-          aria-label="Close error message"
         >
           ✕
         </button>

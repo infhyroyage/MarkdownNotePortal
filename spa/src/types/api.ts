@@ -1,8 +1,4 @@
 /**
- * API リクエストとレスポンスの型定義
- */
-
-/**
  * メモ一覧取得のレスポンス
  */
 export interface ListMemosResponse {

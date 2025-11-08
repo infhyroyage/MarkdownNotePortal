@@ -1,7 +1,7 @@
 /**
- * 初期メモのコンテンツ
+ * メモのコンテンツの初期値
  */
-export const INITIAL_MEMO_CONTENT: string = `# Welcome to Markdown Editor
+export const DEFAULT_MEMO_CONTENT: string = `# Welcome to Markdown Editor
 
 ## Features
 
@@ -52,6 +52,18 @@ Start editing to see your changes!
 `;
 
 /**
- * 初期メモのタイトル
+ * メモのタイトルの初期値
  */
-export const INITIAL_MEMO_TITLE: string = "Initial Memo";
+export const DEFAULT_MEMO_TITLE: string = "Initial Memo";
+
+/**
+ * アクセストークンをSession Storageに保存するためのキー
+ */
+export const SESSION_STORAGE_KEY_ACCESS_TOKEN: string =
+  "mkmemoportal_access_token";
+
+/**
+ * PKCEフロー用のcode_verifierをSession Storageに保存するためのキー
+ */
+export const SESSION_STORAGE_KEY_CODE_VERIFIER: string =
+  "mkmemoportal_pkce_code_verifier";

@@ -2,7 +2,7 @@ import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
-import { INITIAL_MEMO_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
+import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
@@ -23,6 +23,8 @@ export default function Workspace(): JSX.Element {
     null
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -160,8 +162,8 @@ export default function Workspace(): JSX.Element {
       // メモを作成
       const { createMemo } = await import("../utils/api");
       const newMemo = await createMemo(
-        INITIAL_MEMO_TITLE,
-        INITIAL_MEMO_CONTENT
+        DEFAULT_MEMO_TITLE,
+        DEFAULT_MEMO_CONTENT
       );
 
       // メモの状態を更新
@@ -169,8 +171,8 @@ export default function Workspace(): JSX.Element {
         ...prevMemos,
         {
           id: newMemo.memoId,
-          title: INITIAL_MEMO_TITLE,
-          content: INITIAL_MEMO_CONTENT,
+          title: DEFAULT_MEMO_TITLE,
+          content: DEFAULT_MEMO_CONTENT,
         },
       ]);
       setSelectedMemoId(newMemo.memoId);
@@ -258,9 +260,38 @@ export default function Workspace(): JSX.Element {
   }, [errorMessage]);
 
   // エラーメッセージを閉じる処理
-  const handleCloseError = useCallback(() => {
+  const handleCloseError = useCallback((): void => {
     setErrorMessage(null);
   }, []);
+
+  // リサイズ処理
+  const handleMouseDown = useCallback((): void => {
+    setIsDragging(true);
+  }, []);
+
+  // ドラッグ＆ドロップでエディターの幅(画面幅のパーセンテージ)を動的に調整
+  useEffect(() => {
+    if (isDragging) {
+      const handleMouseMove = (e: MouseEvent): void => {
+        if (!isDragging) return;
+
+        const newWidth = (e.clientX / window.innerWidth) * 100;
+        // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
+        if (newWidth >= 20 && newWidth <= 80) {
+          setEditorWidthPercent(newWidth);
+        }
+      };
+
+      const handleMouseUp = (): void => setIsDragging(false);
+
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -295,8 +326,17 @@ export default function Workspace(): JSX.Element {
               <WorkspaceEditor
                 markdownContent={selectedMemo.content}
                 handleMarkdownContentChange={handleMarkdownContentChange}
+                widthPercent={editorWidthPercent}
               />
-              <WorkspacePreview markdownContent={selectedMemo.content} />
+              <div
+                className="w-1 bg-base-300 hover:bg-primary cursor-col-resize shrink-0 transition-colors"
+                onMouseDown={handleMouseDown}
+                role="separator"
+              />
+              <WorkspacePreview
+                markdownContent={selectedMemo.content}
+                widthPercent={100 - editorWidthPercent}
+              />
             </>
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full">
