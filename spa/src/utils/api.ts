@@ -13,10 +13,10 @@ import { SESSION_STORAGE_TOKEN_KEY } from "./auth";
 const API_ENDPOINT: string = import.meta.env.VITE_API_ENDPOINT;
 
 /**
- * リクエストの共通設定を取得
+ * リクエストの共通設定を取得する
  * @returns {AxiosRequestConfig} リクエストの共通設定
  */
-const getRequestConfig = (): AxiosRequestConfig => {
+function getRequestConfig(): AxiosRequestConfig {
   const config: AxiosRequestConfig = {
     headers: {
       "Content-Type": "application/json",
@@ -38,30 +38,47 @@ const getRequestConfig = (): AxiosRequestConfig => {
   }
 
   return config;
-};
+}
 
 /**
- * メモ一覧を取得
+ * 発生したエラーからアラートに表示するエラーメッセージを取得する
+ * @param {unknown} error 発生したエラー
+ * @param {string} defaultMessage デフォルトのエラーメッセージ
+ * @returns {string} アラートに表示するエラーメッセージ
+ */
+export function getErrorMessage(
+  error: unknown,
+  defaultMessage: string
+): string {
+  return axios.isAxiosError(error)
+    ? error.response?.data?.message || defaultMessage
+    : error instanceof Error
+    ? error.message
+    : defaultMessage;
+}
+
+/**
+ * [GET] /memoにアクセスして、メモ一覧を取得する
  * @returns {Promise<ListMemosResponse>} メモ一覧
  */
-export const listMemos = async (): Promise<ListMemosResponse> => {
+export async function listMemos(): Promise<ListMemosResponse> {
   const response = await axios.get<ListMemosResponse>(
     "/memo",
     getRequestConfig()
   );
   return response.data;
-};
+}
 
 /**
- * メモを作成
+ * [POST] /memoにアクセスして、メモを作成する
  * @param {string} title メモのタイトル
  * @param {string} content メモのコンテンツ
  * @returns {Promise<CreateMemoResponse>} 作成されたメモのIDとタイトル
  */
-export const createMemo = async (
+export async function createMemo(
   title: string,
   content: string
-): Promise<CreateMemoResponse> => {
+): Promise<CreateMemoResponse> {
   const response = await axios.post<CreateMemoResponse>(
     "/memo",
     {
@@ -71,33 +88,33 @@ export const createMemo = async (
     getRequestConfig()
   );
   return response.data;
-};
+}
 
 /**
- * メモを取得
+ * [GET] /memo/{memoId}にアクセスして、メモを取得する
  * @param {string} memoId メモのID
  * @returns {Promise<GetMemoResponse>} メモの詳細
  */
-export const getMemo = async (memoId: string): Promise<GetMemoResponse> => {
+export async function getMemo(memoId: string): Promise<GetMemoResponse> {
   const response = await axios.get<GetMemoResponse>(
     `/memo/${memoId}`,
     getRequestConfig()
   );
   return response.data;
-};
+}
 
 /**
- * メモを更新
+ * [PUT] /memo/{memoId}にアクセスして、メモを更新する
  * @param {string} memoId メモのID
  * @param {string} title メモのタイトル
  * @param {string} content メモのコンテンツ
  * @returns {Promise<UpdateMemoResponse>} 更新されたメモの詳細
  */
-export const updateMemo = async (
+export async function updateMemo(
   memoId: string,
   title: string,
   content: string
-): Promise<UpdateMemoResponse> => {
+): Promise<UpdateMemoResponse> {
   const response = await axios.put<UpdateMemoResponse>(
     `/memo/${memoId}`,
     {
@@ -107,13 +124,13 @@ export const updateMemo = async (
     getRequestConfig()
   );
   return response.data;
-};
+}
 
 /**
- * メモを削除
+ * [DELETE] /memo/{memoId}にアクセスして、メモを削除する
  * @param {string} memoId メモのID
  * @returns {Promise<void>}
  */
-export const deleteMemo = async (memoId: string): Promise<void> => {
+export async function deleteMemo(memoId: string): Promise<void> {
   await axios.delete(`/memo/${memoId}`, getRequestConfig());
-};
+}

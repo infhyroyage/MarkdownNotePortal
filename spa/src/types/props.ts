@@ -42,6 +42,21 @@ export interface DrawerProps {
 }
 
 /**
+ * エラーメッセージを表示するアラートのProps
+ */
+export interface ErrorAlertProps {
+  /**
+   * エラーメッセージ
+   */
+  message: string;
+
+  /**
+   * アラートを閉じる関数
+   */
+  onClose: () => void;
+}
+
+/**
  * ハンバーガーメニューボタンを表示するコンポーネントのProps
  */
 export interface HamburgerMenuButtonProps {
