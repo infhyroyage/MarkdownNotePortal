@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState, type JSX } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import type { DrawerProps } from "../types/props";
+import type { Memo } from "../types/state";
+import DeleteMemoModal from "./DeleteMemoModal";
 
 /**
  * メモのリストを表示するドロワーコンポーネント
@@ -17,7 +19,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     selectedMemoId,
   } = props;
 
-  const [memoToDelete, setMemoToDelete] = useState<string | null>(null);
+  const [deleteMemoId, setDeleteMemoId] = useState<string | null>(null);
 
   // ドロワーが開いている時のみEscapeキーでドロワーを閉じる
   useEffect(() => {
@@ -34,19 +36,24 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     };
   }, [isOpen, onCloseDrawer]);
 
+  const deleteMemoTitle: string | null = useMemo(() => {
+    if (!deleteMemoId) return null;
+    return memos.find((memo: Memo) => memo.id === deleteMemoId)?.title ?? null;
+  }, [deleteMemoId, memos]);
+
   const handleDeleteClick = useCallback((memoId: string): void => {
-    setMemoToDelete(memoId);
+    setDeleteMemoId(memoId);
   }, []);
 
-  const handleConfirmDelete = useCallback((): void => {
-    if (memoToDelete) {
-      onDeleteMemo(memoToDelete);
-      setMemoToDelete(null);
+  const handleDeleteModal = useCallback((): void => {
+    if (deleteMemoId) {
+      onDeleteMemo(deleteMemoId);
+      setDeleteMemoId(null);
     }
-  }, [memoToDelete, onDeleteMemo]);
+  }, [deleteMemoId, onDeleteMemo]);
 
-  const handleCancelDelete = useCallback((): void => {
-    setMemoToDelete(null);
+  const handleCancelModal = useCallback((): void => {
+    setDeleteMemoId(null);
   }, []);
 
   return (
@@ -163,37 +170,13 @@ export default function Drawer(props: DrawerProps): JSX.Element {
           </div>
         </div>
       </div>
-
-      {/* 削除確認モーダル */}
-      <dialog
-        className={`modal ${memoToDelete ? "modal-open" : ""}`}
-        aria-labelledby="delete-modal-title"
-      >
-        <div className="modal-box">
-          <p className="py-4">Are you sure you want to delete this memo?</p>
-          <div className="modal-action">
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={handleCancelDelete}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="btn btn-error"
-              onClick={handleConfirmDelete}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button type="button" onClick={handleCancelDelete}>
-            close
-          </button>
-        </form>
-      </dialog>
+      {deleteMemoTitle && (
+        <DeleteMemoModal
+          title={deleteMemoTitle}
+          onCancel={handleCancelModal}
+          onDelete={handleDeleteModal}
+        />
+      )}
     </>
   );
 }

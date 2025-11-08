@@ -2,6 +2,26 @@ import type { ChangeEvent } from "react";
 import type { Memo, SaveStatus } from "./state";
 
 /**
+ * メモを削除するモーダルのProps
+ */
+export interface DeleteMemoModalProps {
+  /**
+   * 削除するメモのタイトル
+   */
+  title: string;
+
+  /**
+   * メモの削除をキャンセルする関数
+   */
+  onCancel: () => void;
+
+  /**
+   * メモを削除を実行する関数
+   */
+  onDelete: () => void;
+}
+
+/**
  * メモドロワーコンポーネントのProps
  */
 export interface DrawerProps {
