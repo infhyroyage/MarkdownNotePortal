@@ -275,16 +275,30 @@ export default function Workspace(): JSX.Element {
     setIsDragging(true);
   }, []);
 
-  // ドラッグ＆ドロップでエディターの幅(画面幅のパーセンテージ)を動的に調整
+  // ドラッグ＆ドロップでエディターのサイズ(画面のパーセンテージ)を動的に調整
   useEffect(() => {
     if (isDragging) {
       const handleMouseMove = (e: MouseEvent): void => {
         if (!isDragging) return;
 
-        const newWidth = (e.clientX / window.innerWidth) * 100;
-        // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
-        if (newWidth >= 20 && newWidth <= 80) {
-          setEditorWidthPercent(newWidth);
+        if (layoutMode === "horizontal") {
+          // 左右配置モード：横方向のリサイズ
+          const newWidth = (e.clientX / window.innerWidth) * 100;
+          // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
+          if (newWidth >= 20 && newWidth <= 80) {
+            setEditorWidthPercent(newWidth);
+          }
+        } else {
+          // 上下配置モード：縦方向のリサイズ
+          // ヘッダーの高さを取得して除外
+          const header = document.querySelector("header");
+          const headerHeight = header ? header.offsetHeight : 0;
+          const availableHeight = window.innerHeight - headerHeight;
+          const newHeight = ((e.clientY - headerHeight) / availableHeight) * 100;
+          // エディターの高さ(利用可能な高さのパーセンテージ)を最小20%、最大80%に制限
+          if (newHeight >= 20 && newHeight <= 80) {
+            setEditorWidthPercent(newHeight);
+          }
         }
       };
 
@@ -297,7 +311,7 @@ export default function Workspace(): JSX.Element {
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, layoutMode]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -335,7 +349,7 @@ export default function Workspace(): JSX.Element {
                 markdownContent={selectedMemo.content}
                 handleMarkdownContentChange={handleMarkdownContentChange}
                 layoutMode={layoutMode}
-                widthPercent={layoutMode === "horizontal" ? editorWidthPercent : 50}
+                widthPercent={editorWidthPercent}
               />
               {layoutMode === "horizontal" ? (
                 <div
@@ -345,14 +359,15 @@ export default function Workspace(): JSX.Element {
                 />
               ) : (
                 <div
-                  className="h-1 bg-base-300 shrink-0"
+                  className="h-1 bg-base-300 hover:bg-primary cursor-row-resize shrink-0 transition-colors"
+                  onMouseDown={handleMouseDown}
                   role="separator"
                 />
               )}
               <WorkspacePreview
                 markdownContent={selectedMemo.content}
                 layoutMode={layoutMode}
-                widthPercent={layoutMode === "horizontal" ? 100 - editorWidthPercent : 50}
+                widthPercent={100 - editorWidthPercent}
               />
             </>
           ) : (
