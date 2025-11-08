@@ -16,7 +16,7 @@ export default function Workspace(): JSX.Element {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [isLoadingMemos, setIsLoadingMemos] = useState<boolean>(true);
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -261,10 +261,49 @@ export default function Workspace(): JSX.Element {
               <WorkspacePreview markdownContent={selectedMemo.content} />
             </>
           ) : (
-            <div className="flex items-center justify-center w-full h-full">
-              <p className="text-lg text-base-content/70">
-                No memo selected. Create a new memo to get started.
-              </p>
+            <div className="flex flex-col items-center justify-center w-full h-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-24 w-24 text-base-content/30"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M3 3l18 18"
+                />
+              </svg>
+              <p className="text-lg text-base-content/70 mb-6">No memo yet</p>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleAddMemo}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                New Memo
+              </button>
             </div>
           )}
         </div>
