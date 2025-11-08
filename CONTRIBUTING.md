@@ -14,11 +14,7 @@
 - Python (プログラミング言語)
 - pytest (ユニットテスト)
 - pylint (コード静的解析)
-- Docker (ローカル開発環境構築)
-
-## ローカル開発環境のセットアップ
-
-[localsetup.md](localsetup.md) 参照。
+- Docker (ローカル環境構築)
 
 ## 開発時の実装規則
 
