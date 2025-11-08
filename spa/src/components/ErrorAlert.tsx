@@ -1,28 +1,14 @@
 import type { JSX } from "react";
+import type { ErrorAlertProps } from "../types/props";
 
 /**
- * ErrorAlertコンポーネントのプロパティ
+ * エラーメッセージを表示するアラート
+ * @param {ErrorAlertProps} props エラーメッセージを表示するアラートのProps
+ * @returns {JSX.Element} エラーメッセージを表示するアラート
  */
-interface ErrorAlertProps {
-  /**
-   * エラーメッセージ
-   */
-  message: string;
-  /**
-   * Alertを閉じる処理
-   */
-  onClose: () => void;
-}
+export default function ErrorAlert(props: ErrorAlertProps): JSX.Element {
+  const { message, onClose } = props;
 
-/**
- * エラーメッセージを表示するAlertコンポーネント
- * @param {ErrorAlertProps} props プロパティ
- * @returns {JSX.Element} エラーアラート
- */
-export default function ErrorAlert({
-  message,
-  onClose,
-}: ErrorAlertProps): JSX.Element {
   return (
     <div className="toast toast-top toast-center z-50">
       <div className="alert alert-error">
