@@ -62,6 +62,36 @@ export interface DrawerProps {
 }
 
 /**
+ * ドロワーのメモボタンのProps
+ */
+export interface DrawerMemoButtonProps {
+  /**
+   * メモが選択されているかどうか
+   */
+  isSelected: boolean;
+
+  /**
+   * メモのID
+   */
+  memoId: string;
+
+  /**
+   * メモのタイトル
+   */
+  memoTitle: string;
+
+  /**
+   * メモを削除するモーダルを表示する関数
+   */
+  onDeleteClick: (memoId: string) => void;
+
+  /**
+   * メモを選択する関数
+   */
+  onSelectMemo: (memoId: string) => void;
+}
+
+/**
  * エラーメッセージを表示するアラートのProps
  */
 export interface ErrorAlertProps {
