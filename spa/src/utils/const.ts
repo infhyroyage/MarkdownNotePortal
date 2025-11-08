@@ -1,7 +1,7 @@
 /**
- * エディター幅のデフォルト値（パーセンテージ）
+ * エディターの幅(画面幅のパーセンテージ)のデフォルト値
  */
-export const DEFAULT_EDITOR_WIDTH: number = 50;
+export const DEFAULT_EDITOR_WIDTH_PERCENT: number = 50;
 
 /**
  * メモのコンテンツの初期値
