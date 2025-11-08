@@ -92,6 +92,16 @@ export interface HeaderProps {
 }
 
 /**
+ * 保存状態のアイコンを表示するコンポーネントのProps
+ */
+export interface SaveStatusIconProps {
+  /**
+   * 自動保存の状態
+   */
+  saveStatus: SaveStatus;
+}
+
+/**
  * タイトルエディターコンポーネントのProps
  */
 export interface TitleEditorProps {
