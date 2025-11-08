@@ -2,12 +2,38 @@ import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
-import { INITIAL_MEMO_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
+import {
+  DEFAULT_EDITOR_WIDTH,
+  INITIAL_MEMO_CONTENT,
+  INITIAL_MEMO_TITLE,
+  LOCAL_STORAGE_EDITOR_WIDTH_KEY,
+} from "../utils/const";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
 import WorkspaceEditor from "./WorkspaceEditor";
 import WorkspacePreview from "./WorkspacePreview";
+
+/**
+ * ローカルストレージからエディター幅を読み込む
+ * @returns {number} エディター幅（パーセンテージ）
+ */
+function loadEditorWidth(): number {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_EDITOR_WIDTH_KEY);
+    if (saved) {
+      const width = Number.parseFloat(saved);
+      // 有効な範囲（20-80%）内であれば使用
+      if (!Number.isNaN(width) && width >= 20 && width <= 80) {
+        return width;
+      }
+    }
+  } catch (error) {
+    // ローカルストレージが使用できない環境ではエラーを無視
+    console.warn("Failed to load editor width from localStorage:", error);
+  }
+  return DEFAULT_EDITOR_WIDTH;
+}
 
 /**
  * ワークスペースを表示するコンポーネント
@@ -23,7 +49,7 @@ export default function Workspace(): JSX.Element {
     null
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [editorWidth, setEditorWidth] = useState<number>(50); // エディター幅のパーセンテージ
+  const [editorWidth, setEditorWidth] = useState<number>(loadEditorWidth()); // エディター幅のパーセンテージ
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // 選択されたメモを取得
@@ -300,6 +326,19 @@ export default function Workspace(): JSX.Element {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // エディター幅をローカルストレージに保存
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LOCAL_STORAGE_EDITOR_WIDTH_KEY,
+        editorWidth.toString()
+      );
+    } catch (error) {
+      // ローカルストレージが使用できない環境ではエラーを無視
+      console.warn("Failed to save editor width to localStorage:", error);
+    }
+  }, [editorWidth]);
 
   return (
     <div className="flex flex-col h-screen">

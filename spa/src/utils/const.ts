@@ -55,3 +55,13 @@ Start editing to see your changes!
  * 初期メモのタイトル
  */
 export const INITIAL_MEMO_TITLE: string = "Initial Memo";
+
+/**
+ * ローカルストレージのキー: エディター幅
+ */
+export const LOCAL_STORAGE_EDITOR_WIDTH_KEY: string = "editor_width";
+
+/**
+ * エディター幅のデフォルト値（パーセンテージ）
+ */
+export const DEFAULT_EDITOR_WIDTH: number = 50;
