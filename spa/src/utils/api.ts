@@ -8,6 +8,11 @@ import type {
 import { SESSION_STORAGE_TOKEN_KEY } from "./auth";
 
 /**
+ * API Gatewayのエンドポイント
+ */
+const API_ENDPOINT: string = import.meta.env.VITE_API_ENDPOINT;
+
+/**
  * リクエストの共通設定を取得
  * @returns {AxiosRequestConfig} リクエストの共通設定
  */
@@ -18,8 +23,11 @@ const getRequestConfig = (): AxiosRequestConfig => {
     },
   };
 
-  // 本番環境のみ、アクセストークンをAuthorizationヘッダーに付与
   if (import.meta.env.PROD) {
+    // AWS環境の場合、API Gatewayのエンドポイントを設定
+    config.baseURL = API_ENDPOINT;
+
+    // AWS環境の場合、アクセストークンをAuthorizationヘッダーに付与
     const accessToken = sessionStorage.getItem(SESSION_STORAGE_TOKEN_KEY);
     if (accessToken) {
       config.headers = {
