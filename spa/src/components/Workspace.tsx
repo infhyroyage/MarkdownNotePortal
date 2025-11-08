@@ -1,9 +1,10 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Memo, SaveStatus } from "../types/state";
-import { listMemos } from "../utils/api";
+import { getErrorMessage, listMemos } from "../utils/api";
 import { INITIAL_MEMO_CONTENT, INITIAL_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
+import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
 import WorkspaceEditor from "./WorkspaceEditor";
 import WorkspacePreview from "./WorkspacePreview";
@@ -21,6 +22,7 @@ export default function Workspace(): JSX.Element {
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
     null
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -45,6 +47,8 @@ export default function Workspace(): JSX.Element {
         if (fetchedMemos.length > 0) {
           setSelectedMemoId(fetchedMemos[0].id);
         }
+      } catch (error) {
+        setErrorMessage(getErrorMessage(error, "Failed to load memos"));
       } finally {
         setIsLoadingMemos(false);
       }
@@ -63,19 +67,23 @@ export default function Workspace(): JSX.Element {
         if (memo && memo.content) return prevMemos;
 
         (async () => {
-          const { getMemo } = await import("../utils/api");
-          const memoDetail = await getMemo(selectedMemoId);
-          setMemos((currentMemos) =>
-            currentMemos.map((memo: Memo) =>
-              memo.id === selectedMemoId
-                ? {
-                    ...memo,
-                    content: memoDetail.content,
-                    title: memoDetail.title,
-                  }
-                : memo
-            )
-          );
+          try {
+            const { getMemo } = await import("../utils/api");
+            const memoDetail = await getMemo(selectedMemoId);
+            setMemos((currentMemos) =>
+              currentMemos.map((memo: Memo) =>
+                memo.id === selectedMemoId
+                  ? {
+                      ...memo,
+                      content: memoDetail.content,
+                      title: memoDetail.title,
+                    }
+                  : memo
+              )
+            );
+          } catch (error) {
+            setErrorMessage(getErrorMessage(error, "Failed to load memo"));
+          }
         })();
 
         return prevMemos;
@@ -96,8 +104,9 @@ export default function Workspace(): JSX.Element {
         setTimeout(() => {
           setSaveStatus("idle");
         }, 2000);
-      } catch {
+      } catch (error) {
         setSaveStatus("idle");
+        setErrorMessage(getErrorMessage(error, "Failed to save memo"));
       }
     },
     []
@@ -147,41 +156,52 @@ export default function Workspace(): JSX.Element {
   );
 
   const handleAddMemo = useCallback(async (): Promise<void> => {
-    // メモを作成
-    const { createMemo } = await import("../utils/api");
-    const newMemo = await createMemo(INITIAL_MEMO_TITLE, INITIAL_MEMO_CONTENT);
+    try {
+      // メモを作成
+      const { createMemo } = await import("../utils/api");
+      const newMemo = await createMemo(
+        INITIAL_MEMO_TITLE,
+        INITIAL_MEMO_CONTENT
+      );
 
-    // メモの状態を更新
-    setMemos((prevMemos: Memo[]) => [
-      ...prevMemos,
-      {
-        id: newMemo.memoId,
-        title: INITIAL_MEMO_TITLE,
-        content: INITIAL_MEMO_CONTENT,
-      },
-    ]);
-    setSelectedMemoId(newMemo.memoId);
+      // メモの状態を更新
+      setMemos((prevMemos: Memo[]) => [
+        ...prevMemos,
+        {
+          id: newMemo.memoId,
+          title: INITIAL_MEMO_TITLE,
+          content: INITIAL_MEMO_CONTENT,
+        },
+      ]);
+      setSelectedMemoId(newMemo.memoId);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Failed to create memo"));
+    }
   }, []);
 
   const handleDeleteMemo = useCallback(
     async (memoId: string): Promise<void> => {
-      // メモを削除
-      const { deleteMemo } = await import("../utils/api");
-      await deleteMemo(memoId);
+      try {
+        // メモを削除
+        const { deleteMemo } = await import("../utils/api");
+        await deleteMemo(memoId);
 
-      // メモの状態を更新
-      setMemos((prevMemos: Memo[]) => {
-        const filteredMemos = prevMemos.filter(
-          (memo: Memo) => memo.id !== memoId
-        );
-        // 削除するメモが選択中の場合、別のメモを選択
-        if (memoId === selectedMemoId && filteredMemos.length > 0) {
-          setSelectedMemoId(filteredMemos[0].id);
-        } else if (memoId === selectedMemoId) {
-          setSelectedMemoId(null);
-        }
-        return filteredMemos;
-      });
+        // メモの状態を更新
+        setMemos((prevMemos: Memo[]) => {
+          const filteredMemos = prevMemos.filter(
+            (memo: Memo) => memo.id !== memoId
+          );
+          // 削除するメモが選択中の場合、別のメモを選択
+          if (memoId === selectedMemoId && filteredMemos.length > 0) {
+            setSelectedMemoId(filteredMemos[0].id);
+          } else if (memoId === selectedMemoId) {
+            setSelectedMemoId(null);
+          }
+          return filteredMemos;
+        });
+      } catch (error) {
+        setErrorMessage(getErrorMessage(error, "Failed to delete memo"));
+      }
     },
     [selectedMemoId]
   );
@@ -227,8 +247,26 @@ export default function Workspace(): JSX.Element {
     };
   }, [autoSaveTimer]);
 
+  // エラーメッセージを自動的に消すタイマー
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  // エラーメッセージを閉じる処理
+  const handleCloseError = useCallback(() => {
+    setErrorMessage(null);
+  }, []);
+
   return (
     <div className="flex flex-col h-screen">
+      {errorMessage && (
+        <ErrorAlert message={errorMessage} onClose={handleCloseError} />
+      )}
       <Header
         title={selectedMemo?.title ?? "Markdown Note Portal"}
         onToggleDrawer={handleToggleDrawer}

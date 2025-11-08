@@ -1,4 +1,8 @@
-import axios, { type AxiosRequestConfig } from "axios";
+import axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  isAxiosError,
+} from "axios";
 import type {
   CreateMemoResponse,
   GetMemoResponse,
@@ -38,6 +42,51 @@ const getRequestConfig = (): AxiosRequestConfig => {
   }
 
   return config;
+};
+
+/**
+ * Axiosエラーから適切なエラーメッセージを取得
+ * @param {unknown} error エラーオブジェクト
+ * @param {string} defaultMessage デフォルトのエラーメッセージ
+ * @returns {string} エラーメッセージ
+ */
+export const getErrorMessage = (
+  error: unknown,
+  defaultMessage: string
+): string => {
+  if (isAxiosError(error)) {
+    const axiosError = error as AxiosError<{ message?: string }>;
+    // レスポンスのmessageフィールドを優先
+    if (axiosError.response?.data?.message) {
+      return axiosError.response.data.message;
+    }
+    // HTTPステータスに基づいたメッセージ
+    if (axiosError.response?.status === 401) {
+      return "Authentication failed. Please sign in again.";
+    }
+    if (axiosError.response?.status === 403) {
+      return "You don't have permission to perform this action.";
+    }
+    if (axiosError.response?.status === 404) {
+      return "The requested resource was not found.";
+    }
+    if (axiosError.response?.status === 500) {
+      return "Server error. Please try again later.";
+    }
+    // ネットワークエラー
+    if (axiosError.code === "ERR_NETWORK") {
+      return "Network error. Please check your connection.";
+    }
+    // その他のaxiosエラー
+    if (axiosError.message) {
+      return axiosError.message;
+    }
+  }
+  // 一般的なエラー
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return defaultMessage;
 };
 
 /**
