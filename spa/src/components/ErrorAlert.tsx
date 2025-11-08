@@ -10,7 +10,7 @@ export default function ErrorAlert(props: ErrorAlertProps): JSX.Element {
   const { message, onClose } = props;
 
   return (
-    <div className="toast toast-top toast-center z-50">
+    <div className="toast toast-bottom toast-end z-50">
       <div className="alert alert-error">
         <svg
           xmlns="http://www.w3.org/2000/svg"
