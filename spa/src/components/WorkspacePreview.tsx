@@ -11,10 +11,13 @@ import type { WorkspacePreviewProps } from "../types/props";
 export default function WorkspacePreview(
   props: WorkspacePreviewProps
 ): JSX.Element {
-  const { markdownContent } = props;
+  const { markdownContent, width } = props;
 
   return (
-    <div className="w-1/2 flex flex-col">
+    <div
+      className="flex flex-col"
+      style={{ width: `${width}%` }}
+    >
       <div className="flex-1 overflow-auto">
         <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>

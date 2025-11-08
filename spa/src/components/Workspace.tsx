@@ -23,6 +23,8 @@ export default function Workspace(): JSX.Element {
     null
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [editorWidth, setEditorWidth] = useState<number>(50); // エディター幅のパーセンテージ
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -262,6 +264,43 @@ export default function Workspace(): JSX.Element {
     setErrorMessage(null);
   }, []);
 
+  // リサイズ処理
+  const handleMouseDown = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const containerWidth = window.innerWidth;
+      const newWidth = (e.clientX / containerWidth) * 100;
+
+      // 最小20%、最大80%に制限
+      if (newWidth >= 20 && newWidth <= 80) {
+        setEditorWidth(newWidth);
+      }
+    },
+    [isDragging]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // マウスイベントのリスナー登録
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
   return (
     <div className="flex flex-col h-screen">
       {errorMessage && (
@@ -295,8 +334,19 @@ export default function Workspace(): JSX.Element {
               <WorkspaceEditor
                 markdownContent={selectedMemo.content}
                 handleMarkdownContentChange={handleMarkdownContentChange}
+                width={editorWidth}
               />
-              <WorkspacePreview markdownContent={selectedMemo.content} />
+              <div
+                className="w-1 bg-base-300 hover:bg-primary cursor-col-resize flex-shrink-0 transition-colors"
+                onMouseDown={handleMouseDown}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize editor and preview"
+              />
+              <WorkspacePreview
+                markdownContent={selectedMemo.content}
+                width={100 - editorWidth}
+              />
             </>
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full">
