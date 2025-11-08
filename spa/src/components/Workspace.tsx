@@ -3,11 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
 import {
+  DEFAULT_EDITOR_WIDTH_PERCENT,
   DEFAULT_MEMO_CONTENT,
   DEFAULT_MEMO_TITLE,
-  LOCAL_STORAGE_KEY_EDITOR_WIDTH,
 } from "../utils/const";
-import { loadEditorWidthPercent } from "../utils/state";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
@@ -29,7 +28,7 @@ export default function Workspace(): JSX.Element {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(
-    loadEditorWidthPercent()
+    DEFAULT_EDITOR_WIDTH_PERCENT
   );
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
@@ -299,16 +298,6 @@ export default function Workspace(): JSX.Element {
       };
     }
   }, [isDragging]);
-
-  // エディターの幅(画面幅のパーセンテージ)の変更時にローカルストレージに保存
-  useEffect(
-    () =>
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY_EDITOR_WIDTH,
-        editorWidthPercent.toString()
-      ),
-    [editorWidthPercent]
-  );
 
   return (
     <div className="flex flex-col h-screen">

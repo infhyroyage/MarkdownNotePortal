@@ -62,11 +62,6 @@ Start editing to see your changes!
 export const DEFAULT_MEMO_TITLE: string = "Initial Memo";
 
 /**
- * エディター幅のローカルストレージのキー
- */
-export const LOCAL_STORAGE_KEY_EDITOR_WIDTH: string = "editor_width";
-
-/**
  * アクセストークンをSession Storageに保存するためのキー
  */
 export const SESSION_STORAGE_KEY_ACCESS_TOKEN: string =
