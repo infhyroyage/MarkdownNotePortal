@@ -12,7 +12,7 @@ export default function DeleteMemoModal(
   const { title, onCancel, onDelete } = props;
 
   return (
-    <dialog className="modal modal-open" aria-labelledby="delete-modal-title">
+    <dialog className="modal modal-open">
       <div className="modal-box">
         <p className="py-4">Delete memo: {title}?</p>
         <div className="modal-action">

@@ -5,7 +5,7 @@ import type {
   ListMemosResponse,
   UpdateMemoResponse,
 } from "../types/api";
-import { SESSION_STORAGE_TOKEN_KEY } from "./auth";
+import { SESSION_STORAGE_KEY_ACCESS_TOKEN } from "./const";
 
 /**
  * API Gatewayのエンドポイント
@@ -28,7 +28,9 @@ function getRequestConfig(): AxiosRequestConfig {
     config.baseURL = API_ENDPOINT;
 
     // AWS環境の場合、アクセストークンをAuthorizationヘッダーに付与
-    const accessToken = sessionStorage.getItem(SESSION_STORAGE_TOKEN_KEY);
+    const accessToken = sessionStorage.getItem(
+      SESSION_STORAGE_KEY_ACCESS_TOKEN
+    );
     if (accessToken) {
       config.headers = {
         ...config.headers,

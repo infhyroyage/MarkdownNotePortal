@@ -5,8 +5,8 @@ import {
   getLoginUrl,
   isAccessTokenValid,
   issueAccessToken,
-  SESSION_STORAGE_CODE_VERIFIER_KEY,
 } from "./utils/auth";
+import { SESSION_STORAGE_KEY_CODE_VERIFIER } from "./utils/const";
 
 /**
  * アプリケーションのエントリーポイント
@@ -34,7 +34,7 @@ export default function App(): JSX.Element {
           // Authorization Codeがある場合、PKCEフロー用のcode_verifierを取得
           // 取得できない場合は、Cognito Hosted UIのログインページにリダイレクト
           const codeVerifier: string | null = sessionStorage.getItem(
-            SESSION_STORAGE_CODE_VERIFIER_KEY
+            SESSION_STORAGE_KEY_CODE_VERIFIER
           );
           if (!codeVerifier) {
             window.location.href = await getLoginUrl();

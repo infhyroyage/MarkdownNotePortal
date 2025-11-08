@@ -1,7 +1,12 @@
 /**
- * 初期メモのコンテンツ
+ * エディター幅のデフォルト値（パーセンテージ）
  */
-export const INITIAL_MEMO_CONTENT: string = `# Welcome to Markdown Editor
+export const DEFAULT_EDITOR_WIDTH: number = 50;
+
+/**
+ * メモのコンテンツの初期値
+ */
+export const DEFAULT_MEMO_CONTENT: string = `# Welcome to Markdown Editor
 
 ## Features
 
@@ -52,16 +57,23 @@ Start editing to see your changes!
 `;
 
 /**
- * 初期メモのタイトル
+ * メモのタイトルの初期値
  */
-export const INITIAL_MEMO_TITLE: string = "Initial Memo";
+export const DEFAULT_MEMO_TITLE: string = "Initial Memo";
 
 /**
- * ローカルストレージのキー: エディター幅
+ * エディター幅のローカルストレージのキー
  */
-export const LOCAL_STORAGE_EDITOR_WIDTH_KEY: string = "editor_width";
+export const LOCAL_STORAGE_KEY_EDITOR_WIDTH: string = "editor_width";
 
 /**
- * エディター幅のデフォルト値（パーセンテージ）
+ * アクセストークンをSession Storageに保存するためのキー
  */
-export const DEFAULT_EDITOR_WIDTH: number = 50;
+export const SESSION_STORAGE_KEY_ACCESS_TOKEN: string =
+  "mkmemoportal_access_token";
+
+/**
+ * PKCEフロー用のcode_verifierをSession Storageに保存するためのキー
+ */
+export const SESSION_STORAGE_KEY_CODE_VERIFIER: string =
+  "mkmemoportal_pkce_code_verifier";

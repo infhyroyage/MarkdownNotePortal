@@ -201,9 +201,9 @@ export interface WorkspaceEditorProps {
   markdownContent: string;
 
   /**
-   * エディターの幅（パーセンテージ）
+   * エディターの幅(画面幅のパーセンテージ)
    */
-  width: number;
+  widthPercent: number;
 }
 
 /**
@@ -216,7 +216,7 @@ export interface WorkspacePreviewProps {
   markdownContent: string;
 
   /**
-   * プレビューの幅（パーセンテージ）
+   * プレビューの幅(画面幅のパーセンテージ)
    */
-  width: number;
+  widthPercent: number;
 }

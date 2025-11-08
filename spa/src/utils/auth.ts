@@ -1,4 +1,8 @@
 import axios, { type AxiosResponse } from "axios";
+import {
+  SESSION_STORAGE_KEY_ACCESS_TOKEN,
+  SESSION_STORAGE_KEY_CODE_VERIFIER,
+} from "./const";
 
 /**
  * Cognito Hosted UIのクライアントID
@@ -11,18 +15,7 @@ const COGNITO_CLIENT_ID: string = import.meta.env.VITE_COGNITO_CLIENT_ID;
 const COGNITO_DOMAIN: string = import.meta.env.VITE_COGNITO_DOMAIN;
 
 /**
- * アクセストークンをSession Storageに保存するためのキー
- */
-export const SESSION_STORAGE_TOKEN_KEY: string = "mkmemoportal_access_token";
-
-/**
- * PKCEフロー用のcode_verifierをSession Storageに保存するためのキー
- */
-export const SESSION_STORAGE_CODE_VERIFIER_KEY: string =
-  "mkmemoportal_pkce_code_verifier";
-
-/**
- * PKCEフロー用のcode_verifierを生成
+ * PKCEフロー用のcode_verifierを生成する
  * @param {number} length 生成するPKCEフロー用のcode_verifierの長さ
  * @returns {string} PKCEフロー用のcode_verifier
  */
@@ -35,7 +28,7 @@ function generateCodeVerifier(length: number): string {
 }
 
 /**
- * PKCEフロー用のcode_verifierから、PKCEフロー用のcode_challengeを生成
+ * PKCEフロー用のcode_verifierから、PKCEフロー用のcode_challengeを生成する
  * @param {string} codeVerifier PKCEフロー用のcode_verifier
  * @returns {Promise<string>} PKCEフロー用のcode_challenge
  */
@@ -59,7 +52,7 @@ async function generateCodeChallenge(codeVerifier: string): Promise<string> {
  */
 export function isAccessTokenValid(): boolean {
   const accessToken: string | null = sessionStorage.getItem(
-    SESSION_STORAGE_TOKEN_KEY
+    SESSION_STORAGE_KEY_ACCESS_TOKEN
   );
 
   // アクセストークンが存在しない場合は無効とする
@@ -119,27 +112,27 @@ export async function issueAccessToken(
 
   // アクセストークンをSession Storageに保存
   const accessToken: string = response.data.access_token;
-  sessionStorage.setItem(SESSION_STORAGE_TOKEN_KEY, accessToken);
+  sessionStorage.setItem(SESSION_STORAGE_KEY_ACCESS_TOKEN, accessToken);
 
   // PKCEフロー用のcode_verifierは用済みのため削除
-  sessionStorage.removeItem(SESSION_STORAGE_CODE_VERIFIER_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY_CODE_VERIFIER);
 }
 
 /**
- * Cognito Hosted UIのログインページURLを生成
+ * Cognito Hosted UIのログインページURLを生成する
  * @returns {string} Cognito Hosted UIのログインページURL
  */
 export async function getLoginUrl(): Promise<string> {
   // アクセストークンとPKCEフロー用のcode_verifierが残っている場合は事前に削除しておく
-  sessionStorage.removeItem(SESSION_STORAGE_TOKEN_KEY);
-  sessionStorage.removeItem(SESSION_STORAGE_CODE_VERIFIER_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY_ACCESS_TOKEN);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY_CODE_VERIFIER);
 
   // PKCEフロー用のcode_verifierとcode_challengeを生成
   const codeVerifier: string = generateCodeVerifier(32);
   const codeChallenge: string = await generateCodeChallenge(codeVerifier);
 
   // PKCEフロー用のcode_verifierをSession Storageに保存
-  sessionStorage.setItem(SESSION_STORAGE_CODE_VERIFIER_KEY, codeVerifier);
+  sessionStorage.setItem(SESSION_STORAGE_KEY_CODE_VERIFIER, codeVerifier);
 
   const params = new URLSearchParams({
     client_id: COGNITO_CLIENT_ID,
@@ -153,13 +146,13 @@ export async function getLoginUrl(): Promise<string> {
 }
 
 /**
- * Cognito Hosted UIのログアウトページURLを生成
+ * Cognito Hosted UIのログアウトページURLを生成する
  * @returns {string} Cognito Hosted UIのログアウトページURL
  */
 export function getLogoutUrl(): string {
   // アクセストークンとPKCEフロー用のcode_verifierが残っている場合は事前に削除しておく
-  sessionStorage.removeItem(SESSION_STORAGE_TOKEN_KEY);
-  sessionStorage.removeItem(SESSION_STORAGE_CODE_VERIFIER_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY_ACCESS_TOKEN);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY_CODE_VERIFIER);
 
   const params: URLSearchParams = new URLSearchParams({
     client_id: COGNITO_CLIENT_ID,
