@@ -48,6 +48,7 @@ def get_user_id(event: Dict[str, Any]) -> str:
     user_id = (
         event.get("requestContext", {})
         .get("authorizer", {})
+        .get("jwt", {})
         .get("claims", {})
         .get("sub")
     )

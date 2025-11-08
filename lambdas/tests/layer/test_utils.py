@@ -46,7 +46,9 @@ def test_get_dynamodb_client_local_environment(mock_env_get, mock_boto3_client):
 def test_get_user_id_aws_environment(mock_env_get):
     """get_user_id関数のテスト(AWS環境)"""
     mock_env_get.return_value = "false"
-    event = {"requestContext": {"authorizer": {"claims": {"sub": "test-user-id"}}}}
+    event = {
+        "requestContext": {"authorizer": {"jwt": {"claims": {"sub": "test-user-id"}}}}
+    }
 
     user_id = get_user_id(event)
 
@@ -68,7 +70,7 @@ def test_get_user_id_local_environment(mock_env_get):
 def test_get_user_id_not_authenticated(mock_env_get):
     """get_user_id関数のテスト(認証エラー)"""
     mock_env_get.return_value = "false"
-    event = {"requestContext": {"authorizer": {}}}
+    event = {"requestContext": {"authorizer": {"jwt": {"claims": {}}}}}
 
     with pytest.raises(AuthenticationError) as exc_info:
         get_user_id(event)
