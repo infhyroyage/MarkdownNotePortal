@@ -16,7 +16,19 @@ Parameters:
     Description: WAF Web ACL ARN in us-east-1
 
 Resources:
-  # S3 Bucket(SPA)
+  # S3 Buckets
+  MkmemoportalLambdaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3LambdaBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
   MkmemoportalSpaBucket:
     Type: AWS::S3::Bucket
     Properties:
