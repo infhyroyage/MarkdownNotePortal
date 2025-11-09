@@ -53,7 +53,7 @@ Variables タブから「New repository variable」ボタンを押下して、�
 
 ```bash
 USER_POOL_ID=$(aws cognito-idp list-user-pools \
-  --max-results 60 \
+  --max-results 1 \
   --query "UserPools[?Name=='mkmemoportal-cognito'].Id" \
   --output text)
 aws cognito-idp admin-create-user \
@@ -68,6 +68,17 @@ aws cognito-idp admin-set-user-password \
   --permanent
 ```
 
+### 5. Web アプリケーションへのアクセス
+
+以下のコマンドを実行して Web アプリケーションの URL を入手し、任意のブラウザを起動して、入手した URL をアドレスバーに入力してアクセスする:
+
+```bash
+aws cloudformation describe-stacks \
+  --stack-name mkmemoportal-stack \
+  --query "Stacks[0].Outputs[?OutputKey=='MarkdownMemoPortalUrl'].OutputValue" \
+  --output text
+```
+
 ## 削除手順
 
 1. 当リポジトリの各 workflow をすべて無効化する。
@@ -76,7 +87,7 @@ aws cognito-idp admin-set-user-password \
 
    ```bash
    USER_POOL_ID=$(aws cognito-idp list-user-pools \
-     --max-results 60 \
+     --max-results 1 \
      --query "UserPools[?Name=='mkmemoportal-cognito'].Id" \
      --output text)
    aws cognito-idp admin-delete-user \
