@@ -62,10 +62,10 @@ TODO
 
 ### 3.1 認証・認可システム
 
-Amazon Cognito User Pool を用いて、以下の方式により認証・認可を行う。
+Amazon Cognito ユーザープールを用いて、以下の方式により認証・認可を行う。
 
 - Cognito Hosted UI を用いた Authorization Code (PKCE) フローでのサインイン方式を採用する。
-- Cognito Hosted UI・SPA でのセルフサインアップは無効化し、サインアップは初期セットアップ時に管理者が手動で AWS マネジメントコンソール経由で登録する運用とする。
+- Cognito Hosted UI・SPA でのセルフサインアップは無効化し、サインアップは初期セットアップ時に管理者が手動登録する運用とする。
 - ログインページは Cognito Hosted UI を採用し、ログイン成功後に CloudFront から配信された SPA のルートページにコールバックする。
 - ログイン成功時に取得するアクセストークンはブラウザの Session Storage で管理し、アクセストークンの有効期限は 60 分とする。
 - SPA のルートページの遷移時に、アクセストークンが有効かどうかチェックし、有効でない場合は Cognito Hosted UI のログインページにリダイレクトする。
