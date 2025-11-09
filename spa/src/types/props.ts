@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { Memo, SaveStatus } from "./state";
+import type { LayoutMode, Memo, SaveStatus } from "./state";
 
 /**
  * メモを削除するモーダルのProps
@@ -136,6 +136,16 @@ export interface HeaderProps {
   isDrawerOpen: boolean;
 
   /**
+   * 現在のレイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
+   * レイアウトを切り替える関数
+   */
+  onToggleLayout: () => void;
+
+  /**
    * ドロワーの表示/非表示を切り替える関数
    */
   onToggleDrawer: () => void;
@@ -154,6 +164,21 @@ export interface HeaderProps {
    * ヘッダーのタイトル
    */
   title: string;
+}
+
+/**
+ * レイアウト切り替えボタンコンポーネントのProps
+ */
+export interface LayoutToggleButtonProps {
+  /**
+   * 現在のレイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
+   * レイアウトを切り替える関数
+   */
+  onToggleLayout: () => void;
 }
 
 /**
@@ -196,12 +221,17 @@ export interface WorkspaceEditorProps {
   handleMarkdownContentChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 
   /**
+   * レイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
    * Markdownコンテンツ
    */
   markdownContent: string;
 
   /**
-   * エディターの幅(画面幅のパーセンテージ)
+   * エディターのサイズ(画面のパーセンテージ)
    */
   widthPercent: number;
 }
@@ -211,12 +241,17 @@ export interface WorkspaceEditorProps {
  */
 export interface WorkspacePreviewProps {
   /**
+   * レイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
    * Markdownコンテンツ
    */
   markdownContent: string;
 
   /**
-   * プレビューの幅(画面幅のパーセンテージ)
+   * プレビューのサイズ(画面のパーセンテージ)
    */
   widthPercent: number;
 }

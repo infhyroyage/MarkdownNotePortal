@@ -22,3 +22,8 @@ export interface Memo {
  * 自動保存の状態
  */
 export type SaveStatus = "idle" | "saving" | "saved";
+
+/**
+ * ワークスペースのレイアウトモード
+ */
+export type LayoutMode = "horizontal" | "vertical";

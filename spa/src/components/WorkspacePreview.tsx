@@ -11,10 +11,17 @@ import type { WorkspacePreviewProps } from "../types/props";
 export default function WorkspacePreview(
   props: WorkspacePreviewProps
 ): JSX.Element {
-  const { markdownContent, widthPercent } = props;
+  const { layoutMode, markdownContent, widthPercent } = props;
 
   return (
-    <div className="flex flex-col" style={{ width: `${widthPercent}%` }}>
+    <div
+      className="flex flex-col"
+      style={
+        layoutMode === "horizontal"
+          ? { width: `${widthPercent}%` }
+          : { height: `${widthPercent}%` }
+      }
+    >
       <div className="flex-1 overflow-auto">
         <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>

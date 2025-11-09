@@ -1,6 +1,6 @@
 import type { ChangeEvent, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Memo, SaveStatus } from "../types/state";
+import type { LayoutMode, Memo, SaveStatus } from "../types/state";
 import { getErrorMessage, listMemos } from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
@@ -25,6 +25,7 @@ export default function Workspace(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -264,21 +265,48 @@ export default function Workspace(): JSX.Element {
     setErrorMessage(null);
   }, []);
 
-  // リサイズ処理
-  const handleMouseDown = useCallback((): void => {
+  // レイアウトモードを切り替える関数
+  const handleToggleLayout = useCallback((): void => {
+    setLayoutMode((prev) =>
+      prev === "horizontal" ? "vertical" : "horizontal"
+    );
+  }, []);
+
+  // 境界線のドラッグ&ドロップ時のリサイズ処理
+  const handleMouseDownBorderLine = useCallback((): void => {
     setIsDragging(true);
   }, []);
 
-  // ドラッグ＆ドロップでエディターの幅(画面幅のパーセンテージ)を動的に調整
+  // 境界線のダブルクリック時のリセット処理
+  const handleDoubleClickBorderLine = useCallback((): void => {
+    setEditorWidthPercent(50);
+  }, []);
+
+  // ドラッグ＆ドロップでエディターのサイズ(画面のパーセンテージ)を動的に調整
   useEffect(() => {
     if (isDragging) {
       const handleMouseMove = (e: MouseEvent): void => {
         if (!isDragging) return;
 
-        const newWidth = (e.clientX / window.innerWidth) * 100;
-        // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
-        if (newWidth >= 20 && newWidth <= 80) {
-          setEditorWidthPercent(newWidth);
+        if (layoutMode === "horizontal") {
+          // 左右配置モード：横方向のリサイズ
+          const newWidth = (e.clientX / window.innerWidth) * 100;
+          // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
+          if (newWidth >= 20 && newWidth <= 80) {
+            setEditorWidthPercent(newWidth);
+          }
+        } else {
+          // 上下配置モード：縦方向のリサイズ
+          // ヘッダーの高さを取得して除外
+          const header = document.querySelector("header");
+          const headerHeight = header ? header.offsetHeight : 0;
+          const availableHeight = window.innerHeight - headerHeight;
+          const newHeight =
+            ((e.clientY - headerHeight) / availableHeight) * 100;
+          // エディターの高さ(利用可能な高さのパーセンテージ)を最小20%、最大80%に制限
+          if (newHeight >= 20 && newHeight <= 80) {
+            setEditorWidthPercent(newHeight);
+          }
         }
       };
 
@@ -291,7 +319,7 @@ export default function Workspace(): JSX.Element {
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, layoutMode]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -305,6 +333,8 @@ export default function Workspace(): JSX.Element {
         onUpdateTitle={handleUpdateTitle}
         hasSelectedMemo={selectedMemo !== undefined}
         saveStatus={saveStatus}
+        layoutMode={layoutMode}
+        onToggleLayout={handleToggleLayout}
       />
       <Drawer
         memos={memos}
@@ -316,7 +346,11 @@ export default function Workspace(): JSX.Element {
         onDeleteMemo={handleDeleteMemo}
       />
       <main className="flex-1 overflow-hidden">
-        <div className="flex h-full">
+        <div
+          className={
+            layoutMode === "horizontal" ? "flex h-full" : "flex flex-col h-full"
+          }
+        >
           {isLoadingMemos ? (
             <div className="flex items-center justify-center w-full h-full">
               <span className="loading loading-spinner loading-lg"></span>
@@ -326,15 +360,22 @@ export default function Workspace(): JSX.Element {
               <WorkspaceEditor
                 markdownContent={selectedMemo.content}
                 handleMarkdownContentChange={handleMarkdownContentChange}
+                layoutMode={layoutMode}
                 widthPercent={editorWidthPercent}
               />
               <div
-                className="w-1 bg-base-300 hover:bg-primary cursor-col-resize shrink-0 transition-colors"
-                onMouseDown={handleMouseDown}
+                className={`bg-base-content/20 hover:bg-primary shrink-0 transition-colors ${
+                  layoutMode === "horizontal"
+                    ? "w-1 cursor-col-resize"
+                    : "h-1 cursor-row-resize"
+                }`}
+                onMouseDown={handleMouseDownBorderLine}
+                onDoubleClick={handleDoubleClickBorderLine}
                 role="separator"
               />
               <WorkspacePreview
                 markdownContent={selectedMemo.content}
+                layoutMode={layoutMode}
                 widthPercent={100 - editorWidthPercent}
               />
             </>
