@@ -87,12 +87,18 @@ aws cognito-idp admin-set-user-password \
 4. 3 のターミナルで以下のコマンドを実行し、それぞれの Amazon S3 バケット内のすべてのオブジェクトを削除する:
 
    ```bash
-   aws s3 rm s3://{決定したLambda関数のビルドアーティファクトを保存するバケット名} --recursive
-   aws s3 rm s3://{決定したSPAのビルドアーティファクトを保存するバケット名} --recursive
+   aws s3 rm s3://{Lambda関数のビルドアーティファクトを保存するバケット名} --recursive
+   aws s3 rm s3://{SPAのビルドアーティファクトを保存するバケット名} --recursive
    ```
 
 5. 3 のターミナルで以下のコマンドを実行し、CloudFormation テンプレートでデプロイしたスタックを削除する:
 
    ```bash
    aws cloudformation delete-stack --stack-name mkmemoportal-stack
+   ```
+
+6. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:
+
+   ```bash
+   aws s3 rb s3://{Lambda関数のビルドアーティファクトを保存するバケット名}
    ```
