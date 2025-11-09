@@ -9,14 +9,19 @@ import type { WorkspaceEditorProps } from "../types/props";
 export default function WorkspaceEditor(
   props: WorkspaceEditorProps
 ): JSX.Element {
-  const { handleMarkdownContentChange, layoutMode, markdownContent, widthPercent } = props;
+  const {
+    handleMarkdownContentChange,
+    layoutMode,
+    markdownContent,
+    widthPercent,
+  } = props;
 
   return (
-    <div 
-      className="flex flex-col" 
+    <div
+      className="flex flex-col"
       style={
-        layoutMode === "horizontal" 
-          ? { width: `${widthPercent}%` } 
+        layoutMode === "horizontal"
+          ? { width: `${widthPercent}%` }
           : { height: `${widthPercent}%` }
       }
     >

@@ -267,7 +267,9 @@ export default function Workspace(): JSX.Element {
 
   // レイアウトモードを切り替える関数
   const handleToggleLayout = useCallback((): void => {
-    setLayoutMode((prev) => (prev === "horizontal" ? "vertical" : "horizontal"));
+    setLayoutMode((prev) =>
+      prev === "horizontal" ? "vertical" : "horizontal"
+    );
   }, []);
 
   // リサイズ処理
@@ -294,7 +296,8 @@ export default function Workspace(): JSX.Element {
           const header = document.querySelector("header");
           const headerHeight = header ? header.offsetHeight : 0;
           const availableHeight = window.innerHeight - headerHeight;
-          const newHeight = ((e.clientY - headerHeight) / availableHeight) * 100;
+          const newHeight =
+            ((e.clientY - headerHeight) / availableHeight) * 100;
           // エディターの高さ(利用可能な高さのパーセンテージ)を最小20%、最大80%に制限
           if (newHeight >= 20 && newHeight <= 80) {
             setEditorWidthPercent(newHeight);
@@ -338,7 +341,11 @@ export default function Workspace(): JSX.Element {
         onDeleteMemo={handleDeleteMemo}
       />
       <main className="flex-1 overflow-hidden">
-        <div className={layoutMode === "horizontal" ? "flex h-full" : "flex flex-col h-full"}>
+        <div
+          className={
+            layoutMode === "horizontal" ? "flex h-full" : "flex flex-col h-full"
+          }
+        >
           {isLoadingMemos ? (
             <div className="flex items-center justify-center w-full h-full">
               <span className="loading loading-spinner loading-lg"></span>
@@ -351,19 +358,15 @@ export default function Workspace(): JSX.Element {
                 layoutMode={layoutMode}
                 widthPercent={editorWidthPercent}
               />
-              {layoutMode === "horizontal" ? (
-                <div
-                  className="w-1 bg-base-300 hover:bg-primary cursor-col-resize shrink-0 transition-colors"
-                  onMouseDown={handleMouseDown}
-                  role="separator"
-                />
-              ) : (
-                <div
-                  className="h-1 bg-base-300 hover:bg-primary cursor-row-resize shrink-0 transition-colors"
-                  onMouseDown={handleMouseDown}
-                  role="separator"
-                />
-              )}
+              <div
+                className={`bg-base-300 hover:bg-primary shrink-0 transition-colors ${
+                  layoutMode === "horizontal"
+                    ? "w-1 cursor-col-resize"
+                    : "h-1 cursor-row-resize"
+                }`}
+                onMouseDown={handleMouseDown}
+                role="separator"
+              />
               <WorkspacePreview
                 markdownContent={selectedMemo.content}
                 layoutMode={layoutMode}

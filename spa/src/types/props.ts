@@ -167,6 +167,21 @@ export interface HeaderProps {
 }
 
 /**
+ * レイアウト切り替えボタンコンポーネントのProps
+ */
+export interface LayoutToggleButtonProps {
+  /**
+   * 現在のレイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
+   * レイアウトを切り替える関数
+   */
+  onToggleLayout: () => void;
+}
+
+/**
  * 保存状態のアイコンを表示するコンポーネントのProps
  */
 export interface SaveStatusIconProps {

@@ -14,11 +14,11 @@ export default function WorkspacePreview(
   const { layoutMode, markdownContent, widthPercent } = props;
 
   return (
-    <div 
-      className="flex flex-col" 
+    <div
+      className="flex flex-col"
       style={
-        layoutMode === "horizontal" 
-          ? { width: `${widthPercent}%` } 
+        layoutMode === "horizontal"
+          ? { width: `${widthPercent}%` }
           : { height: `${widthPercent}%` }
       }
     >
