@@ -39,9 +39,9 @@ export default function Header(props: HeaderProps): JSX.Element {
           onUpdateTitle={onUpdateTitle}
         />
       </div>
-      <div className="flex-none gap-2 flex items-center">
+      <div className="flex-none flex items-center">
         {hasSelectedMemo && (
-          <div className="flex items-center gap-1">
+          <div className="flex-2 items-center px-3">
             <SaveStatusIcon saveStatus={saveStatus} />
           </div>
         )}
