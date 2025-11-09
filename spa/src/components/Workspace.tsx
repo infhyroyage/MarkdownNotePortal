@@ -272,9 +272,14 @@ export default function Workspace(): JSX.Element {
     );
   }, []);
 
-  // リサイズ処理
-  const handleMouseDown = useCallback((): void => {
+  // 境界線のドラッグ&ドロップ時のリサイズ処理
+  const handleMouseDownBorderLine = useCallback((): void => {
     setIsDragging(true);
+  }, []);
+
+  // 境界線のダブルクリック時のリセット処理
+  const handleDoubleClickBorderLine = useCallback((): void => {
+    setEditorWidthPercent(50);
   }, []);
 
   // ドラッグ＆ドロップでエディターのサイズ(画面のパーセンテージ)を動的に調整
@@ -359,12 +364,13 @@ export default function Workspace(): JSX.Element {
                 widthPercent={editorWidthPercent}
               />
               <div
-                className={`bg-base-300 hover:bg-primary shrink-0 transition-colors ${
+                className={`bg-base-content/20 hover:bg-primary shrink-0 transition-colors ${
                   layoutMode === "horizontal"
                     ? "w-1 cursor-col-resize"
                     : "h-1 cursor-row-resize"
                 }`}
-                onMouseDown={handleMouseDown}
+                onMouseDown={handleMouseDownBorderLine}
+                onDoubleClick={handleDoubleClickBorderLine}
                 role="separator"
               />
               <WorkspacePreview
