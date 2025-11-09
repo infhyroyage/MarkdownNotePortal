@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import type { LayoutMode, Memo, SaveStatus } from "./state";
 
 /**
@@ -57,6 +57,7 @@ export interface DrawerProps {
 
   /**
    * 選択中のメモのID
+   * メモが選択されていない場合はnull
    */
   selectedMemoId: string | null;
 }
@@ -212,14 +213,61 @@ export interface TitleEditorProps {
 }
 
 /**
+ * ワークスペースコンポーネントのProps
+ */
+export interface WorkspaceProps {
+  /**
+   * 自動保存のタイマー
+   */
+  autoSaveTimer: NodeJS.Timeout | null;
+
+  /**
+   * レイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
+   * メモ一覧を取得中である場合はtrue、それ以外はfalse
+   */
+  isLoadingMemos: boolean;
+
+  /**
+   * New Memoボタンをクリックした時の処理
+   */
+  onClickButton: () => void;
+
+  /**
+   * メモを保存する関数
+   */
+  saveMemo: (memoId: string, title: string, content: string) => Promise<void>;
+
+  /**
+   * 選択中のメモ
+   * メモが選択されていない場合はundefined
+   */
+  selectedMemo: Memo | undefined;
+
+  /**
+   * 選択中のメモのID
+   * メモが選択されていない場合はnull
+   */
+  selectedMemoId: string | null;
+
+  /**
+   * 自動保存のタイマーを設定する関数
+   */
+  setAutoSaveTimer: (timer: NodeJS.Timeout) => void;
+
+  /**
+   * メモ一覧を更新する関数
+   */
+  setMemos: Dispatch<SetStateAction<Memo[]>>;
+}
+
+/**
  * ワークスペースの左側にあるMarkdownエディターを表示するコンポーネントのProps
  */
 export interface WorkspaceEditorProps {
-  /**
-   * Markdownコンテンツを変更する関数
-   */
-  handleMarkdownContentChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-
   /**
    * レイアウトモード
    */
@@ -229,6 +277,11 @@ export interface WorkspaceEditorProps {
    * Markdownコンテンツ
    */
   markdownContent: string;
+
+  /**
+   * Markdownコンテンツを変更する関数
+   */
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 
   /**
    * エディターのサイズ(画面のパーセンテージ)

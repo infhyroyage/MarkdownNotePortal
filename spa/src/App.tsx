@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import Workspace from "./components/Workspace";
+import AuthenticatedDisplay from "./components/AuthenticatedDisplay";
 import {
   getLoginUrl,
   isAccessTokenValid,
@@ -70,7 +70,7 @@ export default function App(): JSX.Element {
           <span className="loading loading-spinner loading-lg"></span>
         </div>
       ) : (
-        <Workspace />
+        <AuthenticatedDisplay />
       )}
     </div>
   );
