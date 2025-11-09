@@ -2,6 +2,21 @@ import type { JSX } from "react";
 import type { DrawerMemoButtonProps } from "../types/props";
 
 /**
+ * 日時を人間が読みやすい形式にフォーマット
+ * @param {string} isoString ISO形式の日時文字列
+ * @returns {string} フォーマットされた日時文字列
+ */
+function formatDateTime(isoString: string): string {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
+
+/**
  * ドロワーのメモボタンコンポーネント
  * @param {DrawerMemoButtonProps} props ドロワーのメモボタンコンポーネントのProps
  * @returns {JSX.Element} ドロワーのメモボタンコンポーネント
@@ -9,7 +24,7 @@ import type { DrawerMemoButtonProps } from "../types/props";
 export default function DrawerMemoButton(
   props: DrawerMemoButtonProps
 ): JSX.Element {
-  const { memoId, isSelected, memoTitle, onDeleteClick, onSelectMemo } = props;
+  const { memoId, isSelected, memoTitle, lastUpdatedAt, onDeleteClick, onSelectMemo } = props;
 
   return (
     <li key={memoId} className="w-full">
@@ -28,9 +43,12 @@ export default function DrawerMemoButton(
             onSelectMemo(memoId);
           }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-1">
             <span className={isSelected ? "text-primary" : ""}>
               {memoTitle}
+            </span>
+            <span className="text-xs text-base-content/60">
+              {formatDateTime(lastUpdatedAt)}
             </span>
           </div>
         </button>

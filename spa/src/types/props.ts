@@ -82,6 +82,11 @@ export interface DrawerMemoButtonProps {
   memoTitle: string;
 
   /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
+
+  /**
    * メモを削除するモーダルを表示する関数
    */
   onDeleteClick: (memoId: string) => void;

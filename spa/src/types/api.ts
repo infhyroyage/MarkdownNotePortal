@@ -14,6 +14,10 @@ export interface ListMemosResponse {
      * メモのタイトル
      */
     title: string;
+    /**
+     * 最終更新日時
+     */
+    lastUpdatedAt: string;
   }>;
 }
 

@@ -40,6 +40,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
           id: item.memoId,
           title: item.title,
           content: "", // 一覧取得時はコンテンツを取得しない
+          lastUpdatedAt: item.lastUpdatedAt,
         }));
         setMemos(fetchedMemos);
 
@@ -130,12 +131,13 @@ export default function AuthenticatedDisplay(): JSX.Element {
 
       // メモの状態を更新
       setMemos((prevMemos: Memo[]) => [
-        ...prevMemos,
         {
           id: newMemo.memoId,
           title: DEFAULT_MEMO_TITLE,
           content: DEFAULT_MEMO_CONTENT,
+          lastUpdatedAt: new Date().toISOString(),
         },
+        ...prevMemos,
       ]);
       setSelectedMemoId(newMemo.memoId);
     } catch (error) {

@@ -21,10 +21,13 @@ def test_lambda_handler_success(mock_get_dynamodb_client, mock_get_user_id) -> N
             {
                 "memo_id": {"S": "memo-1"},
                 "title": {"S": "メモ1"},
+                "create_at": {"S": "2024-01-01T00:00:00Z"},
+                "update_at": {"S": "2024-01-02T00:00:00Z"},
             },
             {
                 "memo_id": {"S": "memo-2"},
                 "title": {"S": "メモ2"},
+                "create_at": {"S": "2024-01-03T00:00:00Z"},
             },
         ]
     }
@@ -41,10 +44,13 @@ def test_lambda_handler_success(mock_get_dynamodb_client, mock_get_user_id) -> N
     assert response["statusCode"] == 200
     response_body = json.loads(response["body"])
     assert len(response_body["items"]) == 2
-    assert response_body["items"][0]["memoId"] == "memo-1"
-    assert response_body["items"][0]["title"] == "メモ1"
-    assert response_body["items"][1]["memoId"] == "memo-2"
-    assert response_body["items"][1]["title"] == "メモ2"
+    # 最終更新日時の降順でソートされていることを確認（memo-2が最新）
+    assert response_body["items"][0]["memoId"] == "memo-2"
+    assert response_body["items"][0]["title"] == "メモ2"
+    assert response_body["items"][0]["lastUpdatedAt"] == "2024-01-03T00:00:00Z"
+    assert response_body["items"][1]["memoId"] == "memo-1"
+    assert response_body["items"][1]["title"] == "メモ1"
+    assert response_body["items"][1]["lastUpdatedAt"] == "2024-01-02T00:00:00Z"
     mock_dynamodb.query.assert_called_once()
 
 

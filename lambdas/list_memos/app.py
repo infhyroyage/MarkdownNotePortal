@@ -30,18 +30,26 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             TableName="mkmemoportal-dynamodb",
             KeyConditionExpression="user_id = :user_id",
             ExpressionAttributeValues={":user_id": {"S": user_id}},
-            ProjectionExpression="memo_id, title",
+            ProjectionExpression="memo_id, title, create_at, update_at",
         )
 
         # レスポンスの整形
         items: List[Dict[str, str]] = []
         for item in response.get("Items", []):
+            # update_atが存在する場合はupdate_at、存在しない場合はcreate_atを使用
+            last_updated_at = item.get("update_at", {}).get("S") or item.get(
+                "create_at", {}
+            ).get("S", "")
             items.append(
                 {
                     "memoId": item.get("memo_id", {}).get("S", ""),
                     "title": item.get("title", {}).get("S", ""),
+                    "lastUpdatedAt": last_updated_at,
                 }
             )
+
+        # 最終更新日時の降順でソート
+        items.sort(key=lambda x: x.get("lastUpdatedAt", ""), reverse=True)
 
         logger.info("Memo list retrieved: user_id=%s, count=%d", user_id, len(items))
 

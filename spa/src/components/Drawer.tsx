@@ -57,6 +57,13 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     setDeleteMemoId(null);
   }, []);
 
+  // メモを最終更新日時の降順でソート
+  const sortedMemos: Memo[] = useMemo(() => {
+    return [...memos].sort((a: Memo, b: Memo) => {
+      return b.lastUpdatedAt.localeCompare(a.lastUpdatedAt);
+    });
+  }, [memos]);
+
   return (
     <>
       <div
@@ -99,12 +106,13 @@ export default function Drawer(props: DrawerProps): JSX.Element {
           </div>
           <div className="flex-1 overflow-y-auto">
             <ul className="menu w-full p-0">
-              {memos.map((memo: Memo) => (
+              {sortedMemos.map((memo: Memo) => (
                 <DrawerMemoButton
                   key={memo.id}
                   memoId={memo.id}
                   isSelected={selectedMemoId === memo.id}
                   memoTitle={memo.title}
+                  lastUpdatedAt={memo.lastUpdatedAt}
                   onDeleteClick={handleDeleteClick}
                   onSelectMemo={onSelectMemo}
                 />
