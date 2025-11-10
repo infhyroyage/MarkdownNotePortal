@@ -47,6 +47,10 @@ export interface CreateMemoResponse {
    * 作成されたメモのタイトル
    */
   title: string;
+  /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
 }
 
 /**
@@ -97,4 +101,8 @@ export interface UpdateMemoResponse {
    * 更新されたメモのコンテンツ
    */
   content: string;
+  /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
 }

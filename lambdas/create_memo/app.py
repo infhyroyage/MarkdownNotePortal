@@ -49,6 +49,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         # メモIDを生成して保存
         memo_id = str(uuid.uuid4())
+        create_at = datetime.now(timezone.utc).isoformat()
         dynamodb = get_dynamodb_client()
         dynamodb.put_item(
             TableName="mkmemoportal-dynamodb",
@@ -57,7 +58,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "memo_id": {"S": memo_id},
                 "title": {"S": title},
                 "content": {"S": content},
-                "created_at": {"S": datetime.now(timezone.utc).isoformat()},
+                "create_at": {"S": create_at},
             },
         )
         logger.info("Memo created: user_id=%s, memo_id=%s", user_id, memo_id)
@@ -65,7 +66,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             "statusCode": 201,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"memoId": memo_id, "title": title}),
+            "body": json.dumps({"memoId": memo_id, "title": title, "lastUpdatedAt": create_at}),
         }
 
     except json.JSONDecodeError as e:

@@ -45,6 +45,7 @@ def test_lambda_handler_success(
     assert response_body["memoId"] == "test-memo-id"
     assert response_body["title"] == "新しいタイトル"
     assert response_body["content"] == "# 新しい内容"
+    assert response_body["lastUpdatedAt"] == "2024-01-01T00:00:00Z"
     mock_dynamodb.get_item.assert_called_once()
     mock_dynamodb.update_item.assert_called_once()
 

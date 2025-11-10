@@ -95,7 +95,17 @@ export default function AuthenticatedDisplay(): JSX.Element {
       try {
         setSaveStatus("saving");
         const { updateMemo } = await import("../utils/api");
-        await updateMemo(memoId, title, content);
+        const response = await updateMemo(memoId, title, content);
+        
+        // メモの最終更新日時を更新
+        setMemos((currentMemos: Memo[]) =>
+          currentMemos.map((memo: Memo) =>
+            memo.id === memoId
+              ? { ...memo, lastUpdatedAt: response.lastUpdatedAt }
+              : memo
+          )
+        );
+        
         setSaveStatus("saved");
 
         // 2秒後にsavedをidleに戻す
@@ -135,7 +145,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
           id: newMemo.memoId,
           title: DEFAULT_MEMO_TITLE,
           content: DEFAULT_MEMO_CONTENT,
-          lastUpdatedAt: new Date().toISOString(),
+          lastUpdatedAt: newMemo.lastUpdatedAt,
         },
         ...prevMemos,
       ]);
