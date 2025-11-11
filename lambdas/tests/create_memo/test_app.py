@@ -40,6 +40,7 @@ def test_lambda_handler_success(
     response_body = json.loads(response["body"])
     assert response_body["memoId"] == "test-memo-id"
     assert response_body["title"] == "テストメモ"
+    assert response_body["lastUpdatedAt"] == "2024-01-01T00:00:00Z"
     mock_dynamodb.put_item.assert_called_once()
 
 

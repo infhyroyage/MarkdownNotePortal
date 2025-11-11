@@ -16,6 +16,11 @@ export interface Memo {
    * メモのコンテンツ
    */
   content: string;
+
+  /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
 }
 
 /**

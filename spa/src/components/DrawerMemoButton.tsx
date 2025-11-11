@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import type { DrawerMemoButtonProps } from "../types/props";
+import { formatDateTime } from "../utils/date";
 
 /**
  * ドロワーのメモボタンコンポーネント
@@ -9,7 +10,7 @@ import type { DrawerMemoButtonProps } from "../types/props";
 export default function DrawerMemoButton(
   props: DrawerMemoButtonProps
 ): JSX.Element {
-  const { memoId, isSelected, memoTitle, onDeleteClick, onSelectMemo } = props;
+  const { memoId, isSelected, memoTitle, lastUpdatedAt, onDeleteClick, onSelectMemo } = props;
 
   return (
     <li key={memoId} className="w-full">
@@ -28,9 +29,12 @@ export default function DrawerMemoButton(
             onSelectMemo(memoId);
           }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-1">
             <span className={isSelected ? "text-primary" : ""}>
               {memoTitle}
+            </span>
+            <span className="text-xs text-base-content/60">
+              {formatDateTime(lastUpdatedAt)}
             </span>
           </div>
         </button>

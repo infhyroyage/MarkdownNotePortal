@@ -70,14 +70,15 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
 
         # メモを更新
+        update_at = datetime.now(timezone.utc).isoformat()
         dynamodb.update_item(
             TableName="mkmemoportal-dynamodb",
             Key={"user_id": {"S": user_id}, "memo_id": {"S": memo_id}},
-            UpdateExpression="SET title = :title, content = :content, updated_at = :updated_at",
+            UpdateExpression="SET title = :title, content = :content, update_at = :update_at",
             ExpressionAttributeValues={
                 ":title": {"S": title},
                 ":content": {"S": content},
-                ":updated_at": {"S": datetime.now(timezone.utc).isoformat()},
+                ":update_at": {"S": update_at},
             },
         )
 
@@ -86,7 +87,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"memoId": memo_id, "title": title, "content": content}),
+            "body": json.dumps(
+                {
+                    "memoId": memo_id,
+                    "title": title,
+                    "content": content,
+                    "lastUpdatedAt": update_at,
+                }
+            ),
         }
 
     except json.JSONDecodeError as e:
