@@ -9,23 +9,40 @@ import type { DeleteMemoModalProps } from "../types/props";
 export default function DeleteMemoModal(
   props: DeleteMemoModalProps
 ): JSX.Element {
-  const { title, onCancel, onDelete } = props;
+  const { isDeleting = false, title, onCancel, onDelete } = props;
 
   return (
     <dialog className="modal modal-open">
       <div className="modal-box">
         <p className="py-4">Delete memo: {title}?</p>
         <div className="modal-action">
-          <button type="button" className="btn btn-ghost" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onCancel}
+            disabled={isDeleting}
+          >
             Cancel
           </button>
-          <button type="button" className="btn btn-error" onClick={onDelete}>
-            Delete
+          <button
+            type="button"
+            className="btn btn-error"
+            onClick={onDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
           </button>
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button type="button" onClick={onCancel}>
+        <button type="button" onClick={onCancel} disabled={isDeleting}>
           close
         </button>
       </form>

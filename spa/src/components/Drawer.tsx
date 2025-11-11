@@ -13,6 +13,7 @@ import NewMemoButton from "./NewMemoButton";
 export default function Drawer(props: DrawerProps): JSX.Element {
   const {
     isCreatingMemo,
+    isDeletingMemo,
     isOpen,
     memos,
     onAddMemo,
@@ -48,9 +49,9 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     setDeleteMemoId(memoId);
   }, []);
 
-  const handleDeleteModal = useCallback((): void => {
+  const handleDeleteModal = useCallback(async (): Promise<void> => {
     if (deleteMemoId) {
-      onDeleteMemo(deleteMemoId);
+      await onDeleteMemo(deleteMemoId);
       setDeleteMemoId(null);
     }
   }, [deleteMemoId, onDeleteMemo]);
@@ -112,6 +113,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
           title={deleteMemoTitle}
           onCancel={handleCancelModal}
           onDelete={handleDeleteModal}
+          isDeleting={isDeletingMemo}
         />
       )}
     </>

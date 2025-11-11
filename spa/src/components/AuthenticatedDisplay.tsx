@@ -16,6 +16,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [isLoadingMemos, setIsLoadingMemos] = useState<boolean>(true);
   const [isCreatingMemo, setIsCreatingMemo] = useState<boolean>(false);
+  const [isDeletingMemo, setIsDeletingMemo] = useState<boolean>(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
@@ -162,6 +163,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const handleDeleteMemo = useCallback(
     async (memoId: string): Promise<void> => {
       try {
+        setIsDeletingMemo(true);
         // メモを削除
         const { deleteMemo } = await import("../utils/api");
         await deleteMemo(memoId);
@@ -181,6 +183,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         });
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to delete memo"));
+      } finally {
+        setIsDeletingMemo(false);
       }
     },
     [selectedMemoId]
@@ -269,6 +273,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         selectedMemoId={selectedMemoId}
         onSelectMemo={handleSelectMemo}
         isCreatingMemo={isCreatingMemo}
+        isDeletingMemo={isDeletingMemo}
         isOpen={isDrawerOpen}
         onCloseDrawer={handleToggleDrawer}
         onAddMemo={handleAddMemo}

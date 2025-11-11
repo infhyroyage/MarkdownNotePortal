@@ -6,6 +6,11 @@ import type { LayoutMode, Memo, SaveStatus } from "./state";
  */
 export interface DeleteMemoModalProps {
   /**
+   * メモ削除中である場合はtrue、それ以外はfalse
+   */
+  isDeleting?: boolean;
+
+  /**
    * 削除するメモのタイトル
    */
   title: string;
@@ -31,6 +36,11 @@ export interface DrawerProps {
   isCreatingMemo: boolean;
 
   /**
+   * メモ削除中である場合はtrue、それ以外はfalse
+   */
+  isDeletingMemo: boolean;
+
+  /**
    * ドロワーが開いているかどうか
    */
   isOpen: boolean;
@@ -53,7 +63,7 @@ export interface DrawerProps {
   /**
    * メモを削除する関数
    */
-  onDeleteMemo: (memoId: string) => void;
+  onDeleteMemo: (memoId: string) => Promise<void>;
 
   /**
    * メモを選択する関数
