@@ -26,6 +26,11 @@ export interface DeleteMemoModalProps {
  */
 export interface DrawerProps {
   /**
+   * メモ作成中である場合はtrue、それ以外はfalse
+   */
+  isCreatingMemo: boolean;
+
+  /**
    * ドロワーが開いているかどうか
    */
   isOpen: boolean;
@@ -197,6 +202,11 @@ export interface NewMemoButtonProps {
   className?: string;
 
   /**
+   * メモ作成中である場合はtrue、それ以外はfalse
+   */
+  isLoading?: boolean;
+
+  /**
    * New Memoボタンをクリックした時の処理
    */
   onClick: () => void;
@@ -242,6 +252,11 @@ export interface WorkspaceProps {
   autoSaveTimer: NodeJS.Timeout | null;
 
   /**
+   * メモ作成中である場合はtrue、それ以外はfalse
+   */
+  isCreatingMemo: boolean;
+
+  /**
    * レイアウトモード
    */
   layoutMode: LayoutMode;
@@ -254,7 +269,7 @@ export interface WorkspaceProps {
   /**
    * New Memoボタンをクリックした時の処理
    */
-  onClickButton: () => void;
+  onClickNewMemoButton: () => void;
 
   /**
    * メモを保存する関数

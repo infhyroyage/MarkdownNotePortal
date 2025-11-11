@@ -15,6 +15,7 @@ import Workspace from "./Workspace";
 export default function AuthenticatedDisplay(): JSX.Element {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [isLoadingMemos, setIsLoadingMemos] = useState<boolean>(true);
+  const [isCreatingMemo, setIsCreatingMemo] = useState<boolean>(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
@@ -96,7 +97,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         setSaveStatus("saving");
         const { updateMemo } = await import("../utils/api");
         const response = await updateMemo(memoId, title, content);
-        
+
         // メモの最終更新日時を更新
         setMemos((currentMemos: Memo[]) =>
           currentMemos.map((memo: Memo) =>
@@ -105,7 +106,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
               : memo
           )
         );
-        
+
         setSaveStatus("saved");
 
         // 2秒後にsavedをidleに戻す
@@ -132,6 +133,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
 
   const handleAddMemo = useCallback(async (): Promise<void> => {
     try {
+      setIsCreatingMemo(true);
       // メモを作成
       const { createMemo } = await import("../utils/api");
       const newMemo = await createMemo(
@@ -152,6 +154,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
       setSelectedMemoId(newMemo.memoId);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to create memo"));
+    } finally {
+      setIsCreatingMemo(false);
     }
   }, []);
 
@@ -264,6 +268,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         memos={memos}
         selectedMemoId={selectedMemoId}
         onSelectMemo={handleSelectMemo}
+        isCreatingMemo={isCreatingMemo}
         isOpen={isDrawerOpen}
         onCloseDrawer={handleToggleDrawer}
         onAddMemo={handleAddMemo}
@@ -272,9 +277,10 @@ export default function AuthenticatedDisplay(): JSX.Element {
       <Workspace
         autoSaveTimer={autoSaveTimer}
         setAutoSaveTimer={setAutoSaveTimer}
+        isCreatingMemo={isCreatingMemo}
         layoutMode={layoutMode}
         isLoadingMemos={isLoadingMemos}
-        onClickButton={handleAddMemo}
+        onClickNewMemoButton={handleAddMemo}
         saveMemo={saveMemo}
         selectedMemo={selectedMemo}
         selectedMemoId={selectedMemoId}

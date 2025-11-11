@@ -12,6 +12,7 @@ import NewMemoButton from "./NewMemoButton";
  */
 export default function Drawer(props: DrawerProps): JSX.Element {
   const {
+    isCreatingMemo,
     isOpen,
     memos,
     onAddMemo,
@@ -83,7 +84,11 @@ export default function Drawer(props: DrawerProps): JSX.Element {
       >
         <div className="flex flex-col h-full">
           <div className="p-2 border-b border-base-300">
-            <NewMemoButton className="w-full" onClick={onAddMemo} />
+            <NewMemoButton
+              className="w-full"
+              onClick={onAddMemo}
+              isLoading={isCreatingMemo}
+            />
           </div>
           <div className="flex-1 overflow-y-auto">
             <ul className="menu w-full p-0">

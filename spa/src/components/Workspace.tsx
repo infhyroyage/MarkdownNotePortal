@@ -18,9 +18,10 @@ import WorkspacePreview from "./WorkspacePreview";
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const {
     autoSaveTimer,
+    isCreatingMemo,
     layoutMode,
     isLoadingMemos,
-    onClickButton,
+    onClickNewMemoButton,
     saveMemo,
     selectedMemo,
     selectedMemoId,
@@ -171,7 +172,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               />
             </svg>
             <p className="text-lg text-base-content/70 mb-6">No memo yet</p>
-            <NewMemoButton onClick={onClickButton} />
+            <NewMemoButton
+              onClick={onClickNewMemoButton}
+              isLoading={isCreatingMemo}
+            />
           </div>
         )}
       </div>
