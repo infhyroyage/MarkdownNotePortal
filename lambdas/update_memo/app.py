@@ -87,7 +87,14 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"memoId": memo_id, "title": title, "content": content, "lastUpdatedAt": update_at}),
+            "body": json.dumps(
+                {
+                    "memoId": memo_id,
+                    "title": title,
+                    "content": content,
+                    "lastUpdatedAt": update_at,
+                }
+            ),
         }
 
     except json.JSONDecodeError as e:
