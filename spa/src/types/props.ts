@@ -188,6 +188,21 @@ export interface LayoutToggleButtonProps {
 }
 
 /**
+ * New Memoボタンを表示するコンポーネントのProps
+ */
+export interface NewMemoButtonProps {
+  /**
+   * ボタンに追加するTailwindCSSのクラス(省略可能)
+   */
+  className?: string;
+
+  /**
+   * New Memoボタンをクリックした時の処理
+   */
+  onClick: () => void;
+}
+
+/**
  * 保存状態のアイコンを表示するコンポーネントのProps
  */
 export interface SaveStatusIconProps {

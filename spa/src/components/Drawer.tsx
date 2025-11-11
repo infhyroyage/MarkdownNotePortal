@@ -3,6 +3,7 @@ import type { DrawerProps } from "../types/props";
 import type { Memo } from "../types/state";
 import DeleteMemoModal from "./DeleteMemoModal";
 import DrawerMemoButton from "./DrawerMemoButton";
+import NewMemoButton from "./NewMemoButton";
 
 /**
  * メモのリストを表示するドロワーコンポーネント
@@ -82,27 +83,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
       >
         <div className="flex flex-col h-full">
           <div className="p-2 border-b border-base-300">
-            <button
-              type="button"
-              className="btn btn-primary btn-sm w-full"
-              onClick={onAddMemo}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Memo
-            </button>
+            <NewMemoButton className="w-full" onClick={onAddMemo} />
           </div>
           <div className="flex-1 overflow-y-auto">
             <ul className="menu w-full p-0">

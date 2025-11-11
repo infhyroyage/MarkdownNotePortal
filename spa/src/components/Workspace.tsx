@@ -7,6 +7,7 @@ import {
 } from "react";
 import type { WorkspaceProps } from "../types/props";
 import type { Memo } from "../types/state";
+import NewMemoButton from "./NewMemoButton";
 import WorkspaceEditor from "./WorkspaceEditor";
 import WorkspacePreview from "./WorkspacePreview";
 
@@ -170,27 +171,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               />
             </svg>
             <p className="text-lg text-base-content/70 mb-6">No memo yet</p>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={onClickButton}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Memo
-            </button>
+            <NewMemoButton onClick={onClickButton} />
           </div>
         )}
       </div>
