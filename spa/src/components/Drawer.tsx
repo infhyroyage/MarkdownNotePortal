@@ -27,7 +27,8 @@ export default function Drawer(props: DrawerProps): JSX.Element {
 
   // 相対時間をリアルタイムで更新するためのstate
   // このstateの更新により、すべての子コンポーネント（DrawerMemoButton）が一斉に再レンダリングされる
-  const [, setCurrentTime] = useState(Date.now());
+  // 遅延初期化を使用して、Date.now()が初回レンダリング時のみ実行されるようにする
+  const [, setCurrentTime] = useState(() => Date.now());
 
   // 1秒ごとに現在時刻を更新して、すべてのメモの相対時間表示を更新
   useEffect(() => {
