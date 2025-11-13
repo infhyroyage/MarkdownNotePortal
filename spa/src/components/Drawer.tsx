@@ -25,6 +25,22 @@ export default function Drawer(props: DrawerProps): JSX.Element {
 
   const [deleteMemoId, setDeleteMemoId] = useState<string | null>(null);
 
+  // 相対時間をリアルタイムで更新するためのstate
+  // このstateの更新により、すべての子コンポーネント（DrawerMemoButton）が一斉に再レンダリングされる
+  const [, setCurrentTime] = useState(Date.now());
+
+  // 1秒ごとに現在時刻を更新して、すべてのメモの相対時間表示を更新
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+
+    // クリーンアップ: コンポーネントがアンマウントされる際にタイマーをクリア
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   // ドロワーが開いている時のみEscapeキーでドロワーを閉じる
   useEffect(() => {
     if (!isOpen) return;

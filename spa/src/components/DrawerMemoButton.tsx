@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { JSX } from "react";
 import type { DrawerMemoButtonProps } from "../types/props";
 import { formatDateTime } from "../utils/date";
@@ -12,21 +11,6 @@ export default function DrawerMemoButton(
   props: DrawerMemoButtonProps
 ): JSX.Element {
   const { memoId, isSelected, memoTitle, lastUpdatedAt, onDeleteClick, onSelectMemo } = props;
-
-  // 相対時間をリアルタイムで更新するためのstate
-  const [, setCurrentTime] = useState(Date.now());
-
-  // 1秒ごとに現在時刻を更新して再レンダリングを発生させる
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 1000);
-
-    // クリーンアップ: コンポーネントがアンマウントされる際にタイマーをクリア
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   return (
     <li key={memoId} className="w-full">
