@@ -6,6 +6,10 @@ docker/dynamodb/
 venv/
 **/__pycache__
 
+# Node.js
+lambdas/node_modules
+lambdas/coverage
+
 # SPA
 spa/*.tsbuildinfo
 spa/.env
