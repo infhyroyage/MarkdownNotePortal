@@ -1,0 +1,22 @@
+{
+  "name": "mkmemoportal-lambdas",
+  "version": "1.0.0",
+  "description": "Lambda functions for MarkdownNotePortal",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "eslint **/*.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.703.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.17.0",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

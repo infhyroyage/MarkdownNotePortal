@@ -6,13 +6,11 @@ on:
       - main
     paths:
       - .github/workflows/test-lint-lambdas.yaml
-      - .pylintrc
       - lambdas/**
-      - pytest.ini
-      - requirements.txt
+      - docker/**
 
 env:
-  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
 
 permissions:
   checks: write
@@ -26,23 +24,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
-        uses: actions/setup-python@v6
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          cd lambdas
+          npm install
 
       - name: Run Unittests with Coverage
         run: |
-          pytest --cov=lambdas \
-            --cov-report=term-missing \
-            --cov-report=xml:lambdas/coverage.xml \
-            --cov-fail-under=80 \
-            lambdas/tests
+          cd lambdas
+          npm test
 
   lint:
     runs-on: ubuntu-latest
@@ -50,15 +45,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
-        uses: actions/setup-python@v6
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          cd lambdas
+          npm install
 
       - name: Run Lint
-        run: pylint lambdas/**/*.py docker/**/*.py
+        run: |
+          cd lambdas
+          npm run lint

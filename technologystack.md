@@ -8,7 +8,7 @@
 
 ### 1.2 ソリューション概要
 
-ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は、Python3.12 製の AWS Lambda で行う。
+ログインページ(ルート)とワークスペースページの 2 画面構成である React + TypeScript 製のシングルページアプリケーション(SPA)を、Amazon S3 にホスティングし、Amazon CloudFront から配信する。Amazon Cognito User Pool オーソライザーを有効にした Amazon API Gateway 経由で API の認証・認可を行う。メモを Amazon DynamoDB に保存・参照・削除するバックエンド処理は、Node.js 22.x 製の AWS Lambda で行う。
 
 ## 2. アーキテクチャ
 
