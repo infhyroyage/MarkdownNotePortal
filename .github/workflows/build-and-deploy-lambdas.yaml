@@ -8,13 +8,11 @@ on:
       - .github/workflows/build-and-deploy-lambdas.yaml
       - .github/workflows/reusable-build-lambdas.yaml
       - .github/workflows/reusable-deploy-lambdas.yaml
-      - .pylintrc
       - lambdas/**
-      - pytest.ini
-      - requirements.txt
+      - package.json
 
 env:
-  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
 
 jobs:
   build:

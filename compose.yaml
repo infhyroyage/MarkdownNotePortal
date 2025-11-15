@@ -12,9 +12,9 @@ services:
 
   # DynamoDB Local(テーブル作成)
   dynamodb-local-create-table:
-    image: python:3.12-slim
+    image: node:22-slim
     container_name: dynamodb-local-create-table
-    command: sh -c "pip install -q boto3 && python /scripts/create_table.py"
+    command: sh -c "cd /scripts && npm install @aws-sdk/client-dynamodb && node create_table.js"
     volumes:
       - ./docker/scripts:/scripts
     depends_on:
@@ -23,12 +23,12 @@ services:
 
   # [POST] /memo
   create-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/create_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9001:8080"
     environment:
@@ -40,12 +40,12 @@ services:
 
   # [GET] /memo
   list-memos:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/list_memos:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9002:8080"
     environment:
@@ -57,12 +57,12 @@ services:
 
   # [GET] /memo/{memoId}
   get-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/get_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9003:8080"
     environment:
@@ -74,12 +74,12 @@ services:
 
   # [PUT] /memo/{memoId}
   update-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/update_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9004:8080"
     environment:
@@ -91,12 +91,12 @@ services:
 
   # [DELETE] /memo/{memoId}
   delete-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/delete_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9005:8080"
     environment:
