@@ -23,85 +23,90 @@ services:
 
   # [POST] /memo
   create-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/create_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9001:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
+      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
 
   # [GET] /memo
   list-memos:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/list_memos:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9002:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
+      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
 
   # [GET] /memo/{memoId}
   get-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/get_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9003:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
+      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
 
   # [PUT] /memo/{memoId}
   update-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/update_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9004:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
+      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
 
   # [DELETE] /memo/{memoId}
   delete-memo:
-    image: public.ecr.aws/lambda/python:3.12
-    command: ["app.lambda_handler"]
+    image: public.ecr.aws/lambda/nodejs:22
+    command: ["index.handler"]
     restart: always
     volumes:
       - ./lambdas/delete_memo:/var/task
-      - ./lambdas/layer/python:/opt/python
+      - ./lambdas/layer/nodejs:/opt/nodejs
     ports:
       - "9005:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
+      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
