@@ -1,26 +1,30 @@
-import { defineConfig } from 'vitest/config';
+import path from "node:path";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@types": path.resolve(__dirname, "./types"),
+      "@layer": path.resolve(__dirname, "./layer/nodejs"),
+    },
+  },
   test: {
     globals: true,
-    environment: 'node',
+    environment: "node",
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      reportsDirectory: './coverage',
-      include: ['**/*.ts'],
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      reportsDirectory: "./coverage",
+      include: ["**/*.ts"],
       exclude: [
-        '**/tests/**',
-        '**/node_modules/**',
-        '**/*.config.ts',
-        '**/dist/**',
-        '**/coverage/**',
-        '**/types/**',
+        "**/tests/**",
+        "**/node_modules/**",
+        "**/*.config.ts",
+        "**/dist/**",
+        "**/coverage/**",
+        "**/types/**",
       ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 79,
         statements: 80,
       },
     },

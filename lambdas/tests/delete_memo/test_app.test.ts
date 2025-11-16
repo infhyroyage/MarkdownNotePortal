@@ -1,17 +1,19 @@
-/**
- * delete_memo/index.tsのテスト
- */
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DynamoDBClient, GetItemCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
+import {
+  DeleteItemCommand,
+  DynamoDBClient,
+  GetItemCommand,
+} from "@aws-sdk/client-dynamodb";
+import { AuthenticationError } from "@layer/errors.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { APIGatewayEvent } from "../../types/api.js";
 
 // モックの作成
 const mockSend = vi.fn();
 const mockGetUserId = vi.fn();
 const mockGetDynamoDBClient = vi.fn();
 
-vi.mock('../../layer/nodejs/utils.js', async () => {
-  const actual = await vi.importActual('../../layer/nodejs/utils.js');
+vi.mock("../../layer/nodejs/utils.js", async () => {
+  const actual = await vi.importActual("../../layer/nodejs/utils.js");
   return {
     ...actual,
     getDynamoDBClient: mockGetDynamoDBClient,
@@ -20,33 +22,31 @@ vi.mock('../../layer/nodejs/utils.js', async () => {
 });
 
 // テスト対象のモジュールをインポート
-const { handler } = await import('../../delete_memo/index.js');
-import type { APIGatewayEvent } from '../../types/index.js';
-import { AuthenticationError } from '../../types/index.js';
+const { handler } = await import("../../delete_memo/index.js");
 
-describe('delete_memo handler', () => {
+describe("delete_memo handler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetDynamoDBClient.mockReturnValue({
       send: mockSend,
     } as unknown as DynamoDBClient);
-    mockGetUserId.mockReturnValue('test-user-id');
+    mockGetUserId.mockReturnValue("test-user-id");
   });
 
-  it('正常にメモを削除する', async () => {
+  it("正常にメモを削除する", async () => {
     mockSend
       .mockResolvedValueOnce({
         Item: {
-          memo_id: { S: 'test-memo-id' },
-          title: { S: 'Test Title' },
-          content: { S: 'Test Content' },
+          memo_id: { S: "test-memo-id" },
+          title: { S: "Test Title" },
+          content: { S: "Test Content" },
         },
       })
       .mockResolvedValueOnce({});
 
     const event: APIGatewayEvent = {
       pathParameters: {
-        memoId: 'test-memo-id',
+        memoId: "test-memo-id",
       },
     };
 
@@ -55,10 +55,10 @@ describe('delete_memo handler', () => {
     expect(response.statusCode).toBe(204);
     expect(mockSend).toHaveBeenCalledWith(expect.any(GetItemCommand));
     expect(mockSend).toHaveBeenCalledWith(expect.any(DeleteItemCommand));
-    expect(response.body).toBe('');
+    expect(response.body).toBe("");
   });
 
-  it('memoIdが指定されていない場合は400エラーを返す', async () => {
+  it("memoIdが指定されていない場合は400エラーを返す", async () => {
     const event: APIGatewayEvent = {
       pathParameters: {},
     };
@@ -67,18 +67,18 @@ describe('delete_memo handler', () => {
 
     expect(response.statusCode).toBe(400);
     const body = JSON.parse(response.body);
-    expect(body.message).toBe('memoId is required');
+    expect(body.message).toBe("memoId is required");
     expect(mockSend).not.toHaveBeenCalled();
   });
 
-  it('メモが見つからない場合は404エラーを返す', async () => {
+  it("メモが見つからない場合は404エラーを返す", async () => {
     mockSend.mockResolvedValue({
       Item: undefined,
     });
 
     const event: APIGatewayEvent = {
       pathParameters: {
-        memoId: 'non-existent-memo-id',
+        memoId: "non-existent-memo-id",
       },
     };
 
@@ -86,17 +86,17 @@ describe('delete_memo handler', () => {
 
     expect(response.statusCode).toBe(404);
     const body = JSON.parse(response.body);
-    expect(body.message).toBe('Memo not found');
+    expect(body.message).toBe("Memo not found");
   });
 
-  it('認証エラーの場合は401エラーを返す', async () => {
+  it("認証エラーの場合は401エラーを返す", async () => {
     mockGetUserId.mockImplementation(() => {
-      throw new AuthenticationError('Not authenticated');
+      throw new AuthenticationError("Not authenticated");
     });
 
     const event: APIGatewayEvent = {
       pathParameters: {
-        memoId: 'test-memo-id',
+        memoId: "test-memo-id",
       },
     };
 
@@ -104,16 +104,16 @@ describe('delete_memo handler', () => {
 
     expect(response.statusCode).toBe(401);
     const body = JSON.parse(response.body);
-    expect(body.message).toBe('Not authenticated');
+    expect(body.message).toBe("Not authenticated");
     expect(mockSend).not.toHaveBeenCalled();
   });
 
-  it('予期しないエラーの場合は500エラーを返す', async () => {
-    mockSend.mockRejectedValue(new Error('DynamoDB error'));
+  it("予期しないエラーの場合は500エラーを返す", async () => {
+    mockSend.mockRejectedValue(new Error("DynamoDB error"));
 
     const event: APIGatewayEvent = {
       pathParameters: {
-        memoId: 'test-memo-id',
+        memoId: "test-memo-id",
       },
     };
 
@@ -121,6 +121,6 @@ describe('delete_memo handler', () => {
 
     expect(response.statusCode).toBe(500);
     const body = JSON.parse(response.body);
-    expect(body.message).toBe('Internal server error');
+    expect(body.message).toBe("Internal server error");
   });
 });

@@ -1,8 +1,4 @@
 /**
- * API Gateway関連の型定義
- */
-
-/**
  * API Gateway Event型定義
  */
 export interface APIGatewayEvent {
@@ -27,8 +23,3 @@ export interface APIGatewayResponse {
   headers: Record<string, string>;
   body: string;
 }
-
-/**
- * Lambda Handler型定義
- */
-export type LambdaHandler = (event: APIGatewayEvent) => Promise<APIGatewayResponse>;

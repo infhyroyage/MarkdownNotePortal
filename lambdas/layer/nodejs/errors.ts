@@ -1,14 +1,10 @@
 /**
- * カスタムエラークラスの定義
- */
-
-/**
  * 認証エラークラス
  */
 export class AuthenticationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -18,7 +14,7 @@ export class AuthenticationError extends Error {
 export class ValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -28,6 +24,6 @@ export class ValidationError extends Error {
 export class NotFoundError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }

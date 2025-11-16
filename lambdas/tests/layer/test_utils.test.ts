@@ -1,31 +1,27 @@
-/**
- * utils.tsのテスト
- */
+import { AuthenticationError } from "@layer/errors.js";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { getDynamoDBClient, getUserId } from "../../layer/nodejs/utils.js";
+import type { APIGatewayEvent } from "../../types/api.js";
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getDynamoDBClient, getUserId } from '../../layer/nodejs/utils.js';
-import type { APIGatewayEvent } from '../../types/index.js';
-import { AuthenticationError } from '../../types/index.js';
-
-describe('utils', () => {
-  describe('getDynamoDBClient', () => {
+describe("utils", () => {
+  describe("getDynamoDBClient", () => {
     beforeEach(() => {
       delete process.env.DYNAMODB_ENDPOINT;
     });
 
-    it('ローカル環境のDynamoDBクライアントを返す', () => {
-      process.env.DYNAMODB_ENDPOINT = 'http://localhost:8000';
+    it("ローカル環境のDynamoDBクライアントを返す", () => {
+      process.env.DYNAMODB_ENDPOINT = "http://localhost:8000";
       const client = getDynamoDBClient();
       expect(client).toBeDefined();
     });
 
-    it('AWS環境のDynamoDBクライアントを返す', () => {
+    it("AWS環境のDynamoDBクライアントを返す", () => {
       const client = getDynamoDBClient();
       expect(client).toBeDefined();
     });
   });
 
-  describe('getUserId', () => {
+  describe("getUserId", () => {
     const originalIsLocal = process.env.IS_LOCAL;
 
     afterEach(() => {
@@ -37,41 +33,41 @@ describe('utils', () => {
     });
 
     it('ローカル環境の場合は"local_user"を返す', () => {
-      process.env.IS_LOCAL = 'true';
+      process.env.IS_LOCAL = "true";
       const event: APIGatewayEvent = {};
       const userId = getUserId(event);
-      expect(userId).toBe('local_user');
+      expect(userId).toBe("local_user");
     });
 
-    it('AWS環境で認証情報が存在する場合はuser_idを返す', () => {
+    it("AWS環境で認証情報が存在する場合はuser_idを返す", () => {
       delete process.env.IS_LOCAL;
       const event: APIGatewayEvent = {
         requestContext: {
           authorizer: {
             jwt: {
               claims: {
-                sub: 'test-user-id',
+                sub: "test-user-id",
               },
             },
           },
         },
       };
       const userId = getUserId(event);
-      expect(userId).toBe('test-user-id');
+      expect(userId).toBe("test-user-id");
     });
 
-    it('AWS環境で認証情報が存在しない場合はAuthenticationErrorを投げる', () => {
+    it("AWS環境で認証情報が存在しない場合はAuthenticationErrorを投げる", () => {
       delete process.env.IS_LOCAL;
       const event: APIGatewayEvent = {};
       expect(() => getUserId(event)).toThrow(AuthenticationError);
     });
   });
 
-  describe('AuthenticationError', () => {
-    it('エラーメッセージが正しく設定される', () => {
-      const error = new AuthenticationError('Test error');
-      expect(error.name).toBe('AuthenticationError');
-      expect(error.message).toBe('Test error');
+  describe("AuthenticationError", () => {
+    it("エラーメッセージが正しく設定される", () => {
+      const error = new AuthenticationError("Test error");
+      expect(error.name).toBe("AuthenticationError");
+      expect(error.message).toBe("Test error");
     });
   });
 });

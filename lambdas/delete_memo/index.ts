@@ -1,22 +1,14 @@
-/**
- * 指定した1件の保存済みメモを削除する
- */
-
-import { GetItemCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
-import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
-import type { 
-  APIGatewayEvent, 
-  APIGatewayResponse,
-} from '../types/index.js';
-import { AuthenticationError } from '../types/index.js';
-
+import { DeleteItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import { AuthenticationError } from "@layer/errors.js";
+import { getDynamoDBClient, getUserId } from "../layer/nodejs/utils.js";
+import type { APIGatewayEvent, APIGatewayResponse } from "../types/api.js";
 /**
  * 指定した1件の保存済みメモを削除するLambda関数ハンドラー
- * @param event - API Gatewayイベント
- * @returns API Gatewayレスポンス
+ * @param {APIGatewayEvent} event API Gatewayイベント
+ * @returns {APIGatewayResponse} API Gatewayレスポンス
  */
 export async function handler(
-  event: APIGatewayEvent,
+  event: APIGatewayEvent
 ): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
@@ -26,62 +18,69 @@ export async function handler(
     if (!memoId) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'memoId is required' }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "memoId is required" }),
       };
     }
 
     // メモが見つからない場合は404エラーをレスポンス
     const dynamodb = getDynamoDBClient();
-    const getResponse = await dynamodb.send(new GetItemCommand({
-      TableName: 'mkmemoportal-dynamodb',
-      Key: {
-        user_id: { S: userId },
-        memo_id: { S: memoId },
-      },
-    }));
+    const getResponse = await dynamodb.send(
+      new GetItemCommand({
+        TableName: "mkmemoportal-dynamodb",
+        Key: {
+          user_id: { S: userId },
+          memo_id: { S: memoId },
+        },
+      })
+    );
 
     if (!getResponse.Item) {
       console.log(`Memo not found: user_id=${userId}, memo_id=${memoId}`);
       return {
         statusCode: 404,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'Memo not found' }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Memo not found" }),
       };
     }
 
     // メモを削除
-    await dynamodb.send(new DeleteItemCommand({
-      TableName: 'mkmemoportal-dynamodb',
-      Key: {
-        user_id: { S: userId },
-        memo_id: { S: memoId },
-      },
-    }));
+    await dynamodb.send(
+      new DeleteItemCommand({
+        TableName: "mkmemoportal-dynamodb",
+        Key: {
+          user_id: { S: userId },
+          memo_id: { S: memoId },
+        },
+      })
+    );
 
     console.log(`Memo deleted: user_id=${userId}, memo_id=${memoId}`);
 
     return {
       statusCode: 204,
-      headers: { 'Content-Type': 'application/json' },
-      body: '',
+      headers: { "Content-Type": "application/json" },
+      body: "",
     };
-
   } catch (error) {
     if (error instanceof AuthenticationError) {
       console.error(`Authentication error: ${error.message}`);
       return {
         statusCode: 401,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'Not authenticated' }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Not authenticated" }),
       };
     }
 
-    console.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error(
+      `Unexpected error: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Internal server error' }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Internal server error" }),
     };
   }
 }
