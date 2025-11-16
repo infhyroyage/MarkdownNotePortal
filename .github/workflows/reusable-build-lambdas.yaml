@@ -66,7 +66,7 @@ jobs:
           cd lambdas/dist/get_memo && zip -r ../../../get_memo.zip index.js && cd ../../../
           cd lambdas/dist/list_memos && zip -r ../../../list_memos.zip index.js && cd ../../../
           cd lambdas/dist/update_memo && zip -r ../../../update_memo.zip index.js && cd ../../../
-          cd lambdas/dist/layer && zip -r ../../../layer.zip nodejs && cd ../../../
+          cd lambdas/dist/layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
