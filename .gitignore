@@ -1,12 +1,7 @@
 # Docker
 docker/dynamodb/
 
-# Python
-.coverage
-venv/
-**/__pycache__
-
-# Node.js
+# Lambda
 lambdas/node_modules
 lambdas/coverage
 
