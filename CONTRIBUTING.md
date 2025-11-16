@@ -7,13 +7,12 @@
 - Node.js (TypeScript ランタイム、Lambda 関数ランタイム)
 - TypeScript (Lambda 関数の実装言語)
 - React + TypeScript (フロントエンドフレームワーク)
-- Vite (ビルドツール・開発サーバー)
+- Vite (ビルドツール・開発サーバー、Lambda 関数のビルドツール)
 - ESLint (コード静的解析)
 - Tailwind CSS + shadcn/ui (UI フレームワーク)
 - React Router (ルーティング)
 - Axios (HTTP クライアント)
 - Vitest (Lambda 関数のユニットテスト)
-- esbuild (Lambda 関数のビルドツール)
 - Docker (ローカル環境構築)
 
 ## 開発時の実装規則
@@ -24,11 +23,16 @@
   - **`resources/cfn.yaml`**: Lambda 関数のビルドアーティファクトを保存するバケット、AWS WAF 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
   - **`resources/cfn-waf.yaml`**: AWS WAF のみを us-east-1 リージョンで定義
 - GitHub Actions と連携して CloudFormation スタックの構築・更新を行い、AWS リソースの継続的デプロイを行う。この GitHub Actions ワークフローは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
-- AWS Lambda 関数は TypeScript で実装し、esbuild でバンドル・トランスパイルして JavaScript にコンパイルしてからデプロイする。ビルドは以下のコマンドで実行する。
+- AWS Lambda 関数は TypeScript で実装し、Vite でバンドル・トランスパイルして JavaScript にコンパイルしてからデプロイする。ビルドは以下のコマンドで実行する。
   ```bash
   cd lambdas
   npm run build
   ```
+- AWS Lambda 関数の型定義は lambdas/types に集約し、型安全性を確保する。型定義ファイルには以下が含まれる。
+  - `api.ts`: API Gateway関連の型定義
+  - `dynamodb.ts`: DynamoDB関連の型定義、変換関数
+  - `errors.ts`: カスタムエラークラス定義
+  - `index.ts`: 型定義の再エクスポート
 - AWS Lambda 関数の TypeScript のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは Vitest を使用し、以下のコマンドで実行する。
   ```bash
   cd lambdas

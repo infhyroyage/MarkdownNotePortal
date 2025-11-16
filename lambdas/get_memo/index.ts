@@ -3,13 +3,13 @@
  */
 
 import { GetItemCommand } from '@aws-sdk/client-dynamodb';
-import {
-  getDynamoDBClient,
-  getUserId,
-  AuthenticationError,
-  APIGatewayEvent,
+import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
+import type { 
+  APIGatewayEvent, 
   APIGatewayResponse,
-} from '../layer/nodejs/utils.js';
+  GetMemoResponse,
+} from '../types/index.js';
+import { AuthenticationError } from '../types/index.js';
 
 /**
  * 指定した1件の保存済みメモのタイトルと内容(Markdown文字列)を返すLambda関数ハンドラー
@@ -52,7 +52,7 @@ export async function handler(
     }
 
     // レスポンスの整形
-    const item = {
+    const item: GetMemoResponse = {
       memoId: response.Item.memo_id?.S || '',
       title: response.Item.title?.S || '',
       content: response.Item.content?.S || '',

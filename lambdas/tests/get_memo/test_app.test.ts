@@ -21,8 +21,8 @@ vi.mock('../../layer/nodejs/utils.js', async () => {
 
 // テスト対象のモジュールをインポート
 const { handler } = await import('../../get_memo/index.js');
-const { AuthenticationError } = await import('../../layer/nodejs/utils.js');
-import type { APIGatewayEvent } from '../../layer/nodejs/utils.js';
+import type { APIGatewayEvent } from '../../types/index.js';
+import { AuthenticationError } from '../../types/index.js';
 
 describe('get_memo handler', () => {
   beforeEach(() => {

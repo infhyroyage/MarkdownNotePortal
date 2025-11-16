@@ -3,19 +3,13 @@
  */
 
 import { QueryCommand } from '@aws-sdk/client-dynamodb';
-import {
-  getDynamoDBClient,
-  getUserId,
-  AuthenticationError,
-  APIGatewayEvent,
+import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
+import type { 
+  APIGatewayEvent, 
   APIGatewayResponse,
-} from '../layer/nodejs/utils.js';
-
-interface MemoListItem {
-  memoId: string;
-  title: string;
-  lastUpdatedAt: string;
-}
+  ListMemosResponse,
+} from '../types/index.js';
+import { AuthenticationError, convertDynamoDBToMemoListItem } from '../types/index.js';
 
 /**
  * 保存済みのメモの一覧を返すLambda関数ハンドラー
@@ -40,15 +34,7 @@ export async function handler(
     }));
 
     // レスポンスの整形
-    const items: MemoListItem[] = (response.Items || []).map(item => {
-      // update_atが存在する場合はupdate_at、存在しない場合はcreate_atを使用
-      const lastUpdatedAt = item.update_at?.S || item.create_at?.S || '';
-      return {
-        memoId: item.memo_id?.S || '',
-        title: item.title?.S || '',
-        lastUpdatedAt,
-      };
-    });
+    const items = (response.Items || []).map(convertDynamoDBToMemoListItem);
 
     // 最終更新日時の降順でソート
     items.sort((a, b) => {
@@ -59,10 +45,12 @@ export async function handler(
 
     console.log(`Memo list retrieved: user_id=${userId}, count=${items.length}`);
 
+    const result: ListMemosResponse = { items };
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify(result),
     };
 
   } catch (error) {

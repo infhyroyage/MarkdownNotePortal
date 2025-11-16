@@ -4,18 +4,14 @@
 
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { randomUUID } from 'crypto';
-import {
-  getDynamoDBClient,
-  getUserId,
-  AuthenticationError,
-  APIGatewayEvent,
+import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
+import type { 
+  APIGatewayEvent, 
   APIGatewayResponse,
-} from '../layer/nodejs/utils.js';
-
-interface CreateMemoRequest {
-  title: string;
-  content: string;
-}
+  CreateMemoRequest,
+  CreateMemoResponse,
+} from '../types/index.js';
+import { AuthenticationError } from '../types/index.js';
 
 /**
  * 1件のメモを保存するLambda関数ハンドラー
@@ -67,10 +63,16 @@ export async function handler(
 
     console.log(`Memo created: user_id=${userId}, memo_id=${memoId}`);
 
+    const response: CreateMemoResponse = {
+      memoId,
+      title,
+      lastUpdatedAt: createAt,
+    };
+
     return {
       statusCode: 201,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memoId, title, lastUpdatedAt: createAt }),
+      body: JSON.stringify(response),
     };
 
   } catch (error) {

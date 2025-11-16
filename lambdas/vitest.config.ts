@@ -15,6 +15,7 @@ export default defineConfig({
         '**/*.config.ts',
         '**/dist/**',
         '**/coverage/**',
+        '**/types/**',
       ],
       thresholds: {
         lines: 80,

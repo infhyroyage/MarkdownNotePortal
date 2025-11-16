@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getDynamoDBClient, getUserId, AuthenticationError } from '../../layer/nodejs/utils.js';
-import type { APIGatewayEvent } from '../../layer/nodejs/utils.js';
+import { getDynamoDBClient, getUserId } from '../../layer/nodejs/utils.js';
+import type { APIGatewayEvent } from '../../types/index.js';
+import { AuthenticationError } from '../../types/index.js';
 
 describe('utils', () => {
   describe('getDynamoDBClient', () => {

@@ -3,13 +3,12 @@
  */
 
 import { GetItemCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
-import {
-  getDynamoDBClient,
-  getUserId,
-  AuthenticationError,
-  APIGatewayEvent,
+import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
+import type { 
+  APIGatewayEvent, 
   APIGatewayResponse,
-} from '../layer/nodejs/utils.js';
+} from '../types/index.js';
+import { AuthenticationError } from '../types/index.js';
 
 /**
  * 指定した1件の保存済みメモを削除するLambda関数ハンドラー

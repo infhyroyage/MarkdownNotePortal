@@ -3,6 +3,8 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import type { APIGatewayEvent } from '../../types/api.js';
+import { AuthenticationError } from '../../types/errors.js';
 
 /**
  * DynamoDBクライアントを取得する
@@ -47,38 +49,5 @@ export function getUserId(event: APIGatewayEvent): string {
   return userId;
 }
 
-/**
- * 認証エラークラス
- */
-export class AuthenticationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AuthenticationError';
-  }
-}
-
-/**
- * API Gateway Event型定義
- */
-export interface APIGatewayEvent {
-  body?: string;
-  pathParameters?: Record<string, string>;
-  requestContext?: {
-    authorizer?: {
-      jwt?: {
-        claims?: {
-          sub?: string;
-        };
-      };
-    };
-  };
-}
-
-/**
- * API Gateway Response型定義
- */
-export interface APIGatewayResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-}
+// 型定義は types/ からインポートするため、ここでは再エクスポートのみ
+export { AuthenticationError } from '../../types/errors.js';

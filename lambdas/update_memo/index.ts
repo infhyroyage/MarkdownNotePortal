@@ -3,18 +3,14 @@
  */
 
 import { GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
-import {
-  getDynamoDBClient,
-  getUserId,
-  AuthenticationError,
-  APIGatewayEvent,
+import { getDynamoDBClient, getUserId } from '../layer/nodejs/utils.js';
+import type { 
+  APIGatewayEvent, 
   APIGatewayResponse,
-} from '../layer/nodejs/utils.js';
-
-interface UpdateMemoRequest {
-  title: string;
-  content: string;
-}
+  UpdateMemoRequest,
+  UpdateMemoResponse,
+} from '../types/index.js';
+import { AuthenticationError } from '../types/index.js';
 
 /**
  * 指定した1件の保存済みのメモのタイトルと内容(Markdown文字列)を更新するLambda関数ハンドラー
@@ -95,15 +91,17 @@ export async function handler(
 
     console.log(`Memo updated: user_id=${userId}, memo_id=${memoId}`);
 
+    const result: UpdateMemoResponse = {
+      memoId,
+      title,
+      content,
+      lastUpdatedAt: updateAt,
+    };
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        memoId,
-        title,
-        content,
-        lastUpdatedAt: updateAt,
-      }),
+      body: JSON.stringify(result),
     };
 
   } catch (error) {
