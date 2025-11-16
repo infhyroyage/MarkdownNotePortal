@@ -1,23 +1,14 @@
 {
   "name": "mkmemoportal-lambdas",
-  "version": "1.0.0",
-  "description": "Lambda functions for Markdown Memo Portal",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest",
-    "test:ci": "vitest run --coverage",
     "lint": "eslint '**/*.ts'",
-    "type-check": "tsc --noEmit"
+    "test": "vitest run --coverage",
+    "test:watch": "vitest"
   },
-  "keywords": [
-    "lambda",
-    "aws",
-    "dynamodb"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.713.0",
     "uuid": "^11.0.3"
@@ -35,8 +26,5 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^4.0.9"
-  },
-  "engines": {
-    "node": ">=22.0.0"
   }
 }

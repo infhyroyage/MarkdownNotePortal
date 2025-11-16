@@ -35,7 +35,7 @@ jobs:
       - name: Run Unittests with Coverage
         run: |
           cd lambdas
-          npm run test:ci
+          npm run test
 
   build:
     needs: test

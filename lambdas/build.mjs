@@ -1,19 +1,24 @@
-import { build } from 'esbuild';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { build } from "esbuild";
+import { join } from "path";
 
-const lambdaDirs = ['create_memo', 'delete_memo', 'get_memo', 'list_memos', 'update_memo'];
+const lambdaDirs = [
+  "create_memo",
+  "delete_memo",
+  "get_memo",
+  "list_memos",
+  "update_memo",
+];
 
 async function buildLambdas() {
   for (const dir of lambdaDirs) {
     await build({
-      entryPoints: [join(dir, 'index.ts')],
+      entryPoints: [join(dir, "index.ts")],
       bundle: true,
-      platform: 'node',
-      target: 'node22',
-      format: 'esm',
-      outfile: join('dist', dir, 'index.js'),
-      external: ['@aws-sdk/*'],
+      platform: "node",
+      target: "node22",
+      format: "esm",
+      outfile: join("dist", dir, "index.js"),
+      external: ["@aws-sdk/*"],
       banner: {
         js: `
 import { createRequire } from 'module';
@@ -28,21 +33,21 @@ const __dirname = dirname(__filename);
     });
     console.log(`✓ Built ${dir}`);
   }
-  
+
   // Build layer
   await build({
-    entryPoints: ['layer/nodejs/utils.ts'],
+    entryPoints: ["layer/nodejs/utils.ts"],
     bundle: true,
-    platform: 'node',
-    target: 'node22',
-    format: 'esm',
-    outfile: 'dist/layer/nodejs/utils.js',
-    external: ['@aws-sdk/*'],
+    platform: "node",
+    target: "node22",
+    format: "esm",
+    outfile: "dist/layer/nodejs/utils.js",
+    external: ["@aws-sdk/*"],
   });
-  console.log('✓ Built layer');
+  console.log("✓ Built layer");
 }
 
 buildLambdas().catch((error) => {
-  console.error('Build failed:', error);
+  console.error("Build failed:", error);
   process.exit(1);
 });
