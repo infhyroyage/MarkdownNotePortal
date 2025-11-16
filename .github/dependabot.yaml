@@ -5,8 +5,8 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
+  - package-ecosystem: "npm"
+    directory: "/lambdas"
     schedule:
       interval: "weekly"
       day: "thursday"
@@ -15,8 +15,8 @@ updates:
     assignees:
       - "infhyroyage"
     ignore:
-      - dependency-name: "boto3"
-        update-types: ["version-update:semver-patch"]
+      - dependency-name: "@types/node"
+      - dependency-name: "typescript"
     labels: []
 
   - package-ecosystem: "npm"
