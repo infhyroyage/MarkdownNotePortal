@@ -1,10 +1,10 @@
 # Docker
 docker/dynamodb/
 
-# Python
-.coverage
-venv/
-**/__pycache__
+# Lambda
+lambdas/node_modules
+lambdas/coverage
+lambdas/dist
 
 # SPA
 spa/*.tsbuildinfo
