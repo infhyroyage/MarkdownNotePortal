@@ -61,12 +61,13 @@ jobs:
 
       - name: Build Lambda Functions and Layer Codes
         run: |
-          cd lambdas/dist/create_memo && zip -r ../../../create_memo.zip index.js && cd ../../../
-          cd lambdas/dist/delete_memo && zip -r ../../../delete_memo.zip index.js && cd ../../../
-          cd lambdas/dist/get_memo && zip -r ../../../get_memo.zip index.js && cd ../../../
-          cd lambdas/dist/list_memos && zip -r ../../../list_memos.zip index.js && cd ../../../
-          cd lambdas/dist/update_memo && zip -r ../../../update_memo.zip index.js && cd ../../../
-          cd lambdas/dist/layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
+          cd lambdas/dist
+          zip -r ../../create_memo.zip create_memo/index.js create_memo/package.json assets layer/nodejs package.json
+          zip -r ../../delete_memo.zip delete_memo/index.js delete_memo/package.json assets layer/nodejs package.json
+          zip -r ../../get_memo.zip get_memo/index.js get_memo/package.json assets layer/nodejs package.json
+          zip -r ../../list_memos.zip list_memos/index.js list_memos/package.json assets layer/nodejs package.json
+          zip -r ../../update_memo.zip update_memo/index.js update_memo/package.json assets layer/nodejs package.json
+          cd layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5

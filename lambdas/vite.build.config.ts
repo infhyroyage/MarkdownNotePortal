@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
@@ -10,6 +11,9 @@ const lambdaFunctions = [
 ];
 
 export default defineConfig({
+  ssr: {
+    noExternal: true,
+  },
   build: {
     ssr: true,
     target: "node22",
@@ -31,7 +35,7 @@ export default defineConfig({
       },
       output: {
         format: "es",
-        entryFileNames: (chunkInfo) => {
+        entryFileNames: (chunkInfo: { name: string }) => {
           // Lambda関数の出力先
           if (lambdaFunctions.includes(chunkInfo.name)) {
             return `${chunkInfo.name}/index.js`;
@@ -53,7 +57,48 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
         `.trim(),
       },
-      external: ["@aws-sdk/client-dynamodb", "crypto"],
+      external: ["crypto"],
+      plugins: [
+        {
+          name: "generate-package-json",
+          closeBundle() {
+            [
+              "", // dist root
+              "create_memo",
+              "list_memos",
+              "get_memo",
+              "update_memo",
+              "delete_memo",
+              "layer/nodejs",
+            ].forEach((dir: string) => {
+              const targetPath: string = resolve(
+                __dirname,
+                "dist",
+                dir,
+                "package.json"
+              );
+              try {
+                writeFileSync(
+                  targetPath,
+                  JSON.stringify(
+                    {
+                      type: "module",
+                    },
+                    null,
+                    2
+                  )
+                );
+                console.log(`Created: ${targetPath}`);
+              } catch (error) {
+                console.error(
+                  `Failed to create ${targetPath}:`,
+                  (error as Error).message
+                );
+              }
+            });
+          },
+        },
+      ],
     },
   },
   resolve: {

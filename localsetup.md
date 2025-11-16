@@ -11,11 +11,9 @@
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 
 3. ターミナルを起動して以下のコマンドを実行し、Lambda 関数の依存関係をインストールし、TypeScript コードをビルドする:
+
    ```bash
-   cd lambdas
-   npm install
-   npm run build
-   cd ..
+   pushd lambdas && npm install && npm run build && popd
    ```
 
 4. 3 と同じターミナルで以下のコマンドを実行し、Docker Compose でそれぞれの Lambda 関数、および DynamoDB Local の Docker コンテナをすべて起動する。実行したターミナルはそのまま放置する:

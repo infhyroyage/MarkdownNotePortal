@@ -14,7 +14,7 @@ services:
   dynamodb-local-create-table:
     image: amazon/aws-cli:latest
     container_name: dynamodb-local-create-table
-    command: sh /scripts/create_table.sh
+    entrypoint: ["/bin/sh", "/scripts/create_table.sh"]
     volumes:
       - ./docker/scripts:/scripts
     environment:
@@ -27,17 +27,15 @@ services:
   # [POST] /memo
   create-memo:
     image: public.ecr.aws/lambda/nodejs:22
-    command: ["index.handler"]
+    command: ["create_memo/index.handler"]
     restart: always
     volumes:
-      - ./lambdas/dist/create_memo:/var/task
-      - ./lambdas/dist/layer/nodejs:/opt/nodejs
+      - ./lambdas/dist:/var/task
     ports:
       - "9001:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
-      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
@@ -45,17 +43,15 @@ services:
   # [GET] /memo
   list-memos:
     image: public.ecr.aws/lambda/nodejs:22
-    command: ["index.handler"]
+    command: ["list_memos/index.handler"]
     restart: always
     volumes:
-      - ./lambdas/dist/list_memos:/var/task
-      - ./lambdas/dist/layer/nodejs:/opt/nodejs
+      - ./lambdas/dist:/var/task
     ports:
       - "9002:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
-      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
@@ -63,17 +59,15 @@ services:
   # [GET] /memo/{memoId}
   get-memo:
     image: public.ecr.aws/lambda/nodejs:22
-    command: ["index.handler"]
+    command: ["get_memo/index.handler"]
     restart: always
     volumes:
-      - ./lambdas/dist/get_memo:/var/task
-      - ./lambdas/dist/layer/nodejs:/opt/nodejs
+      - ./lambdas/dist:/var/task
     ports:
       - "9003:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
-      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
@@ -81,17 +75,15 @@ services:
   # [PUT] /memo/{memoId}
   update-memo:
     image: public.ecr.aws/lambda/nodejs:22
-    command: ["index.handler"]
+    command: ["update_memo/index.handler"]
     restart: always
     volumes:
-      - ./lambdas/dist/update_memo:/var/task
-      - ./lambdas/dist/layer/nodejs:/opt/nodejs
+      - ./lambdas/dist:/var/task
     ports:
       - "9004:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
-      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
@@ -99,17 +91,15 @@ services:
   # [DELETE] /memo/{memoId}
   delete-memo:
     image: public.ecr.aws/lambda/nodejs:22
-    command: ["index.handler"]
+    command: ["delete_memo/index.handler"]
     restart: always
     volumes:
-      - ./lambdas/dist/delete_memo:/var/task
-      - ./lambdas/dist/layer/nodejs:/opt/nodejs
+      - ./lambdas/dist:/var/task
     ports:
       - "9005:8080"
     environment:
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
       - IS_LOCAL=true
-      - NODE_PATH=/opt/nodejs
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
