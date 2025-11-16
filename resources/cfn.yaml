@@ -213,7 +213,7 @@ Resources:
     Properties:
       FunctionName: mkmemoportal-lambda-create-memo
       Runtime: nodejs22.x
-      Handler: index.handler
+      Handler: create_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
         S3Bucket: !Ref S3LambdaBucketName
@@ -228,7 +228,7 @@ Resources:
     Properties:
       FunctionName: mkmemoportal-lambda-delete-memo
       Runtime: nodejs22.x
-      Handler: index.handler
+      Handler: delete_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
         S3Bucket: !Ref S3LambdaBucketName
@@ -243,7 +243,7 @@ Resources:
     Properties:
       FunctionName: mkmemoportal-lambda-get-memo
       Runtime: nodejs22.x
-      Handler: index.handler
+      Handler: get_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
         S3Bucket: !Ref S3LambdaBucketName
@@ -258,7 +258,7 @@ Resources:
     Properties:
       FunctionName: mkmemoportal-lambda-list-memos
       Runtime: nodejs22.x
-      Handler: index.handler
+      Handler: list_memos/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
         S3Bucket: !Ref S3LambdaBucketName
@@ -273,7 +273,7 @@ Resources:
     Properties:
       FunctionName: mkmemoportal-lambda-update-memo
       Runtime: nodejs22.x
-      Handler: index.handler
+      Handler: update_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
         S3Bucket: !Ref S3LambdaBucketName
