@@ -23,7 +23,7 @@
    - **[DELETE] /memo/{memoId} の Lambda 関数**(ポート番号:9005)
 
 > [!IMPORTANT]
-> DynamoDB テーブル`mkmemoportal-dynamodb`は、上記コマンド実行時に`docker/scripts/create_table.py`を自動実行して作成されるため、明示的にテーブルを手動作成する必要はない。
+> DynamoDB テーブル`mkmemoportal-dynamodb`は、上記コマンド実行時に`docker/scripts/create_table.sh`を自動実行して作成されるため、明示的にテーブルを手動作成する必要はない。
 
 4. 3 とは別のターミナルで以下のコマンドを実行し、フロントエンドのディレクトリに移動して、Node.js の依存関係をインストールする:
 

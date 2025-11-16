@@ -12,11 +12,14 @@ services:
 
   # DynamoDB Local(テーブル作成)
   dynamodb-local-create-table:
-    image: python:3.12-slim
+    image: amazon/aws-cli:latest
     container_name: dynamodb-local-create-table
-    command: sh -c "pip install -q boto3 && python /scripts/create_table.py"
+    command: sh /scripts/create_table.sh
     volumes:
       - ./docker/scripts:/scripts
+    environment:
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey
     depends_on:
       - dynamodb-local
     restart: "no"
