@@ -4,6 +4,7 @@ docker/dynamodb/
 # Lambda
 lambdas/node_modules
 lambdas/coverage
+lambdas/dist
 
 # SPA
 spa/*.tsbuildinfo

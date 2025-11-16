@@ -5,13 +5,15 @@
 本システムの開発には、以下のツールとテクノロジーを使用する:
 
 - Node.js (TypeScript ランタイム、Lambda 関数ランタイム)
+- TypeScript (Lambda 関数の実装言語)
 - React + TypeScript (フロントエンドフレームワーク)
 - Vite (ビルドツール・開発サーバー)
 - ESLint (コード静的解析)
 - Tailwind CSS + shadcn/ui (UI フレームワーク)
 - React Router (ルーティング)
 - Axios (HTTP クライアント)
-- Jest (Lambda 関数のユニットテスト)
+- Vitest (Lambda 関数のユニットテスト)
+- esbuild (Lambda 関数のビルドツール)
 - Docker (ローカル環境構築)
 
 ## 開発時の実装規則
@@ -22,16 +24,22 @@
   - **`resources/cfn.yaml`**: Lambda 関数のビルドアーティファクトを保存するバケット、AWS WAF 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
   - **`resources/cfn-waf.yaml`**: AWS WAF のみを us-east-1 リージョンで定義
 - GitHub Actions と連携して CloudFormation スタックの構築・更新を行い、AWS リソースの継続的デプロイを行う。この GitHub Actions ワークフローは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
-- AWS Lambda 関数の Node.js のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは、以下のコマンドで実行する。
+- AWS Lambda 関数は TypeScript で実装し、esbuild でバンドル・トランスパイルして JavaScript にコンパイルしてからデプロイする。ビルドは以下のコマンドで実行する。
+  ```bash
+  cd lambdas
+  npm run build
+  ```
+- AWS Lambda 関数の TypeScript のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは Vitest を使用し、以下のコマンドで実行する。
   ```bash
   cd lambdas
   npm test
   ```
 - AWS Lambda 関数間で共通する処理は Lambda レイヤーとして lambdas/layer に実装し、コードの重複を避ける。
-- AWS Lambda 関数は、必ず ESLint の警告・エラーをすべて解消するように、コード品質を担保する。ESLint の静的解析は、以下のコマンドで実行する。
+- AWS Lambda 関数は、必ず TypeScript の型チェックと ESLint の警告・エラーをすべて解消するように、コード品質を担保する。型チェックと ESLint の静的解析は、以下のコマンドで実行する。
   ```bash
   cd lambdas
-  npm run lint
+  npm run type-check  # TypeScript型チェック
+  npm run lint        # ESLint静的解析
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
   - **`.github/workflows/build-and-deploy-lambdas.yaml`**: AWS Lambda 関数のテスト・ビルド・デプロイ

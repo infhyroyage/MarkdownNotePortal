@@ -44,14 +44,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          cd lambdas
+          npm ci
+
+      - name: Build TypeScript to JavaScript
+        run: |
+          cd lambdas
+          npm run build
+
       - name: Build Lambda Functions and Layer Codes
         run: |
-          cd lambdas/create_memo && zip -r ../../create_memo.zip index.js && cd ../../
-          cd lambdas/delete_memo && zip -r ../../delete_memo.zip index.js && cd ../../
-          cd lambdas/get_memo && zip -r ../../get_memo.zip index.js && cd ../../
-          cd lambdas/list_memos && zip -r ../../list_memos.zip index.js && cd ../../
-          cd lambdas/update_memo && zip -r ../../update_memo.zip index.js && cd ../../
-          cd lambdas/layer && zip -r ../../layer.zip nodejs && cd ../../
+          cd lambdas/dist/create_memo && zip -r ../../../create_memo.zip index.js && cd ../../../
+          cd lambdas/dist/delete_memo && zip -r ../../../delete_memo.zip index.js && cd ../../../
+          cd lambdas/dist/get_memo && zip -r ../../../get_memo.zip index.js && cd ../../../
+          cd lambdas/dist/list_memos && zip -r ../../../list_memos.zip index.js && cd ../../../
+          cd lambdas/dist/update_memo && zip -r ../../../update_memo.zip index.js && cd ../../../
+          cd lambdas/dist/layer && zip -r ../../../layer.zip nodejs && cd ../../../
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5

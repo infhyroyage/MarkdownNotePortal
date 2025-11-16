@@ -6,9 +6,9 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 /**
  * DynamoDBクライアントを取得する
- * @returns {DynamoDBClient} DynamoDBクライアント
+ * @returns DynamoDBクライアント
  */
-export function getDynamoDBClient() {
+export function getDynamoDBClient(): DynamoDBClient {
   const endpointUrl = process.env.DYNAMODB_ENDPOINT;
   
   if (endpointUrl) {
@@ -29,11 +29,11 @@ export function getDynamoDBClient() {
 
 /**
  * API GatewayのCognito Authorizerでの認証で生成したCognito JWTトークンのsubクレームからuser_idを取得する
- * @param {Object} event - API Gatewayイベント
- * @returns {string} user_idの文字列
+ * @param event - API Gatewayイベント
+ * @returns user_idの文字列
  * @throws {AuthenticationError} 認証エラー
  */
-export function getUserId(event) {
+export function getUserId(event: APIGatewayEvent): string {
   // ローカル環境の場合は認証が存在しないため、"local_user"を返す
   const isLocal = process.env.IS_LOCAL?.toLowerCase() === 'true';
   if (isLocal) {
@@ -51,8 +51,34 @@ export function getUserId(event) {
  * 認証エラークラス
  */
 export class AuthenticationError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = 'AuthenticationError';
   }
+}
+
+/**
+ * API Gateway Event型定義
+ */
+export interface APIGatewayEvent {
+  body?: string;
+  pathParameters?: Record<string, string>;
+  requestContext?: {
+    authorizer?: {
+      jwt?: {
+        claims?: {
+          sub?: string;
+        };
+      };
+    };
+  };
+}
+
+/**
+ * API Gateway Response型定義
+ */
+export interface APIGatewayResponse {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
 }

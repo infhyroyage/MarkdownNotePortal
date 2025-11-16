@@ -4,28 +4,32 @@
 
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { randomUUID } from 'crypto';
+import {
+  getDynamoDBClient,
+  getUserId,
+  AuthenticationError,
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from '../layer/nodejs/utils.js';
 
-// Lambda環境では/opt/nodejsから、テスト環境では相対パスからインポート
-let utils;
-try {
-  utils = await import('/opt/nodejs/utils.js');
-} catch {
-  utils = await import('../layer/nodejs/utils.js');
+interface CreateMemoRequest {
+  title: string;
+  content: string;
 }
-const { getDynamoDBClient, getUserId, AuthenticationError } = utils;
 
 /**
  * 1件のメモを保存するLambda関数ハンドラー
- * @param {Object} event - API Gatewayイベント
- * @param {Object} _context - Lambda実行コンテキスト
- * @returns {Object} API Gatewayレスポンス
+ * @param event - API Gatewayイベント
+ * @returns API Gatewayレスポンス
  */
-export async function handler(event, _context) {
+export async function handler(
+  event: APIGatewayEvent,
+): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
 
     // リクエストボディの取得とパース
-    const body = JSON.parse(event.body || '{}');
+    const body: CreateMemoRequest = JSON.parse(event.body || '{}');
     const title = (body.title || '').trim();
     const content = body.content || '';
 
@@ -88,7 +92,7 @@ export async function handler(event, _context) {
       };
     }
 
-    console.error(`Unexpected error: ${error.message}`);
+    console.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },

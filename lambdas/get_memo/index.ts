@@ -3,23 +3,22 @@
  */
 
 import { GetItemCommand } from '@aws-sdk/client-dynamodb';
-
-// Lambda環境では/opt/nodejsから、テスト環境では相対パスからインポート
-let utils;
-try {
-  utils = await import('/opt/nodejs/utils.js');
-} catch {
-  utils = await import('../layer/nodejs/utils.js');
-}
-const { getDynamoDBClient, getUserId, AuthenticationError } = utils;
+import {
+  getDynamoDBClient,
+  getUserId,
+  AuthenticationError,
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from '../layer/nodejs/utils.js';
 
 /**
  * 指定した1件の保存済みメモのタイトルと内容(Markdown文字列)を返すLambda関数ハンドラー
- * @param {Object} event - API Gatewayイベント
- * @param {Object} _context - Lambda実行コンテキスト
- * @returns {Object} API Gatewayレスポンス
+ * @param event - API Gatewayイベント
+ * @returns API Gatewayレスポンス
  */
-export async function handler(event, _context) {
+export async function handler(
+  event: APIGatewayEvent,
+): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
 
@@ -77,7 +76,7 @@ export async function handler(event, _context) {
       };
     }
 
-    console.error(`Unexpected error: ${error.message}`);
+    console.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },

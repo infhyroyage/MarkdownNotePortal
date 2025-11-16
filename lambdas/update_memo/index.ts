@@ -3,28 +3,32 @@
  */
 
 import { GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import {
+  getDynamoDBClient,
+  getUserId,
+  AuthenticationError,
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from '../layer/nodejs/utils.js';
 
-// Lambda環境では/opt/nodejsから、テスト環境では相対パスからインポート
-let utils;
-try {
-  utils = await import('/opt/nodejs/utils.js');
-} catch {
-  utils = await import('../layer/nodejs/utils.js');
+interface UpdateMemoRequest {
+  title: string;
+  content: string;
 }
-const { getDynamoDBClient, getUserId, AuthenticationError } = utils;
 
 /**
  * 指定した1件の保存済みのメモのタイトルと内容(Markdown文字列)を更新するLambda関数ハンドラー
- * @param {Object} event - API Gatewayイベント
- * @param {Object} _context - Lambda実行コンテキスト
- * @returns {Object} API Gatewayレスポンス
+ * @param event - API Gatewayイベント
+ * @returns API Gatewayレスポンス
  */
-export async function handler(event, _context) {
+export async function handler(
+  event: APIGatewayEvent,
+): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
 
     // リクエストボディの取得とパース
-    const body = JSON.parse(event.body || '{}');
+    const body: UpdateMemoRequest = JSON.parse(event.body || '{}');
     const title = (body.title || '').trim();
     const content = body.content || '';
 
@@ -121,7 +125,7 @@ export async function handler(event, _context) {
       };
     }
 
-    console.error(`Unexpected error: ${error.message}`);
+    console.error(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
