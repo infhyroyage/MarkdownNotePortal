@@ -1,7 +1,7 @@
 /**
- * 日時を相対時間表示にフォーマット（英語）
+ * 日時を相対時間表示にフォーマット(英語)
  * @param {string} isoString ISO形式の日時文字列
- * @returns {string} 相対時間表示の文字列（例: "3 seconds ago", "5 minutes ago"）
+ * @returns {string} 相対時間表示の文字列(例: "3 seconds ago", "5 minutes ago")
  */
 export function formatDateTime(isoString: string): string {
   const date = new Date(isoString);
@@ -15,13 +15,17 @@ export function formatDateTime(isoString: string): string {
 
   // 60秒未満
   if (diffInSeconds < 60) {
-    return diffInSeconds === 1 ? "1 second ago" : `${diffInSeconds} seconds ago`;
+    return diffInSeconds === 1
+      ? "1 second ago"
+      : `${diffInSeconds} seconds ago`;
   }
 
   // 60分未満
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return diffInMinutes === 1 ? "1 minute ago" : `${diffInMinutes} minutes ago`;
+    return diffInMinutes === 1
+      ? "1 minute ago"
+      : `${diffInMinutes} minutes ago`;
   }
 
   // 24時間未満

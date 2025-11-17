@@ -61,7 +61,7 @@ export function getErrorMessage(
 
 /**
  * [GET] /memoにアクセスして、メモ一覧を取得する
- * @param {string} [search] 検索文字列（省略可）
+ * @param {string} [search] 検索文字列(省略可能)
  * @returns {Promise<ListMemosResponse>} メモ一覧
  */
 export async function listMemos(search?: string): Promise<ListMemosResponse> {

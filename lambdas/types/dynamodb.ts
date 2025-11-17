@@ -1,7 +1,7 @@
 import type { AttributeValue } from "@aws-sdk/client-dynamodb";
 
 /**
- * DynamoDBのアイテム型（汎用的な形式）
+ * DynamoDBのアイテム型(汎用的な形式)
  */
 export type DynamoDBItem = Record<string, AttributeValue>;
 
@@ -18,7 +18,7 @@ export interface MemoItemDynamoDB {
 }
 
 /**
- * メモアイテム（アプリケーション形式）
+ * メモアイテム(アプリケーション形式)
  */
 export interface MemoItem {
   memoId: string;
@@ -29,7 +29,7 @@ export interface MemoItem {
 }
 
 /**
- * メモリストアイテム（アプリケーション形式）
+ * メモリストアイテム(アプリケーション形式)
  */
 export interface MemoListItem {
   memoId: string;
