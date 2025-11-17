@@ -123,4 +123,74 @@ describe("list_memos handler", () => {
     const body = JSON.parse(response.body);
     expect(body.items[0].lastUpdatedAt).toBe("2023-01-01T00:00:00.000Z");
   });
+
+  it("検索クエリが指定された場合、FilterExpressionが適用される", async () => {
+    mockSend.mockResolvedValue({
+      Items: [
+        {
+          memo_id: { S: "memo-1" },
+          title: { S: "Test Title" },
+          content: { S: "Test Content" },
+          create_at: { S: "2023-01-01T00:00:00.000Z" },
+        },
+      ],
+    });
+
+    const event: APIGatewayEvent = {
+      queryStringParameters: {
+        search: "Test",
+      },
+    };
+
+    const response = await handler(event);
+
+    expect(response.statusCode).toBe(200);
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          FilterExpression: "contains(title, :search) OR contains(content, :search)",
+          ProjectionExpression: "memo_id, title, content, create_at, update_at",
+          ExpressionAttributeValues: expect.objectContaining({
+            ":search": { S: "Test" },
+          }),
+        }),
+      })
+    );
+  });
+
+  it("検索クエリが空文字の場合、FilterExpressionは適用されない", async () => {
+    mockSend.mockResolvedValue({
+      Items: [
+        {
+          memo_id: { S: "memo-1" },
+          title: { S: "Title 1" },
+          create_at: { S: "2023-01-01T00:00:00.000Z" },
+        },
+      ],
+    });
+
+    const event: APIGatewayEvent = {
+      queryStringParameters: {
+        search: "",
+      },
+    };
+
+    const response = await handler(event);
+
+    expect(response.statusCode).toBe(200);
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          ProjectionExpression: "memo_id, title, create_at, update_at",
+        }),
+      })
+    );
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.not.objectContaining({
+          FilterExpression: expect.anything(),
+        }),
+      })
+    );
+  });
 });

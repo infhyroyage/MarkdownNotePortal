@@ -25,6 +25,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -32,12 +33,12 @@ export default function AuthenticatedDisplay(): JSX.Element {
     [memos, selectedMemoId]
   );
 
-  // 初回レンダリング時にメモ一覧を取得
-  useEffect(() => {
-    (async () => {
+  // メモ一覧を取得する関数
+  const loadMemos = useCallback(
+    async (search?: string): Promise<void> => {
       try {
         setIsLoadingMemos(true);
-        const response = await listMemos();
+        const response = await listMemos(search);
         const fetchedMemos: Memo[] = response.items.map((item) => ({
           id: item.memoId,
           title: item.title,
@@ -49,14 +50,22 @@ export default function AuthenticatedDisplay(): JSX.Element {
         // メモが存在する場合は最初のメモを選択
         if (fetchedMemos.length > 0) {
           setSelectedMemoId(fetchedMemos[0].id);
+        } else {
+          setSelectedMemoId(null);
         }
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to load memos"));
       } finally {
         setIsLoadingMemos(false);
       }
-    })();
-  }, []);
+    },
+    []
+  );
+
+  // 初回レンダリング時にメモ一覧を取得
+  useEffect(() => {
+    loadMemos();
+  }, [loadMemos]);
 
   // selectedMemoIdが変更されたときに、選択されたメモのコンテンツを取得
   useEffect(() => {
@@ -253,6 +262,15 @@ export default function AuthenticatedDisplay(): JSX.Element {
     );
   }, []);
 
+  // 検索を実行する関数
+  const handleSearch = useCallback(
+    (query: string): void => {
+      setSearchQuery(query);
+      loadMemos(query);
+    },
+    [loadMemos]
+  );
+
   return (
     <div className="flex flex-col h-screen">
       {errorMessage && (
@@ -278,6 +296,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         onCloseDrawer={handleToggleDrawer}
         onAddMemo={handleAddMemo}
         onDeleteMemo={handleDeleteMemo}
+        onSearch={handleSearch}
+        searchQuery={searchQuery}
       />
       <Workspace
         autoSaveTimer={autoSaveTimer}

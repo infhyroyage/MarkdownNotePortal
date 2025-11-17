@@ -61,13 +61,15 @@ export function getErrorMessage(
 
 /**
  * [GET] /memoにアクセスして、メモ一覧を取得する
+ * @param {string} [search] 検索文字列（省略可）
  * @returns {Promise<ListMemosResponse>} メモ一覧
  */
-export async function listMemos(): Promise<ListMemosResponse> {
-  const response = await axios.get<ListMemosResponse>(
-    "/memo",
-    getRequestConfig()
-  );
+export async function listMemos(search?: string): Promise<ListMemosResponse> {
+  const config = getRequestConfig();
+  if (search) {
+    config.params = { search };
+  }
+  const response = await axios.get<ListMemosResponse>("/memo", config);
   return response.data;
 }
 

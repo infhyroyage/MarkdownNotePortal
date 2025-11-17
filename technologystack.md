@@ -84,7 +84,8 @@ API Gateway で以下の API エンドポイントを管理する。
   - 成功レスポンス: `201 Created` `{ "memoId": string, "title": string }`
   - バリデーション: `title` は 1〜200 文字、`content` は Markdown 文字列
 - [GET] /memo
-  - 概要: 保存済みメモの一覧を返す。
+  - 概要: 保存済みメモの一覧を返す。クエリパラメータ `search` を指定した場合、メモのタイトルまたはコンテンツに検索文字列が含まれるメモのみを返す。
+  - クエリパラメータ: `search` (省略可能) - 検索文字列。指定した場合、タイトルまたはコンテンツに部分一致するメモのみを返す。
   - 成功レスポンス: `200 OK` `{ "items": [{ "memoId": string, "title": string }] }`
 - [GET] /memo/{memoId}
   - 概要: 指定した 1 件の保存済みのメモのタイトルと内容(Markdown 文字列)を返す。
@@ -118,7 +119,7 @@ API Gateway には Cognito User Pool オーソライザーが設定されてお�
 
 パーティションキー`user_id`、ソートキー`memo_id`とする構成により、以下の API アクセス時にメモデータを効率的に取得できる。
 
-- [GET] /memo: `user_id`を指定して Query の DynamoDB API を実行して、特定のユーザーでのすべてのメモを取得
+- [GET] /memo: `user_id`を指定して Query の DynamoDB API を実行して、特定のユーザーでのすべてのメモを取得。検索クエリパラメータが指定された場合は、FilterExpression を使用してタイトルまたはコンテンツに検索文字列が含まれるメモのみをフィルタリングする。
 - [GET] /memo/{memoId}: `user_id` と `memo_id` を組み合わせて指定して GetItem の DynamoDB API を実行して、特定のユーザーでの特定のメモを取得
 
 ### 3.4 UI/UX 設計

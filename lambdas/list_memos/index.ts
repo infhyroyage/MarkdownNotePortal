@@ -19,18 +19,36 @@ export async function handler(
   try {
     const userId = getUserId(event);
 
+    // クエリパラメータから検索文字列を取得
+    const searchQuery = event.queryStringParameters?.search?.trim() || "";
+
     // メモ一覧を取得
     const dynamodb = getDynamoDBClient();
-    const response = await dynamodb.send(
-      new QueryCommand({
-        TableName: "mkmemoportal-dynamodb",
-        KeyConditionExpression: "user_id = :user_id",
-        ExpressionAttributeValues: {
-          ":user_id": { S: userId },
-        },
-        ProjectionExpression: "memo_id, title, create_at, update_at",
-      })
-    );
+    const queryParams: {
+      TableName: string;
+      KeyConditionExpression: string;
+      ExpressionAttributeValues: Record<string, { S: string }>;
+      ProjectionExpression?: string;
+      FilterExpression?: string;
+    } = {
+      TableName: "mkmemoportal-dynamodb",
+      KeyConditionExpression: "user_id = :user_id",
+      ExpressionAttributeValues: {
+        ":user_id": { S: userId },
+      },
+      ProjectionExpression: "memo_id, title, create_at, update_at",
+    };
+
+    // 検索文字列が指定されている場合、contentも取得してフィルタリング
+    if (searchQuery) {
+      queryParams.ProjectionExpression =
+        "memo_id, title, content, create_at, update_at";
+      queryParams.FilterExpression =
+        "contains(title, :search) OR contains(content, :search)";
+      queryParams.ExpressionAttributeValues[":search"] = { S: searchQuery };
+    }
+
+    const response = await dynamodb.send(new QueryCommand(queryParams));
 
     // レスポンスの整形
     const items: MemoListItem[] = (response.Items || []).map(
