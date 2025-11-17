@@ -112,7 +112,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
           <div className="p-2 border-b border-base-300">
             <input
               type="text"
-              placeholder="検索..."
+              placeholder="Search..."
               className="input input-bordered input-sm w-full"
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}

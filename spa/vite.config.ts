@@ -75,9 +75,19 @@ const lambdaProxyMiddleware = (
   next: () => void
 ) => {
   // Lambda関数で処理するパス以外は、Lambda関数にプロキシせず、次のミドルウェアにそのまま処理を渡す
-  const path: string = req.url || "";
-  if (!path.startsWith("/memo")) {
+  const urlString: string = req.url || "";
+  if (!urlString.startsWith("/memo")) {
     return next();
+  }
+
+  // URLからパスとクエリパラメータを分離
+  const [path, queryString] = urlString.split("?");
+  const queryStringParameters: Record<string, string> = {};
+  if (queryString) {
+    const params = new URLSearchParams(queryString);
+    params.forEach((value, key) => {
+      queryStringParameters[key] = value;
+    });
   }
 
   // ルーティング先のポート番号を決定
@@ -115,6 +125,10 @@ const lambdaProxyMiddleware = (
                   memoId: pathMatch[1],
                 }
               : null,
+            queryStringParameters:
+              Object.keys(queryStringParameters).length > 0
+                ? queryStringParameters
+                : undefined,
             body,
           },
           {
