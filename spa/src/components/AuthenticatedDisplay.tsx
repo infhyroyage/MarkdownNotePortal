@@ -28,6 +28,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isFormatting, setIsFormatting] = useState<boolean>(false);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -273,6 +274,57 @@ export default function AuthenticatedDisplay(): JSX.Element {
     [loadMemos]
   );
 
+  // Markdownをフォーマットする関数
+  const handleFormatMarkdown = useCallback(async (): Promise<void> => {
+    if (!selectedMemoId || !selectedMemo) return;
+
+    try {
+      setIsFormatting(true);
+
+      // prettierを動的にインポートしてMarkdownをフォーマット
+      const prettier = await import("prettier");
+      const parserMarkdown = await import("prettier/plugins/markdown");
+
+      const formattedContent = await prettier.format(selectedMemo.content, {
+        parser: "markdown",
+        plugins: [parserMarkdown],
+        proseWrap: "preserve",
+      });
+
+      // フォーマットされたコンテンツで状態を更新
+      setMemos((prevMemos: Memo[]) =>
+        prevMemos.map((memo: Memo) =>
+          memo.id === selectedMemoId
+            ? { ...memo, content: formattedContent.trim() }
+            : memo
+        )
+      );
+
+      // 既存のタイマーをキャンセル
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+
+      // 3秒後に自動保存
+      const timer = setTimeout(() => {
+        setMemos((currentMemos: Memo[]) => {
+          const currentMemo = currentMemos.find(
+            (memo: Memo) => memo.id === selectedMemoId
+          );
+          if (currentMemo) {
+            saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
+          }
+          return currentMemos;
+        });
+      }, 3000);
+      setAutoSaveTimer(timer);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Failed to format markdown"));
+    } finally {
+      setIsFormatting(false);
+    }
+  }, [selectedMemoId, selectedMemo, autoSaveTimer, saveMemo]);
+
   return (
     <div className="flex flex-col h-screen">
       {errorMessage && (
@@ -287,6 +339,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         saveStatus={saveStatus}
         layoutMode={layoutMode}
         onToggleLayout={handleToggleLayout}
+        onFormatMarkdown={handleFormatMarkdown}
+        isFormatting={isFormatting}
       />
       <Drawer
         memos={memos}

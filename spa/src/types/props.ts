@@ -167,9 +167,19 @@ export interface HeaderProps {
   isDrawerOpen: boolean;
 
   /**
+   * フォーマット中である場合はtrue、それ以外はfalse
+   */
+  isFormatting?: boolean;
+
+  /**
    * 現在のレイアウトモード
    */
   layoutMode: LayoutMode;
+
+  /**
+   * Markdownをフォーマットする関数
+   */
+  onFormatMarkdown: () => void;
 
   /**
    * レイアウトを切り替える関数

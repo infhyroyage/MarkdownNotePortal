@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import type { HeaderProps } from "../types/props";
+import FormatButton from "./FormatButton";
 import HamburgerMenuButton from "./HamburgerMenuButton";
 import LayoutToggleButton from "./LayoutToggleButton";
 import SaveStatusIcon from "./SaveStatusIcon";
@@ -16,7 +17,9 @@ export default function Header(props: HeaderProps): JSX.Element {
   const {
     hasSelectedMemo,
     isDrawerOpen,
+    isFormatting = false,
     layoutMode,
+    onFormatMarkdown,
     onToggleDrawer,
     onToggleLayout,
     onUpdateTitle,
@@ -41,9 +44,15 @@ export default function Header(props: HeaderProps): JSX.Element {
       </div>
       <div className="flex-none flex items-center">
         {hasSelectedMemo && (
-          <div className="flex-2 items-center px-3">
-            <SaveStatusIcon saveStatus={saveStatus} />
-          </div>
+          <>
+            <div className="flex-2 items-center px-3">
+              <SaveStatusIcon saveStatus={saveStatus} />
+            </div>
+            <FormatButton
+              onFormat={onFormatMarkdown}
+              isFormatting={isFormatting}
+            />
+          </>
         )}
         <LayoutToggleButton
           layoutMode={layoutMode}
