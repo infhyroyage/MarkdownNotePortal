@@ -38,26 +38,26 @@ export async function handler(
 
     const response = await dynamodb.send(new QueryCommand(queryParams));
 
-    // レスポンスの整形（フィルタリング用に一時的にcontentも含める）
+    // レスポンスの整形(フィルタリング用に一時的にcontentも含める)
     interface MemoListItemWithContent extends MemoListItem {
       content: string;
     }
 
-    let itemsWithContent: MemoListItemWithContent[] = (response.Items || []).map(
-      (item: DynamoDBItem) => {
-        const memoId = item.memo_id?.S || "";
-        const title = item.title?.S || "";
-        const content = item.content?.S || "";
-        const lastUpdatedAt = item.update_at?.S || item.create_at?.S || "";
+    let itemsWithContent: MemoListItemWithContent[] = (
+      response.Items || []
+    ).map((item: DynamoDBItem) => {
+      const memoId = item.memo_id?.S || "";
+      const title = item.title?.S || "";
+      const content = item.content?.S || "";
+      const lastUpdatedAt = item.update_at?.S || item.create_at?.S || "";
 
-        return {
-          memoId,
-          title,
-          content,
-          lastUpdatedAt,
-        };
-      }
-    );
+      return {
+        memoId,
+        title,
+        content,
+        lastUpdatedAt,
+      };
+    });
 
     // 検索文字列が指定されている場合、大文字小文字を区別せずにフィルタリング
     if (searchQuery) {
