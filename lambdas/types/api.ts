@@ -4,6 +4,7 @@
 export interface APIGatewayEvent {
   body?: string;
   pathParameters?: Record<string, string>;
+  queryStringParameters?: Record<string, string>;
   requestContext?: {
     authorizer?: {
       jwt?: {

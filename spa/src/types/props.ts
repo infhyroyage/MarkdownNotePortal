@@ -66,9 +66,19 @@ export interface DrawerProps {
   onDeleteMemo: (memoId: string) => Promise<void>;
 
   /**
+   * 検索関数
+   */
+  onSearch: (searchQuery: string) => void;
+
+  /**
    * メモを選択する関数
    */
   onSelectMemo: (memoId: string) => void;
+
+  /**
+   * 検索文字列
+   */
+  searchQuery: string;
 
   /**
    * 選択中のメモのID

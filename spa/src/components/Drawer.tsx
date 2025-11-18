@@ -19,12 +19,15 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     onAddMemo,
     onCloseDrawer,
     onDeleteMemo,
+    onSearch,
     onSelectMemo,
+    searchQuery,
     selectedMemoId,
   } = props;
 
   const [deleteMemoId, setDeleteMemoId] = useState<string | null>(null);
   const [, setCurrentTime] = useState(() => Date.now());
+  const [localSearchQuery, setLocalSearchQuery] = useState<string>(searchQuery);
 
   // 1秒おきに、すべてのDrawerMemoButtonを一斉に再レンダリングして、相対時間表示を更新
   useEffect(() => {
@@ -71,6 +74,10 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     setDeleteMemoId(null);
   }, []);
 
+  const handleSearchBlur = useCallback((): void => {
+    onSearch(localSearchQuery);
+  }, [localSearchQuery, onSearch]);
+
   // メモを最終更新日時の降順でソート
   const sortedMemos: Memo[] = useMemo(() => {
     return [...memos].sort((a: Memo, b: Memo) => {
@@ -100,6 +107,16 @@ export default function Drawer(props: DrawerProps): JSX.Element {
               className="w-full"
               onClick={onAddMemo}
               isLoading={isCreatingMemo}
+            />
+          </div>
+          <div className="p-2 border-b border-base-300">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="input input-bordered input-sm w-full"
+              value={localSearchQuery}
+              onChange={(e) => setLocalSearchQuery(e.target.value)}
+              onBlur={handleSearchBlur}
             />
           </div>
           <div className="flex-1 overflow-y-auto">
