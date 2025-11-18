@@ -124,7 +124,7 @@ describe("list_memos handler", () => {
     expect(body.items[0].lastUpdatedAt).toBe("2023-01-01T00:00:00.000Z");
   });
 
-  it("検索クエリが指定された場合、FilterExpressionが適用される", async () => {
+  it("検索クエリが指定された場合、contentも取得する", async () => {
     mockSend.mockResolvedValue({
       Items: [
         {
@@ -148,17 +148,16 @@ describe("list_memos handler", () => {
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
-          FilterExpression: "contains(title, :search) OR contains(content, :search)",
           ProjectionExpression: "memo_id, title, content, create_at, update_at",
-          ExpressionAttributeValues: expect.objectContaining({
-            ":search": { S: "Test" },
-          }),
         }),
       })
     );
+    const body = JSON.parse(response.body);
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0].memoId).toBe("memo-1");
   });
 
-  it("検索クエリが空文字の場合、FilterExpressionは適用されない", async () => {
+  it("検索クエリが空文字の場合、contentは取得しない", async () => {
     mockSend.mockResolvedValue({
       Items: [
         {
@@ -185,12 +184,108 @@ describe("list_memos handler", () => {
         }),
       })
     );
-    expect(mockSend).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: expect.not.objectContaining({
-          FilterExpression: expect.anything(),
-        }),
-      })
-    );
+  });
+
+  it("検索クエリでタイトルに一致するメモをフィルタリングする", async () => {
+    mockSend.mockResolvedValue({
+      Items: [
+        {
+          memo_id: { S: "memo-1" },
+          title: { S: "Test Title" },
+          content: { S: "Some Content" },
+          create_at: { S: "2023-01-01T00:00:00.000Z" },
+        },
+        {
+          memo_id: { S: "memo-2" },
+          title: { S: "Another Title" },
+          content: { S: "Other Content" },
+          create_at: { S: "2023-01-02T00:00:00.000Z" },
+        },
+      ],
+    });
+
+    const event: APIGatewayEvent = {
+      queryStringParameters: {
+        search: "Test",
+      },
+    };
+
+    const response = await handler(event);
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0].memoId).toBe("memo-1");
+  });
+
+  it("検索クエリでコンテンツに一致するメモをフィルタリングする", async () => {
+    mockSend.mockResolvedValue({
+      Items: [
+        {
+          memo_id: { S: "memo-1" },
+          title: { S: "Title 1" },
+          content: { S: "Special Content" },
+          create_at: { S: "2023-01-01T00:00:00.000Z" },
+        },
+        {
+          memo_id: { S: "memo-2" },
+          title: { S: "Title 2" },
+          content: { S: "Normal Content" },
+          create_at: { S: "2023-01-02T00:00:00.000Z" },
+        },
+      ],
+    });
+
+    const event: APIGatewayEvent = {
+      queryStringParameters: {
+        search: "Special",
+      },
+    };
+
+    const response = await handler(event);
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body.items).toHaveLength(1);
+    expect(body.items[0].memoId).toBe("memo-1");
+  });
+
+  it("検索クエリで大文字小文字を区別せずにフィルタリングする", async () => {
+    mockSend.mockResolvedValue({
+      Items: [
+        {
+          memo_id: { S: "memo-1" },
+          title: { S: "Test Title" },
+          content: { S: "test content" },
+          create_at: { S: "2023-01-01T00:00:00.000Z" },
+        },
+        {
+          memo_id: { S: "memo-2" },
+          title: { S: "Another Title" },
+          content: { S: "TEST CONTENT" },
+          create_at: { S: "2023-01-02T00:00:00.000Z" },
+        },
+        {
+          memo_id: { S: "memo-3" },
+          title: { S: "Normal Title" },
+          content: { S: "normal content" },
+          create_at: { S: "2023-01-03T00:00:00.000Z" },
+        },
+      ],
+    });
+
+    const event: APIGatewayEvent = {
+      queryStringParameters: {
+        search: "TEST",
+      },
+    };
+
+    const response = await handler(event);
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body.items).toHaveLength(2);
+    expect(body.items[0].memoId).toBe("memo-2");
+    expect(body.items[1].memoId).toBe("memo-1");
   });
 });
