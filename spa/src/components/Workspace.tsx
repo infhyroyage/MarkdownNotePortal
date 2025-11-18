@@ -21,6 +21,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     isCreatingMemo,
     layoutMode,
     isLoadingMemos,
+    isLoadingMemoDetail,
     onClickNewMemoButton,
     saveMemo,
     selectedMemo,
@@ -121,7 +122,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           layoutMode === "horizontal" ? "flex h-full" : "flex flex-col h-full"
         }
       >
-        {isLoadingMemos ? (
+        {isLoadingMemos || isLoadingMemoDetail ? (
           <div className="flex items-center justify-center w-full h-full">
             <span className="loading loading-spinner loading-lg"></span>
           </div>

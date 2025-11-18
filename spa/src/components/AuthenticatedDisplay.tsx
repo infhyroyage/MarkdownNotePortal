@@ -15,6 +15,8 @@ import Workspace from "./Workspace";
 export default function AuthenticatedDisplay(): JSX.Element {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [isLoadingMemos, setIsLoadingMemos] = useState<boolean>(true);
+  const [isLoadingMemoDetail, setIsLoadingMemoDetail] =
+    useState<boolean>(false);
   const [isCreatingMemo, setIsCreatingMemo] = useState<boolean>(false);
   const [isDeletingMemo, setIsDeletingMemo] = useState<boolean>(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
@@ -34,33 +36,30 @@ export default function AuthenticatedDisplay(): JSX.Element {
   );
 
   // メモ一覧を取得する関数
-  const loadMemos = useCallback(
-    async (search?: string): Promise<void> => {
-      try {
-        setIsLoadingMemos(true);
-        const response = await listMemos(search);
-        const fetchedMemos: Memo[] = response.items.map((item) => ({
-          id: item.memoId,
-          title: item.title,
-          content: "", // 一覧取得時はコンテンツを取得しない
-          lastUpdatedAt: item.lastUpdatedAt,
-        }));
-        setMemos(fetchedMemos);
+  const loadMemos = useCallback(async (search?: string): Promise<void> => {
+    try {
+      setIsLoadingMemos(true);
+      const response = await listMemos(search);
+      const fetchedMemos: Memo[] = response.items.map((item) => ({
+        id: item.memoId,
+        title: item.title,
+        content: "", // 一覧取得時はコンテンツを取得しない
+        lastUpdatedAt: item.lastUpdatedAt,
+      }));
+      setMemos(fetchedMemos);
 
-        // メモが存在する場合は最初のメモを選択
-        if (fetchedMemos.length > 0) {
-          setSelectedMemoId(fetchedMemos[0].id);
-        } else {
-          setSelectedMemoId(null);
-        }
-      } catch (error) {
-        setErrorMessage(getErrorMessage(error, "Failed to load memos"));
-      } finally {
-        setIsLoadingMemos(false);
+      // メモが存在する場合は最初のメモを選択
+      if (fetchedMemos.length > 0) {
+        setSelectedMemoId(fetchedMemos[0].id);
+      } else {
+        setSelectedMemoId(null);
       }
-    },
-    []
-  );
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Failed to load memos"));
+    } finally {
+      setIsLoadingMemos(false);
+    }
+  }, []);
 
   // 初回レンダリング時にメモ一覧を取得
   useEffect(() => {
@@ -81,6 +80,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
 
       // メモのコンテンツを取得
       try {
+        setIsLoadingMemoDetail(true);
         const { getMemo } = await import("../utils/api");
         const memoDetail = await getMemo(selectedMemoId);
         setMemos((currentMemos: Memo[]) =>
@@ -96,6 +96,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         );
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to load memo"));
+      } finally {
+        setIsLoadingMemoDetail(false);
       }
     })();
   }, [memos, selectedMemoId]);
@@ -305,6 +307,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         isCreatingMemo={isCreatingMemo}
         layoutMode={layoutMode}
         isLoadingMemos={isLoadingMemos}
+        isLoadingMemoDetail={isLoadingMemoDetail}
         onClickNewMemoButton={handleAddMemo}
         saveMemo={saveMemo}
         selectedMemo={selectedMemo}

@@ -287,6 +287,11 @@ export interface WorkspaceProps {
   isLoadingMemos: boolean;
 
   /**
+   * メモの詳細を取得中である場合はtrue、それ以外はfalse
+   */
+  isLoadingMemoDetail: boolean;
+
+  /**
    * New Memoボタンをクリックした時の処理
    */
   onClickNewMemoButton: () => void;
