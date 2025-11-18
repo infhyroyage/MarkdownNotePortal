@@ -1,6 +1,8 @@
 import type { JSX } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github.css";
 import type { WorkspacePreviewProps } from "../types/props";
 
 /**
@@ -24,7 +26,10 @@ export default function WorkspacePreview(
     >
       <div className="flex-1 overflow-auto">
         <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
             {markdownContent}
           </ReactMarkdown>
         </div>
