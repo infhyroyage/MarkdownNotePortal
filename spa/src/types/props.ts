@@ -138,6 +138,21 @@ export interface ErrorAlertProps {
 }
 
 /**
+ * フォーマットボタンを表示するコンポーネントのProps
+ */
+export interface FormatButtonProps {
+  /**
+   * フォーマット中である場合はtrue、それ以外はfalse
+   */
+  isFormatting?: boolean;
+
+  /**
+   * フォーマットボタンをクリックした時の処理
+   */
+  onFormat: () => void;
+}
+
+/**
  * ハンバーガーメニューボタンを表示するコンポーネントのProps
  */
 export interface HamburgerMenuButtonProps {
