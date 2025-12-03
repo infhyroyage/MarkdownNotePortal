@@ -9,6 +9,10 @@ on:
       - .github/workflows/reusable-build-and-deploy-spa.yaml
       - spa/**
 
+permissions:
+  id-token: write   # Required for requesting the OIDC JWT
+  contents: read    # Required for actions/checkout
+
 jobs:
   build-and-deploy:
     uses: ./.github/workflows/reusable-build-and-deploy-spa.yaml
