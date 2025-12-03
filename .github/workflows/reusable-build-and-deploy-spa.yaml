@@ -7,9 +7,7 @@ on:
         required: true
         type: string
     secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
+      AWS_ARN_IAM_ROLE_GITHUB_ACTIONS:
         required: true
 
 env:
@@ -36,8 +34,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: ap-northeast-1
 
       - name: Get CloudFormation Outputs

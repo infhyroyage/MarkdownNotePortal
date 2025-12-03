@@ -15,5 +15,4 @@ jobs:
     with:
       S3_SPA_BUCKET_NAME: ${{ vars.S3_SPA_BUCKET_NAME }}
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}

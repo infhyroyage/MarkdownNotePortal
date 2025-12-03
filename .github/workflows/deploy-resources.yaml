@@ -14,8 +14,7 @@ jobs:
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
 
   deploy-stack-waf:
     runs-on: ubuntu-latest
@@ -26,8 +25,7 @@ jobs:
       - name: Configure AWS Credentials for us-east-1
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: us-east-1
 
       - name: Deploy Stack with WAF
@@ -60,8 +58,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: ap-northeast-1
 
       - name: Deploy Stack without WAF
@@ -99,8 +96,7 @@ jobs:
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
 
   build-and-deploy-spa:
     needs: deploy-stack
@@ -108,5 +104,4 @@ jobs:
     with:
       S3_SPA_BUCKET_NAME: ${{ vars.S3_SPA_BUCKET_NAME }}
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
