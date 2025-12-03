@@ -8,6 +8,10 @@ on:
       - .github/workflows/deploy-resources.yaml
       - resources/**
 
+permissions:
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read # Required for actions/checkout
+
 jobs:
   build-lambdas:
     uses: ./.github/workflows/reusable-build-lambdas.yaml

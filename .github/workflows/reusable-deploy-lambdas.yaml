@@ -10,6 +10,10 @@ on:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS:
         required: true
 
+permissions:
+  id-token: write   # Required for requesting the OIDC JWT
+  contents: read    # Required for actions/checkout
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
