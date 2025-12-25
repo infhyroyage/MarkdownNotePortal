@@ -10,7 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.955.0",
+    "@aws-sdk/client-dynamodb": "^3.958.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
