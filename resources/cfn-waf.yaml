@@ -2,6 +2,13 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Markdown Memo Portal - WAF in us-east-1
 
 Resources:
+  # CloudWatch Logs(WAF Logging)
+  MkmemoportalWafLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: aws-waf-logs-mkmemoportal
+      RetentionInDays: 90
+
   # WAF
   MkmemoportalWaf:
     Type: AWS::WAFv2::WebACL
@@ -28,6 +35,13 @@ Resources:
         SampledRequestsEnabled: true
         CloudWatchMetricsEnabled: true
         MetricName: MkmemoportalWafMetric
+
+  MkmemoportalWafLoggingConfiguration:
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      ResourceArn: !GetAtt MkmemoportalWaf.Arn
+      LogDestinationConfigs:
+        - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:aws-waf-logs-mkmemoportal
 
 Outputs:
   WafWebAclArn:
