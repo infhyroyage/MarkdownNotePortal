@@ -56,7 +56,92 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
 
 以下の図は、システム全体のアーキテクチャを示している:
 
-![architecture.drawio](architecture.drawio.svg)
+```mermaid
+graph TB
+    subgraph Internet
+        User[ユーザー]
+    end
+
+    subgraph usEast1 [us-east-1]
+        WAF[AWS WAF<br/>Web ACL]
+        CWLogs[CloudWatch Logs<br/>WAFログ]
+        WAF -.ログ.-> CWLogs
+    end
+
+    subgraph apNortheast1 [ap-northeast-1]
+        subgraph Frontend
+            CloudFront[Amazon CloudFront<br/>CDN]
+            S3SPA[Amazon S3<br/>SPAバケット]
+            OAC[Origin Access Control]
+
+            CloudFront -->|OAC経由| S3SPA
+        end
+
+        subgraph Auth
+            Cognito[Amazon Cognito<br/>User Pool]
+            CognitoDomain[Cognito Hosted UI]
+            Cognito --- CognitoDomain
+        end
+
+        subgraph Backend
+            APIGW[API Gateway<br/>HTTP API]
+            Authorizer[Cognito<br/>Authorizer]
+
+            APIGW --- Authorizer
+
+            LambdaLayer[Lambda Layer<br/>共通ユーティリティ]
+
+            LambdaCreate[Lambda<br/>create-memo]
+            LambdaGet[Lambda<br/>get-memo]
+            LambdaList[Lambda<br/>list-memos]
+            LambdaUpdate[Lambda<br/>update-memo]
+            LambdaDelete[Lambda<br/>delete-memo]
+
+            LambdaCreate -.使用.-> LambdaLayer
+            LambdaGet -.使用.-> LambdaLayer
+            LambdaList -.使用.-> LambdaLayer
+            LambdaUpdate -.使用.-> LambdaLayer
+            LambdaDelete -.使用.-> LambdaLayer
+
+            DynamoDB[Amazon DynamoDB<br/>mkmemoportal-dynamodb<br/>PK: user_id, SK: memo_id]
+
+            APIGW -->|POST /memo| LambdaCreate
+            APIGW -->|GET /memo| LambdaList
+            APIGW -->|GET /memo/memoId| LambdaGet
+            APIGW -->|PUT /memo/memoId| LambdaUpdate
+            APIGW -->|DELETE /memo/memoId| LambdaDelete
+
+            LambdaCreate --> DynamoDB
+            LambdaGet --> DynamoDB
+            LambdaList --> DynamoDB
+            LambdaUpdate --> DynamoDB
+            LambdaDelete --> DynamoDB
+        end
+
+        subgraph IAM
+            LambdaRole[IAM Role<br/>Lambda実行ロール<br/>DynamoDB操作権限]
+        end
+
+        LambdaCreate -.使用.-> LambdaRole
+        LambdaGet -.使用.-> LambdaRole
+        LambdaList -.使用.-> LambdaRole
+        LambdaUpdate -.使用.-> LambdaRole
+        LambdaDelete -.使用.-> LambdaRole
+    end
+
+    User -->|1. アクセス| CloudFront
+    CloudFront -.WAF保護.-> WAF
+    User -->|2. ログイン| CognitoDomain
+    CognitoDomain -->|3. JWT発行| User
+    User -->|4. API呼び出し<br/>Authorization: Bearer JWT| APIGW
+    Authorizer -.JWT検証.-> Cognito
+
+    classDef awsService fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#232F3E
+    classDef userNode fill:#232F3E,stroke:#FF9900,stroke-width:2px,color:#FFFFFF
+
+    class CloudFront,S3SPA,Cognito,APIGW,LambdaCreate,LambdaGet,LambdaList,LambdaUpdate,LambdaDelete,DynamoDB,WAF,CWLogs awsService
+    class User userNode
+```
 
 ## 3. コア機能の実装詳細
 
