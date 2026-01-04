@@ -93,7 +93,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             const currentMemo = currentMemos.find(
               (memo: Memo) => memo.id === selectedMemoId
             );
-            if (currentMemo) {
+            if (currentMemo && currentMemo.content !== undefined) {
               saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
             }
             return currentMemos;
@@ -129,7 +129,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         ) : selectedMemo !== undefined ? (
           <>
             <WorkspaceEditor
-              markdownContent={selectedMemo.content}
+              markdownContent={selectedMemo.content ?? ""}
               onChange={handleMarkdownContentChange}
               layoutMode={layoutMode}
               widthPercent={editorWidthPercent}
@@ -145,7 +145,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               role="separator"
             />
             <WorkspacePreview
-              markdownContent={selectedMemo.content}
+              markdownContent={selectedMemo.content ?? ""}
               layoutMode={layoutMode}
               widthPercent={100 - editorWidthPercent}
             />
