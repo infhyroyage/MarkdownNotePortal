@@ -14,8 +14,9 @@ export interface Memo {
 
   /**
    * メモのコンテンツ
+   * 一覧取得時は undefined、詳細取得後に実際のコンテンツ（空文字列含む）が設定される
    */
-  content: string;
+  content: string | undefined;
 
   /**
    * 最終更新日時

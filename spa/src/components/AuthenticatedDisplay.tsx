@@ -44,7 +44,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       const fetchedMemos: Memo[] = response.items.map((item) => ({
         id: item.memoId,
         title: item.title,
-        content: "", // 一覧取得時はコンテンツを取得しない
+        content: undefined, // 一覧取得時はコンテンツを取得しない（詳細取得後に設定）
         lastUpdatedAt: item.lastUpdatedAt,
       }));
       setMemos(fetchedMemos);
@@ -74,10 +74,11 @@ export default function AuthenticatedDisplay(): JSX.Element {
       if (!selectedMemoId) return;
 
       // 既にメモのコンテンツを取得している場合はスキップ
+      // （content が undefined でなければ取得済み。空文字列も取得済みとして扱う）
       const existedMemo: Memo | undefined = memos.find(
         (memo: Memo) => memo.id === selectedMemoId
       );
-      if (existedMemo && existedMemo.content) return;
+      if (existedMemo && existedMemo.content !== undefined) return;
 
       // メモのコンテンツを取得
       try {
@@ -222,7 +223,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
             const currentMemo = currentMemos.find(
               (memo: Memo) => memo.id === selectedMemoId
             );
-            if (currentMemo) {
+            if (currentMemo && currentMemo.content !== undefined) {
               saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
             }
             return currentMemos;
@@ -276,7 +277,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
 
   // Markdownをフォーマットする関数
   const handleFormatMarkdown = useCallback(async (): Promise<void> => {
-    if (!selectedMemoId || !selectedMemo) return;
+    if (!selectedMemoId || !selectedMemo || selectedMemo.content === undefined)
+      return;
 
     try {
       setIsFormatting(true);
@@ -311,7 +313,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
           const currentMemo = currentMemos.find(
             (memo: Memo) => memo.id === selectedMemoId
           );
-          if (currentMemo) {
+          if (currentMemo && currentMemo.content !== undefined) {
             saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
           }
           return currentMemos;
