@@ -64,6 +64,9 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
    }
    ```
 5. 「許可を追加」画面で、以下の AWS 管理ポリシーを検索して選択し、「次へ」ボタンを押下する:
+   - AmazonAPIGatewayAdministrator: API Gateway のフルアクセス権限
+   - AmazonCognitoPowerUser: Cognito のフルアクセス権限
+   - AmazonDynamoDBFullAccess: DynamoDB のフルアクセス権限
    - AmazonS3FullAccess: S3 のフルアクセス権限
    - AWSCloudFormationFullAccess: CloudFormation のフルアクセス権限
    - AWSLambda_FullAccess: Lambda のフルアクセス権限
