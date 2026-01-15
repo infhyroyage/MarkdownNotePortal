@@ -7,6 +7,7 @@
 1. AWS アカウントを用意する。
 2. 当リポジトリで使用する以下の S3 バケット名をすべて決定する。
    - Lambda 関数のビルドアーティファクトを保存するバケット
+   - Lambda@Edge 関数のビルドアーティファクトを保存するバケット
    - SPA のビルドアーティファクトを保存するバケット
 3. Cognito Hosted UI でのログイン用に使用するユーザーのメールアドレス・パスワードをすべて決定する。
 4. 以下のツールを事前にインストールしておく:
@@ -88,11 +89,12 @@ Secrets タブから「New repository secret」ボタンを押下して、下記
 
 Variables タブから「New repository variable」ボタンを押下して、下記の通り変数をすべて設定する。
 
-| 変数名                      | 変数値                                                  |
-| --------------------------- | ------------------------------------------------------- |
-| S3_LAMBDA_BUCKET_NAME       | Lambda 関数のビルドアーティファクトを保存するバケット名 |
-| S3_SPA_BUCKET_NAME          | SPA のビルドアーティファクトを保存するバケット名        |
-| COGNITO_HOSTED_UI_SUBDOMAIN | Cognito Hosted UI のドメイン                            |
+| 変数名                      | 変数値                                                       |
+| --------------------------- | ------------------------------------------------------------ |
+| S3_LAMBDA_BUCKET_NAME       | Lambda 関数のビルドアーティファクトを保存するバケット名      |
+| S3_LAMBDA_EDGE_BUCKET_NAME  | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
+| S3_SPA_BUCKET_NAME          | SPA のビルドアーティファクトを保存するバケット名             |
+| COGNITO_HOSTED_UI_SUBDOMAIN | Cognito Hosted UI のドメイン                                 |
 
 ### 5. AWS リソースのデプロイ
 

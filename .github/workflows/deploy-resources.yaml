@@ -17,10 +17,12 @@ jobs:
     uses: ./.github/workflows/reusable-build-lambdas.yaml
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
+      S3_LAMBDA_EDGE_BUCKET_NAME: ${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
 
   deploy-stack-waf:
+    needs: build-lambdas
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,17 +34,20 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: us-east-1
 
-      - name: Deploy Stack with WAF
+      - name: Deploy Stack in us-east-1
         run: |
           aws cloudformation deploy \
             --template-file resources/cfn-waf.yaml \
             --stack-name mkmemoportal-stack-waf \
-            --region us-east-1
+            --region us-east-1 \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              S3LambdaEdgeBucketName=${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
 
-      - name: Describe Stack with WAF Events on Failure
+      - name: Describe Stack Events on Failure
         if: failure()
         run: |
-          echo "=== CloudFormation Stack with WAF Events (Recent) ==="
+          echo "=== CloudFormation Stack Events in us-east-1 (Recent) ==="
           aws cloudformation describe-stack-events \
             --stack-name mkmemoportal-stack-waf \
             --region us-east-1 \
@@ -65,12 +70,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: ap-northeast-1
 
-      - name: Deploy Stack without WAF
+      - name: Deploy Stack in ap-northeast-1
         run: |
           WAF_WEB_ACL_ARN=$(aws cloudformation describe-stacks \
             --stack-name mkmemoportal-stack-waf \
             --region us-east-1 \
             --query 'Stacks[0].Outputs[?OutputKey==`WafWebAclArn`].OutputValue' \
+            --output text)
+          LAMBDA_EDGE_VERSION_ARN=$(aws cloudformation describe-stacks \
+            --stack-name mkmemoportal-stack-waf \
+            --region us-east-1 \
+            --query 'Stacks[0].Outputs[?OutputKey==`LambdaEdgeViewerRequestVersionArn`].OutputValue' \
             --output text)
           aws cloudformation deploy \
             --template-file resources/cfn.yaml \
@@ -81,12 +91,13 @@ jobs:
               CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }} \
               S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }} \
               S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }} \
-              WafWebAclArn=${WAF_WEB_ACL_ARN}
+              WafWebAclArn=${WAF_WEB_ACL_ARN} \
+              LambdaEdgeViewerRequestVersionArn=${LAMBDA_EDGE_VERSION_ARN}
 
-      - name: Describe Stack without WAF Events on Failure
+      - name: Describe Stack Events on Failure (ap-northeast-1)
         if: failure()
         run: |
-          echo "=== CloudFormation Stack without WAF Events (Recent) ==="
+          echo "=== CloudFormation Stack Events in ap-northeast-1 (Recent) ==="
           aws cloudformation describe-stack-events \
             --stack-name mkmemoportal-stack \
             --region ap-northeast-1 \
@@ -99,6 +110,7 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-lambdas.yaml
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
+      S3_LAMBDA_EDGE_BUCKET_NAME: ${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
 

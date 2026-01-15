@@ -6,13 +6,16 @@ on:
       S3_LAMBDA_BUCKET_NAME:
         required: true
         type: string
+      S3_LAMBDA_EDGE_BUCKET_NAME:
+        required: true
+        type: string
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS:
         required: true
 
 permissions:
-  id-token: write   # Required for requesting the OIDC JWT
-  contents: read    # Required for actions/checkout
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read # Required for actions/checkout
 
 jobs:
   deploy:
@@ -85,3 +88,20 @@ jobs:
             --function-name mkmemoportal-lambda-update-memo \
             --layers $LAYER_ARN \
             --region ap-northeast-1
+
+      - name: Update Lambda@Edge Function Code
+        run: |
+          aws lambda update-function-code \
+            --function-name mkmemoportal-lambda-edge-viewer-request \
+            --s3-bucket ${{ inputs.S3_LAMBDA_EDGE_BUCKET_NAME }} \
+            --s3-key edge_viewer_request.zip \
+            --region us-east-1
+          aws lambda wait function-updated \
+            --function-name mkmemoportal-lambda-edge-viewer-request \
+            --region us-east-1
+
+      - name: Publish New Lambda@Edge Version
+        run: |
+          aws lambda publish-version \
+            --function-name mkmemoportal-lambda-edge-viewer-request \
+            --region us-east-1

@@ -8,6 +8,7 @@ const lambdaFunctions = [
   "get_memo",
   "list_memos",
   "update_memo",
+  "edge_viewer_request",
 ];
 
 export default defineConfig({
@@ -67,6 +68,7 @@ const __filename = fileURLToPath(import.meta.url);
               "get_memo",
               "update_memo",
               "delete_memo",
+              "edge_viewer_request",
               "layer/nodejs",
             ].forEach((dir: string) => {
               const targetPath: string = resolve(

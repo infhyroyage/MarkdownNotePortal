@@ -6,13 +6,16 @@ on:
       S3_LAMBDA_BUCKET_NAME:
         required: true
         type: string
+      S3_LAMBDA_EDGE_BUCKET_NAME:
+        required: true
+        type: string
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS:
         required: true
 
 permissions:
-  id-token: write   # Required for requesting the OIDC JWT
-  contents: read    # Required for actions/checkout
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read # Required for actions/checkout
 
 env:
   NODE_VERSION: "22"
@@ -69,6 +72,7 @@ jobs:
           zip -r ../../get_memo.zip get_memo/index.js get_memo/package.json assets layer/nodejs package.json
           zip -r ../../list_memos.zip list_memos/index.js list_memos/package.json assets layer/nodejs package.json
           zip -r ../../update_memo.zip update_memo/index.js update_memo/package.json assets layer/nodejs package.json
+          zip -r ../../edge_viewer_request.zip edge_viewer_request/index.js edge_viewer_request/package.json package.json
           cd layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
 
       - name: Configure AWS Credentials
@@ -91,3 +95,13 @@ jobs:
           aws s3 cp list_memos.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/list_memos.zip --region ap-northeast-1
           aws s3 cp update_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/update_memo.zip --region ap-northeast-1
           aws s3 cp layer.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/layer.zip --region ap-northeast-1
+
+      - name: Create S3 Bucket for Lambda@Edge if Not Exists
+        run: |
+          if ! aws s3 ls s3://${{ inputs.S3_LAMBDA_EDGE_BUCKET_NAME }} --region us-east-1 > /dev/null 2>&1; then
+            aws s3 mb s3://${{ inputs.S3_LAMBDA_EDGE_BUCKET_NAME }} --region us-east-1
+          fi
+
+      - name: Upload Lambda@Edge Artifact to us-east-1
+        run: |
+          aws s3 cp edge_viewer_request.zip s3://${{ inputs.S3_LAMBDA_EDGE_BUCKET_NAME }}/edge_viewer_request.zip --region us-east-1

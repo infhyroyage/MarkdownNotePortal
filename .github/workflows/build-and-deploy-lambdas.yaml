@@ -11,14 +11,15 @@ on:
       - lambdas/**
 
 permissions:
-  id-token: write   # Required for requesting the OIDC JWT
-  contents: read    # Required for actions/checkout
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read # Required for actions/checkout
 
 jobs:
   build:
     uses: ./.github/workflows/reusable-build-lambdas.yaml
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
+      S3_LAMBDA_EDGE_BUCKET_NAME: ${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
 
@@ -27,5 +28,6 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-lambdas.yaml
     with:
       S3_LAMBDA_BUCKET_NAME: ${{ vars.S3_LAMBDA_BUCKET_NAME }}
+      S3_LAMBDA_EDGE_BUCKET_NAME: ${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
     secrets:
       AWS_ARN_IAM_ROLE_GITHUB_ACTIONS: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
