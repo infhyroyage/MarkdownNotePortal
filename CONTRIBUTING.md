@@ -18,8 +18,8 @@
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
 - ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、フロントエンド・バックエンドの AWS リソースを統合的に定義する、以下の CloudFormation テンプレートファイルを使用する。
-  - **`resources/cfn.yaml`**: Lambda 関数のビルドアーティファクトを保存するバケット、AWS WAF 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
-  - **`resources/cfn-waf.yaml`**: AWS WAF のみを us-east-1 リージョンで定義
+  - **`resources/cfn_ap-northeast-1.yaml`**: AWS WAF/Lambda@Edge 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
+  - **`resources/cfn_us-east-1.yaml`**: AWS WAF/Lambda@Edge を us-east-1 リージョンで定義
 - GitHub Actions と連携して CloudFormation スタックの構築・更新を行い、AWS リソースの継続的デプロイを行う。この GitHub Actions ワークフローは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
 - AWS Lambda 関数間で共通する処理は Lambda レイヤーとして lambdas/layer に実装し、コードの重複を避ける。
 - AWS Lambda 関数の型定義は lambdas/types に集約し、型安全性を確保する。

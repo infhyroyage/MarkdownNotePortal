@@ -50,9 +50,9 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
 | `mkmemoportal-lambda-get-memo`            | AWS Lambda         | ap-northeast-1 | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`          | AWS Lambda         | ap-northeast-1 | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo`         | AWS Lambda         | ap-northeast-1 | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda@Edge    | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
-| `mkmemoportal-stack`                      | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
-| `mkmemoportal-stack`                      | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
+| `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda         | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
+| `mkmemoportal-stack-ap-northeast-1`       | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
+| `mkmemoportal-stack-us-east-1`            | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
 | `mkmemoportal-waf`                        | AWS WAF            | us-east-1      | CloudFront ディストリビューションにアタッチする Web ACL        |
 
 ### 2.3 AWS アーキテクチャー図

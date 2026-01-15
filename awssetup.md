@@ -132,7 +132,7 @@ aws cognito-idp admin-set-user-password \
 
 ```bash
 aws cloudformation describe-stacks \
-  --stack-name mkmemoportal-stack \
+  --stack-name mkmemoportal-stack-ap-northeast-1 \
   --query "Stacks[0].Outputs[?OutputKey=='MarkdownMemoPortalUrl'].OutputValue" \
   --output text
 ```
@@ -163,7 +163,8 @@ aws cloudformation describe-stacks \
 5. 3 のターミナルで以下のコマンドを実行し、CloudFormation テンプレートでデプロイしたスタックを削除する:
 
    ```bash
-   aws cloudformation delete-stack --stack-name mkmemoportal-stack
+   aws cloudformation delete-stack --stack-name mkmemoportal-stack-ap-northeast-1 --region ap-northeast-1
+   aws cloudformation delete-stack --stack-name mkmemoportal-stack-us-east-1 --region us-east-1
    ```
 
 6. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:

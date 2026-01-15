@@ -48,7 +48,7 @@ Resources:
       LogDestinationConfigs:
         - !GetAtt MkmemoportalWafLogGroup.Arn
 
-  # Lambda@Edge IAM Role
+  # IAM Role
   MkmemoportalIAMRoleLambdaEdge:
     Type: AWS::IAM::Role
     Properties:
@@ -66,7 +66,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
-  # Lambda@Edge Function
+  # Lambda Functions(Lambda@Edge)
   MkmemoportalLambdaEdgeViewerRequest:
     Type: AWS::Lambda::Function
     Properties:
