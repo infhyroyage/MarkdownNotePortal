@@ -70,6 +70,7 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
    - AWSWAFFullAccess: WAF のフルアクセス権限
    - CloudFrontFullAccess: CloudFront のフルアクセス権限
    - CloudWatchLogsFullAccess: CloudWatch Logs のフルアクセス権限
+   - IAMFullAccess: IAM のフルアクセス権限
 6. 「ロール名」に任意の IAM ロール名を入力し、「ロールを作成」ボタンを押下して、IAM ロールを作成する。
 7. ロールの一覧から作成した IAM ロールを選択し、ロールの ARN(`arn:aws:iam::(AWSアカウントID):role/(IAMロール名)`)を手元に控える。
 
