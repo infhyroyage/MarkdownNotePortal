@@ -160,6 +160,7 @@ aws cloudformation describe-stacks \
 
    ```bash
    aws s3 rm s3://{Lambda関数のビルドアーティファクトを保存するバケット名} --recursive
+   aws s3 rm s3://{Lambda@Edge関数のビルドアーティファクトを保存するバケット名} --recursive
    aws s3 rm s3://{SPAのビルドアーティファクトを保存するバケット名} --recursive
    ```
 
