@@ -68,6 +68,7 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
    - AmazonCognitoPowerUser: Cognito のフルアクセス権限
    - AmazonDynamoDBFullAccess: DynamoDB のフルアクセス権限
    - AmazonS3FullAccess: S3 のフルアクセス権限
+   - AWSBackupFullAccess: AWS Backup のフルアクセス権限
    - AWSCloudFormationFullAccess: CloudFormation のフルアクセス権限
    - AWSLambda_FullAccess: Lambda のフルアクセス権限
    - AWSWAFFullAccess: WAF のフルアクセス権限
@@ -139,6 +140,38 @@ aws cloudformation describe-stacks \
   --query "Stacks[0].Outputs[?OutputKey=='MarkdownMemoPortalUrl'].OutputValue" \
   --output text
 ```
+
+## バックアップ復旧手順
+
+以下の手順により、 DynamoDB テーブル `mkmemoportal-dynamodb` のバックアップから、別の新しい DynamoDB テーブルとして復旧する。復元が完了したら、復元したテーブルのデータを DynamoDB テーブル`mkmemoportal-dynamodb`にマイグレーションすること。
+
+1. 復元対象のリカバリポイント ARN を確認する:
+
+   ```bash
+   aws backup list-recovery-points-by-backup-vault \
+     --backup-vault-name mkmemoportal-backup-vault \
+     --query "RecoveryPoints[].{ARN:RecoveryPointArn,Created:CreationDate}" \
+     --output table
+   ```
+
+2. バックアップから新しい DynamoDB テーブルに復元する:
+
+   ```bash
+   aws backup start-restore-job \
+     --recovery-point-arn {確認したリカバリポイントARN} \
+     --iam-role-arn arn:aws:iam::{AWSアカウントID}:role/mkmemoportal-iam-role-backup \
+     --metadata '{"targetTableName":"{新しいDynamoDBテーブル名}","encryptionType":"Default"}' \
+     --region ap-northeast-1
+   ```
+
+3. 復元が完了するまで、復元ジョブのステータスを繰り返し確認する:
+
+   ```bash
+   aws backup list-restore-jobs \
+     --by-resource-type DynamoDB \
+     --query "RestoreJobs[0].{JobId:RestoreJobId,Status:Status,Created:CreationDate}" \
+     --output table
+   ```
 
 ## 削除手順
 

@@ -23,6 +23,7 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
   - Amazon Cognito (ユーザープールによる認証機能の提供)
   - Amazon DynamoDB (保存したメモの管理)
   - Amazon S3 (フロントエンド・バックエンドのビルドアーティファクト格納)
+  - AWS Backup (バックアップ管理)
   - AWS CloudFormation (スタック管理)
   - AWS IAM (権限管理)
   - AWS Lambda (バックエンドのロジック実装)
@@ -50,7 +51,7 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
 | `mkmemoportal-lambda-get-memo`            | AWS Lambda         | ap-northeast-1 | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`          | AWS Lambda         | ap-northeast-1 | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo`         | AWS Lambda         | ap-northeast-1 | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
-| `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda         | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
+| `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda@Edge    | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
 | `mkmemoportal-stack-ap-northeast-1`       | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
 | `mkmemoportal-stack-us-east-1`            | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
 | `mkmemoportal-waf`                        | AWS WAF            | us-east-1      | CloudFront ディストリビューションにアタッチする Web ACL        |
@@ -125,7 +126,15 @@ API Gateway には Cognito User Pool オーソライザーが設定されてお�
 - [GET] /memo: `user_id`を指定して Query の DynamoDB API を実行して、特定のユーザーでのすべてのメモを取得。
 - [GET] /memo/{memoId}: `user_id` と `memo_id` を組み合わせて指定して GetItem の DynamoDB API を実行して、特定のユーザーでの特定のメモを取得
 
-### 3.4 UI/UX 設計
+## 3.4 DynamoDB テーブルのバックアップ
+
+DynamoDB テーブル `mkmemoportal-dynamodb` は、自身の削除に伴うメモのデータの喪失に備え、 DynamoDB の PITR 機能ではなく AWS Backup で、以下の通り日次バックアップを取得する。
+
+- **スケジュール**: 毎日 UTC 18:00(日本時間3:00)
+- **保持期間**: 3 日間
+- **保存先**: AWS Backup Vault `mkmemoportal-backup-vault`
+
+### 3.5 UI/UX 設計
 
 レスポンシブデザインに対応した Web アプリケーションを実現するために、Tailwind CSS によるモバイルファースト設計を採用する。
 Tailwind CSS ベースな UI を統一的に提供するために、daisyUI を採用する。
