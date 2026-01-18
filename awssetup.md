@@ -63,20 +63,101 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
      ]
    }
    ```
-5. 「許可を追加」画面で、以下の AWS 管理ポリシーを検索して選択し、「次へ」ボタンを押下する:
-   - AmazonAPIGatewayAdministrator: API Gateway のフルアクセス権限
-   - AmazonCognitoPowerUser: Cognito のフルアクセス権限
-   - AmazonDynamoDBFullAccess: DynamoDB のフルアクセス権限
-   - AmazonS3FullAccess: S3 のフルアクセス権限
-   - AWSBackupFullAccess: AWS Backup のフルアクセス権限
-   - AWSCloudFormationFullAccess: CloudFormation のフルアクセス権限
-   - AWSLambda_FullAccess: Lambda のフルアクセス権限
-   - AWSWAFFullAccess: WAF のフルアクセス権限
-   - CloudFrontFullAccess: CloudFront のフルアクセス権限
-   - CloudWatchLogsFullAccess: CloudWatch Logs のフルアクセス権限
-   - IAMFullAccess: IAM のフルアクセス権限
+5. 「許可を追加」画面では、何も選択せずに「次へ」ボタンを押下する。
 6. 「ロール名」に任意の IAM ロール名を入力し、「ロールを作成」ボタンを押下して、IAM ロールを作成する。
-7. ロールの一覧から作成した IAM ロールを選択し、ロールの ARN(`arn:aws:iam::(AWSアカウントID):role/(IAMロール名)`)を手元に控える。
+7. ロールの一覧から作成した IAM ロールを選択し、「許可を追加」>「インラインポリシーを作成」を押下する。
+8. 「JSON」タブを選択し、以下の JSON を入力して「次へ」ボタンを押下する:
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Sid": "APIGateway",
+         "Effect": "Allow",
+         "Action": "apigateway:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "Backup",
+         "Effect": "Allow",
+         "Action": [
+            "backup:*",
+            "backup-storage:*"
+          ],
+         "Resource": "*"
+       },
+       {
+         "Sid": "CloudFormation",
+         "Effect": "Allow",
+         "Action": "cloudformation:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "CloudFront",
+         "Effect": "Allow",
+         "Action": "cloudfront:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "CloudWatchLogs",
+         "Effect": "Allow",
+         "Action": "logs:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "Cognito",
+         "Effect": "Allow",
+         "Action": [
+           "cognito-idp:*",
+           "cognito-identity:*"
+         ],
+         "Resource": "*"
+       },
+       {
+         "Sid": "DynamoDB",
+         "Effect": "Allow",
+         "Action": "dynamodb:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "IAM",
+         "Effect": "Allow",
+         "Action": "iam:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "KMS",
+         "Effect": "Allow",
+         "Action": "kms:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "Lambda",
+         "Effect": "Allow",
+         "Action": "lambda:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "S3",
+         "Effect": "Allow",
+         "Action": "s3:*",
+         "Resource": "*"
+       },
+       {
+         "Sid": "WAF",
+         "Effect": "Allow",
+         "Action": [
+           "wafv2:*",
+           "waf:*",
+           "waf-regional:*"
+         ],
+         "Resource": "*"
+       }
+     ]
+   }
+   ```
+9. 「ポリシー名」に任意の IAM ポリシー名を入力し、「ポリシーの作成」ボタンを押下する。
+10. ロールの ARN(`arn:aws:iam::(AWSアカウントID):role/(IAMロール名)`)を手元に控える。
 
 ### 4. GitHub Actions 用シークレット・変数設定
 
