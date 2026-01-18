@@ -119,12 +119,49 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
          "Action": "dynamodb:*",
          "Resource": "*"
        },
-       {
-         "Sid": "IAM",
-         "Effect": "Allow",
-         "Action": "iam:*",
-         "Resource": "*"
-       },
+      {
+        "Sid": "IAMRoleManagement",
+        "Effect": "Allow",
+        "Action": [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:UpdateRole",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy"
+        ],
+        "Resource": [
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-backup",
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-lambda",
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-lambda-edge"
+        ]
+      },
+      {
+        "Sid": "IAMPassRole",
+        "Effect": "Allow",
+        "Action": "iam:PassRole",
+        "Resource": [
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-backup",
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-lambda",
+          "arn:aws:iam::*:role/mkmemoportal-iam-role-lambda-edge"
+        ],
+        "Condition": {
+          "StringEquals": {
+            "iam:PassedToService": [
+              "lambda.amazonaws.com",
+              "edgelambda.amazonaws.com",
+              "backup.amazonaws.com"
+            ]
+          }
+        }
+      },
        {
          "Sid": "KMS",
          "Effect": "Allow",
