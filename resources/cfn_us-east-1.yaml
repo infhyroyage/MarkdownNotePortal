@@ -65,6 +65,17 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: mkmemoportal-ssm-parameter-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource:
+                  - !Sub arn:aws:ssm:ap-northeast-1:${AWS::AccountId}:parameter/mkmemoportal/*
 
   # Lambda Functions(Lambda@Edge)
   MkmemoportalLambdaEdgeViewerRequest:

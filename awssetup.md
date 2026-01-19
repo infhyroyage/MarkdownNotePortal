@@ -181,6 +181,12 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
          "Resource": "*"
        },
        {
+         "Sid": "SSM",
+         "Effect": "Allow",
+         "Action": "ssm:*",
+         "Resource": "*"
+       },
+       {
          "Sid": "WAF",
          "Effect": "Allow",
          "Action": [

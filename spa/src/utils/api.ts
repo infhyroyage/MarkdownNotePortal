@@ -5,12 +5,28 @@ import type {
   ListMemosResponse,
   UpdateMemoResponse,
 } from "../types/api";
-import { SESSION_STORAGE_KEY_ACCESS_TOKEN } from "./const";
+import { COOKIE_NAME_ACCESS_TOKEN } from "./const";
 
 /**
  * API Gatewayのエンドポイント
  */
 const API_ENDPOINT: string = import.meta.env.VITE_API_ENDPOINT;
+
+/**
+ * Cookieから指定した名前の値を取得する
+ * @param {string} name Cookie名
+ * @returns {string | null} Cookie値(存在しない場合はnull)
+ */
+function getCookie(name: string): string | null {
+  const cookies = document.cookie.split(";");
+  for (const cookie of cookies) {
+    const [cookieName, ...valueParts] = cookie.trim().split("=");
+    if (cookieName === name) {
+      return valueParts.join("=");
+    }
+  }
+  return null;
+}
 
 /**
  * リクエストの共通設定を取得する
@@ -27,10 +43,8 @@ function getRequestConfig(): AxiosRequestConfig {
     // AWS環境の場合、API Gatewayのエンドポイントを設定
     config.baseURL = API_ENDPOINT;
 
-    // AWS環境の場合、アクセストークンをAuthorizationヘッダーに付与
-    const accessToken = sessionStorage.getItem(
-      SESSION_STORAGE_KEY_ACCESS_TOKEN
-    );
+    // AWS環境の場合、CookieからアクセストークンをAuthorizationヘッダーに付与
+    const accessToken: string | null = getCookie(COOKIE_NAME_ACCESS_TOKEN);
     if (accessToken) {
       config.headers = {
         ...config.headers,

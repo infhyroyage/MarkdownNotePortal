@@ -71,10 +71,11 @@ Amazon Cognito ユーザープールを用いて、以下の方式により認�
 - Cognito Hosted UI を用いた Authorization Code (PKCE) フローでのサインイン方式を採用する。
 - Cognito Hosted UI・SPA でのセルフサインアップは無効化し、サインアップは初期セットアップ時に管理者が手動登録する運用とする。
 - ログインページは Cognito Hosted UI を採用し、ログイン成功後に CloudFront から配信された SPA のルートページにコールバックする。
-- ログイン成功時に取得するアクセストークンはブラウザの Session Storage で管理し、アクセストークンの有効期限は 60 分とする。
-- SPA のルートページの遷移時に、アクセストークンが有効かどうかチェックし、有効でない場合は Cognito Hosted UI のログインページにリダイレクトする。
-- SPA からの API 呼び出しには、 `Authorization` ヘッダーにアクセストークン付与を必須とすることで、API の認証を行う。API の認証に失敗した場合は、Cognito Hosted UI のログインページにリダイレクトする。
-- SPA からサインアウトを行うことができ、サインアウト後は Cognito Hosted UI のログインページにリダイレクトする。
+- 認証処理は CloudFront のビューワーリクエストに関連付けた Lambda@Edge で、AWS Systems Manager Parameter Store からパラメーターを取得しながら実行する。
+- ログイン成功時に取得するアクセストークンはブラウザの Cookie で管理し、アクセストークンの有効期限は 60 分とする。
+- CloudFront へのリクエスト時に、Lambda@Edge がアクセストークンの有効性をチェックし、有効でない場合は Cognito Hosted UI のログインページにリダイレクトする。
+- SPA からの API 呼び出しには、Cookie から取得したアクセストークンを `Authorization` ヘッダーに付与することで、API の認証を行う。API の認証に失敗した場合は、Cognito Hosted UI のログインページにリダイレクトする。
+- SPA からサインアウトを行うことができ、サインアウト時は Lambda@Edge がログアウト処理(Cookie 削除と Cognito ログアウトページへのリダイレクト)を行う。
 
 なお、ローカル環境の場合、認証・認可は何も行わず、`Authorization` ヘッダーによる API の認証も何も行わない。
 

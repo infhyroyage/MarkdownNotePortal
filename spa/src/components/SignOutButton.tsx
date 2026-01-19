@@ -1,15 +1,14 @@
 import type { JSX } from "react";
 import { useCallback } from "react";
-import { getLogoutUrl } from "../utils/auth";
 
 /**
  * ログアウトボタンを表示するコンポーネント
  * @returns {JSX.Element} ログアウトボタンを表示するコンポーネント
  */
 export default function SignOutButton(): JSX.Element {
-  // ログアウトボタン押下時に、Cognito Hosted UIのログアウトページにリダイレクト
+  // ログアウトボタン押下時に、Lambda@Edgeのログアウト処理にリダイレクト
   const onClickLogout = useCallback(() => {
-    window.location.href = getLogoutUrl();
+    window.location.href = `${window.location.origin}/?logout=true`;
   }, []);
 
   return (

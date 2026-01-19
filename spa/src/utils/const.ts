@@ -1,3 +1,10 @@
+
+/**
+ * アクセストークンを保存するCookie名
+ * Lambda@Edgeで設定されるCookieと同じ名前
+ */
+export const COOKIE_NAME_ACCESS_TOKEN: string = "mkmemoportal_access_token";
+
 /**
  * メモのコンテンツの初期値
  */
@@ -55,15 +62,3 @@ Start editing to see your changes!
  * メモのタイトルの初期値
  */
 export const DEFAULT_MEMO_TITLE: string = "Initial Memo";
-
-/**
- * アクセストークンをSession Storageに保存するためのキー
- */
-export const SESSION_STORAGE_KEY_ACCESS_TOKEN: string =
-  "mkmemoportal_access_token";
-
-/**
- * PKCEフロー用のcode_verifierをSession Storageに保存するためのキー
- */
-export const SESSION_STORAGE_KEY_CODE_VERIFIER: string =
-  "mkmemoportal_pkce_code_verifier";

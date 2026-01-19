@@ -192,6 +192,31 @@ Resources:
       Domain: !Ref CognitoHostedUISubDomain
       UserPoolId: !Ref MkmemoportalCognito
 
+  # SSM Parameter Store
+  MkmemoportalSsmCognitoClientId:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mkmemoportal/cognito/client_id
+      Type: String
+      Value: !Ref MkmemoportalCognitoClient
+      Description: Cognito User Pool Client ID
+
+  MkmemoportalSsmCognitoDomain:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mkmemoportal/cognito/domain
+      Type: String
+      Value: !Sub ${CognitoHostedUISubDomain}.auth.${AWS::Region}.amazoncognito.com
+      Description: Cognito Hosted UI Domain
+
+  MkmemoportalSsmCloudfrontDomain:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /mkmemoportal/cloudfront/domain
+      Type: String
+      Value: !GetAtt MkmemoportalCloudfront.DomainName
+      Description: CloudFront Domain
+
   # CloudFront
   MkmemoportalCloudfrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
@@ -226,13 +251,16 @@ Resources:
             - GET
             - HEAD
           ForwardedValues:
-            QueryString: false
+            QueryString: true
             Cookies:
-              Forward: none
+              Forward: whitelist
+              WhitelistedNames:
+                - mkmemoportal_access_token
+                - mkmemoportal_code_verifier
           Compress: true
           MinTTL: 0
-          DefaultTTL: 86400
-          MaxTTL: 31536000
+          DefaultTTL: 0
+          MaxTTL: 0
           LambdaFunctionAssociations:
             - EventType: viewer-request
               LambdaFunctionARN: !Ref LambdaEdgeViewerRequestVersionArn
