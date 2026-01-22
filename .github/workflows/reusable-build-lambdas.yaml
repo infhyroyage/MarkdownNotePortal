@@ -72,7 +72,7 @@ jobs:
           zip -r ../../get_memo.zip get_memo/index.js get_memo/package.json assets layer/nodejs package.json
           zip -r ../../list_memos.zip list_memos/index.js list_memos/package.json assets layer/nodejs package.json
           zip -r ../../update_memo.zip update_memo/index.js update_memo/package.json assets layer/nodejs package.json
-          zip -r ../../edge_viewer_request.zip edge_viewer_request/index.js edge_viewer_request/package.json package.json
+          zip -r ../../edge_viewer_request.zip edge_viewer_request/index.js edge_viewer_request/package.json assets package.json
           cd layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
 
       - name: Configure AWS Credentials

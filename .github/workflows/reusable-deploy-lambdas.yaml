@@ -101,7 +101,37 @@ jobs:
             --region us-east-1
 
       - name: Publish New Lambda@Edge Version
+        id: publish_lambda_edge
         run: |
-          aws lambda publish-version \
+          NEW_VERSION_ARN=$(aws lambda publish-version \
             --function-name mkmemoportal-lambda-edge-viewer-request \
-            --region us-east-1
+            --region us-east-1 \
+            --query 'FunctionArn' \
+            --output text)
+          echo "new_version_arn=$NEW_VERSION_ARN" >> $GITHUB_OUTPUT
+
+      - name: Get CloudFront Distribution ID
+        id: get_cloudfront_id
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name mkmemoportal-stack-ap-northeast-1 \
+            --region ap-northeast-1 \
+            --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' \
+            --output text)
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Update CloudFront Distribution
+        env:
+          DISTRIBUTION_ID: ${{ steps.get_cloudfront_id.outputs.distribution_id }}
+          NEW_VERSION_ARN: ${{ steps.publish_lambda_edge.outputs.new_version_arn }}
+        run: |
+          DISTRIBUTION_CONFIG=$(aws cloudfront get-distribution-config \
+            --id "$DISTRIBUTION_ID" \
+            --output json)
+          ETAG=$(echo "$DISTRIBUTION_CONFIG" | jq -r '.ETag')
+          UPDATED_DISTRIBUTION_CONFIG=$(echo "$DISTRIBUTION_CONFIG" | jq --arg ARN "$NEW_VERSION_ARN" \
+            '.DistributionConfig.DefaultCacheBehavior.LambdaFunctionAssociations.Items[0].LambdaFunctionARN = $ARN | .DistributionConfig')
+          aws cloudfront update-distribution \
+            --id "$DISTRIBUTION_ID" \
+            --distribution-config "$UPDATED_DISTRIBUTION_CONFIG" \
+            --if-match "$ETAG"
