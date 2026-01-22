@@ -62,17 +62,17 @@ jobs:
             --output text \
             --region ap-northeast-1)
 
-          echo "VITE_API_ENDPOINT=$API_ENDPOINT" >> $GITHUB_ENV
-          echo "VITE_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" >> $GITHUB_ENV
-          echo "VITE_COGNITO_DOMAIN=$COGNITO_DOMAIN" >> $GITHUB_ENV
+          echo "VITE_API_ENDPOINT=$API_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "VITE_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "VITE_COGNITO_DOMAIN=$COGNITO_DOMAIN" >> $GITHUB_OUTPUT
 
       - name: Build SPA
         working-directory: spa
         run: npm run build
         env:
-          VITE_API_ENDPOINT: ${{ env.VITE_API_ENDPOINT }}
-          VITE_COGNITO_CLIENT_ID: ${{ env.VITE_COGNITO_CLIENT_ID }}
-          VITE_COGNITO_DOMAIN: ${{ env.VITE_COGNITO_DOMAIN }}
+          VITE_API_ENDPOINT: ${{ steps.cfn-outputs.outputs.VITE_API_ENDPOINT }}
+          VITE_COGNITO_CLIENT_ID: ${{ steps.cfn-outputs.outputs.VITE_COGNITO_CLIENT_ID }}
+          VITE_COGNITO_DOMAIN: ${{ steps.cfn-outputs.outputs.VITE_COGNITO_DOMAIN }}
 
       - name: Upload SPA Artifacts
         run: |
