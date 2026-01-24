@@ -1,7 +1,14 @@
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LayoutMode, Memo, SaveStatus } from "../types/state";
-import { getErrorMessage, listMemos } from "../utils/api";
+import {
+  createMemo,
+  deleteMemo,
+  getErrorMessage,
+  getMemo,
+  listMemos,
+  updateMemo,
+} from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
@@ -83,7 +90,6 @@ export default function AuthenticatedDisplay(): JSX.Element {
       // メモのコンテンツを取得
       try {
         setIsLoadingMemoDetail(true);
-        const { getMemo } = await import("../utils/api");
         const memoDetail = await getMemo(selectedMemoId);
         setMemos((currentMemos: Memo[]) =>
           currentMemos.map((memo: Memo) =>
@@ -109,7 +115,6 @@ export default function AuthenticatedDisplay(): JSX.Element {
     async (memoId: string, title: string, content: string): Promise<void> => {
       try {
         setSaveStatus("saving");
-        const { updateMemo } = await import("../utils/api");
         const response = await updateMemo(memoId, title, content);
 
         // メモの最終更新日時を更新
@@ -149,7 +154,6 @@ export default function AuthenticatedDisplay(): JSX.Element {
     try {
       setIsCreatingMemo(true);
       // メモを作成
-      const { createMemo } = await import("../utils/api");
       const newMemo = await createMemo(
         DEFAULT_MEMO_TITLE,
         DEFAULT_MEMO_CONTENT
@@ -178,7 +182,6 @@ export default function AuthenticatedDisplay(): JSX.Element {
       try {
         setIsDeletingMemo(true);
         // メモを削除
-        const { deleteMemo } = await import("../utils/api");
         await deleteMemo(memoId);
 
         // メモの状態を更新
