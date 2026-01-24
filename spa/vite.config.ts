@@ -72,7 +72,7 @@ const readRequestBody = (req: IncomingMessage): Promise<string> => {
 const lambdaProxyMiddleware = (
   req: IncomingMessage,
   res: ServerResponse,
-  next: () => void
+  next: () => void,
 ) => {
   // Lambda関数で処理するパス以外は、Lambda関数にプロキシせず、次のミドルウェアにそのまま処理を渡す
   const urlString: string = req.url || "";
@@ -135,7 +135,7 @@ const lambdaProxyMiddleware = (
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
       // Lambda関数のレスポンスをHTTPレスポンスに変換
@@ -155,7 +155,7 @@ const lambdaProxyMiddleware = (
           JSON.stringify({
             message: "Internal proxy error",
             details: error instanceof Error ? error.message : String(error),
-          })
+          }),
         );
       }
     }
@@ -192,6 +192,18 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  // 大きなサイズのライブラリ(React Router、axios、daisyui)を個別チャンクに分割
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-axios": ["axios"],
+          "vendor-daisyui": ["daisyui"],
+        },
+      },
     },
   },
 });

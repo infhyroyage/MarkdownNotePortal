@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useState,
@@ -9,7 +11,9 @@ import type { WorkspaceProps } from "../types/props";
 import type { Memo } from "../types/state";
 import NewMemoButton from "./NewMemoButton";
 import WorkspaceEditor from "./WorkspaceEditor";
-import WorkspacePreview from "./WorkspacePreview";
+
+// メモ選択時にWorkspacePreviewを遅延ロードすることでビルドアーティファクトのファイルサイズを削減
+const WorkspacePreview = lazy(() => import("./WorkspacePreview"));
 
 /**
  * ワークスペースを表示するコンポーネント
@@ -77,8 +81,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       const newContent = e.target.value;
       setMemos((prevMemos: Memo[]) =>
         prevMemos.map((memo: Memo) =>
-          memo.id === selectedMemoId ? { ...memo, content: newContent } : memo
-        )
+          memo.id === selectedMemoId ? { ...memo, content: newContent } : memo,
+        ),
       );
 
       // 既存のタイマーをキャンセル
@@ -91,7 +95,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         const timer = setTimeout(() => {
           setMemos((currentMemos: Memo[]) => {
             const currentMemo = currentMemos.find(
-              (memo: Memo) => memo.id === selectedMemoId
+              (memo: Memo) => memo.id === selectedMemoId,
             );
             if (currentMemo && currentMemo.content !== undefined) {
               saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
@@ -102,7 +106,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         setAutoSaveTimer(timer);
       }
     },
-    [autoSaveTimer, saveMemo, selectedMemoId, setAutoSaveTimer, setMemos]
+    [autoSaveTimer, saveMemo, selectedMemoId, setAutoSaveTimer, setMemos],
   );
 
   // 境界線のドラッグ&ドロップ時のリサイズ処理
@@ -144,11 +148,26 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               onDoubleClick={handleDoubleClickBorderLine}
               role="separator"
             />
-            <WorkspacePreview
-              markdownContent={selectedMemo.content ?? ""}
-              layoutMode={layoutMode}
-              widthPercent={100 - editorWidthPercent}
-            />
+            <Suspense
+              fallback={
+                <div
+                  className="flex items-center justify-center"
+                  style={
+                    layoutMode === "horizontal"
+                      ? { width: `${100 - editorWidthPercent}%` }
+                      : { height: `${100 - editorWidthPercent}%` }
+                  }
+                >
+                  <span className="loading loading-spinner loading-md"></span>
+                </div>
+              }
+            >
+              <WorkspacePreview
+                markdownContent={selectedMemo.content ?? ""}
+                layoutMode={layoutMode}
+                widthPercent={100 - editorWidthPercent}
+              />
+            </Suspense>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full">
