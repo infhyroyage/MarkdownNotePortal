@@ -9,7 +9,7 @@ on:
       - lambdas/**
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: "24.13.0"
 
 permissions:
   checks: write

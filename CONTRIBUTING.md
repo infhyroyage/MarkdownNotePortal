@@ -4,7 +4,7 @@
 
 本システムの開発には、以下のツールとテクノロジーを使用する:
 
-- Node.js (TypeScript ランタイム)
+- Node.js v24 (TypeScript ランタイム)
 - TypeScript (Lambda 関数の実装言語)
 - React (フロントエンドフレームワーク)
 - Vite (ビルドツール・フロントエンドの開発サーバー)

@@ -26,7 +26,7 @@ services:
 
   # [POST] /memo
   create-memo:
-    image: public.ecr.aws/lambda/nodejs:22
+    image: public.ecr.aws/lambda/nodejs:24
     command: ["create_memo/index.handler"]
     restart: always
     volumes:
@@ -42,7 +42,7 @@ services:
 
   # [GET] /memo
   list-memos:
-    image: public.ecr.aws/lambda/nodejs:22
+    image: public.ecr.aws/lambda/nodejs:24
     command: ["list_memos/index.handler"]
     restart: always
     volumes:
@@ -58,7 +58,7 @@ services:
 
   # [GET] /memo/{memoId}
   get-memo:
-    image: public.ecr.aws/lambda/nodejs:22
+    image: public.ecr.aws/lambda/nodejs:24
     command: ["get_memo/index.handler"]
     restart: always
     volumes:
@@ -74,7 +74,7 @@ services:
 
   # [PUT] /memo/{memoId}
   update-memo:
-    image: public.ecr.aws/lambda/nodejs:22
+    image: public.ecr.aws/lambda/nodejs:24
     command: ["update_memo/index.handler"]
     restart: always
     volumes:
@@ -90,7 +90,7 @@ services:
 
   # [DELETE] /memo/{memoId}
   delete-memo:
-    image: public.ecr.aws/lambda/nodejs:22
+    image: public.ecr.aws/lambda/nodejs:24
     command: ["delete_memo/index.handler"]
     restart: always
     volumes:

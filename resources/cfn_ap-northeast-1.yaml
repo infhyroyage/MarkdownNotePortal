@@ -281,7 +281,7 @@ Resources:
     Properties:
       LayerName: mkmemoportal-lambda-layer
       CompatibleRuntimes:
-        - nodejs22.x
+        - nodejs24.x
       Content:
         S3Bucket: !Ref S3LambdaBucketName
         S3Key: layer.zip
@@ -291,7 +291,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-create-memo
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: create_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
@@ -306,7 +306,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-delete-memo
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: delete_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
@@ -321,7 +321,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-get-memo
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: get_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
@@ -336,7 +336,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-list-memos
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: list_memos/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:
@@ -351,7 +351,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-update-memo
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: update_memo/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambda.Arn
       Code:

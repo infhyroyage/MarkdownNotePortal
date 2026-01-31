@@ -63,7 +63,7 @@ jobs:
           LAYER_VERSION=$(aws lambda publish-layer-version \
             --layer-name mkmemoportal-lambda-layer \
             --content S3Bucket=${{ inputs.S3_LAMBDA_BUCKET_NAME }},S3Key=layer.zip \
-            --compatible-runtimes nodejs22.x \
+            --compatible-runtimes nodejs24.x \
             --region ap-northeast-1 \
             --query 'Version' \
             --output text)

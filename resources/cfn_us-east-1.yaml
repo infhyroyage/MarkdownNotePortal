@@ -82,7 +82,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: mkmemoportal-lambda-edge-viewer-request
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
       Handler: edge_viewer_request/index.handler
       Role: !GetAtt MkmemoportalIAMRoleLambdaEdge.Arn
       Code:

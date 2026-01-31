@@ -6,7 +6,7 @@
 
    - Docker Desktop
    - Git
-   - Node.js
+   - Node.js v24
 
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 

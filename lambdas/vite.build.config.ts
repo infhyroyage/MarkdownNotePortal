@@ -17,7 +17,7 @@ export default defineConfig({
   },
   build: {
     ssr: true,
-    target: "node22",
+    target: "node24",
     outDir: "dist",
     emptyOutDir: true,
     minify: false,
