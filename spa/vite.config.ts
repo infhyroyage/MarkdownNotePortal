@@ -196,12 +196,23 @@ export default defineConfig({
   },
   // 大きなサイズのライブラリ(React Router、axios、daisyui)を個別チャンクに分割
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom"],
-          "vendor-axios": ["axios"],
-          "vendor-daisyui": ["daisyui"],
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-react",
+              test: /node_modules\/react(?:-dom)?(\/|$)/,
+            },
+            {
+              name: "vendor-axios",
+              test: /node_modules\/axios(\/|$)/,
+            },
+            {
+              name: "vendor-daisyui",
+              test: /node_modules\/daisyui(\/|$)/,
+            },
+          ],
         },
       },
     },
