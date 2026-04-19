@@ -30,7 +30,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(
-    null
+    null,
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
@@ -40,7 +40,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
     () => memos.find((memo: Memo) => memo.id === selectedMemoId),
-    [memos, selectedMemoId]
+    [memos, selectedMemoId],
   );
 
   // メモ一覧を取得する関数
@@ -71,7 +71,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
 
   // 初回レンダリング時にメモ一覧を取得
   useEffect(() => {
-    loadMemos();
+    queueMicrotask(() => {
+      void loadMemos();
+    });
   }, [loadMemos]);
 
   // selectedMemoIdが変更されたときに、選択されたメモのコンテンツを取得
@@ -83,7 +85,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       // 既にメモのコンテンツを取得している場合はスキップ
       // content が undefined でなければ取得済み。空文字列も取得済みとして扱う
       const existedMemo: Memo | undefined = memos.find(
-        (memo: Memo) => memo.id === selectedMemoId
+        (memo: Memo) => memo.id === selectedMemoId,
       );
       if (existedMemo && existedMemo.content !== undefined) return;
 
@@ -99,8 +101,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
                   title: memoDetail.title,
                   content: memoDetail.content,
                 }
-              : memo
-          )
+              : memo,
+          ),
         );
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to load memo"));
@@ -122,8 +124,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
           currentMemos.map((memo: Memo) =>
             memo.id === memoId
               ? { ...memo, lastUpdatedAt: response.lastUpdatedAt }
-              : memo
-          )
+              : memo,
+          ),
         );
 
         setSaveStatus("saved");
@@ -137,17 +139,17 @@ export default function AuthenticatedDisplay(): JSX.Element {
         setErrorMessage(getErrorMessage(error, "Failed to save memo"));
       }
     },
-    []
+    [],
   );
 
   const handleSelectMemo = useCallback(
     (memoId: string): void => setSelectedMemoId(memoId),
-    []
+    [],
   );
 
   const handleToggleDrawer = useCallback(
     (): void => setIsDrawerOpen((prev) => !prev),
-    []
+    [],
   );
 
   const handleAddMemo = useCallback(async (): Promise<void> => {
@@ -156,7 +158,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       // メモを作成
       const newMemo = await createMemo(
         DEFAULT_MEMO_TITLE,
-        DEFAULT_MEMO_CONTENT
+        DEFAULT_MEMO_CONTENT,
       );
 
       // メモの状態を更新
@@ -187,7 +189,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         // メモの状態を更新
         setMemos((prevMemos: Memo[]) => {
           const filteredMemos = prevMemos.filter(
-            (memo: Memo) => memo.id !== memoId
+            (memo: Memo) => memo.id !== memoId,
           );
           // 削除するメモが選択中の場合、別のメモを選択
           if (memoId === selectedMemoId && filteredMemos.length > 0) {
@@ -203,15 +205,15 @@ export default function AuthenticatedDisplay(): JSX.Element {
         setIsDeletingMemo(false);
       }
     },
-    [selectedMemoId]
+    [selectedMemoId],
   );
 
   const handleUpdateTitle = useCallback(
     (newTitle: string): void => {
       setMemos((prevMemos: Memo[]) =>
         prevMemos.map((memo: Memo) =>
-          memo.id === selectedMemoId ? { ...memo, title: newTitle } : memo
-        )
+          memo.id === selectedMemoId ? { ...memo, title: newTitle } : memo,
+        ),
       );
 
       // 既存のタイマーをキャンセル
@@ -224,7 +226,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         const timer = setTimeout(() => {
           setMemos((currentMemos: Memo[]) => {
             const currentMemo = currentMemos.find(
-              (memo: Memo) => memo.id === selectedMemoId
+              (memo: Memo) => memo.id === selectedMemoId,
             );
             if (currentMemo && currentMemo.content !== undefined) {
               saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
@@ -235,7 +237,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         setAutoSaveTimer(timer);
       }
     },
-    [selectedMemoId, autoSaveTimer, saveMemo]
+    [selectedMemoId, autoSaveTimer, saveMemo],
   );
 
   // コンポーネントのアンマウント時にタイマーをクリーンアップ
@@ -265,7 +267,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   // レイアウトモードを切り替える関数
   const handleToggleLayout = useCallback((): void => {
     setLayoutMode((prev) =>
-      prev === "horizontal" ? "vertical" : "horizontal"
+      prev === "horizontal" ? "vertical" : "horizontal",
     );
   }, []);
 
@@ -275,7 +277,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       setSearchQuery(query);
       loadMemos(query);
     },
-    [loadMemos]
+    [loadMemos],
   );
 
   // Markdownをフォーマットする関数
@@ -301,8 +303,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         prevMemos.map((memo: Memo) =>
           memo.id === selectedMemoId
             ? { ...memo, content: formattedContent.trim() }
-            : memo
-        )
+            : memo,
+        ),
       );
 
       // 既存のタイマーをキャンセル
@@ -314,7 +316,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       const timer = setTimeout(() => {
         setMemos((currentMemos: Memo[]) => {
           const currentMemo = currentMemos.find(
-            (memo: Memo) => memo.id === selectedMemoId
+            (memo: Memo) => memo.id === selectedMemoId,
           );
           if (currentMemo && currentMemo.content !== undefined) {
             saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);

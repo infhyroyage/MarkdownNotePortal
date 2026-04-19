@@ -12,14 +12,16 @@ export default function TitleEditor(props: TitleEditorProps): JSX.Element {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>(title);
+  const [prevTitle, setPrevTitle] = useState<string>(title);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLElement | null>(null);
 
-  // タイトルが変更されたら、編集中のタイトルも更新
-  useEffect(() => {
+  // 親から渡されるtitleが変わったらローカルの編集用stateを同期
+  if (title !== prevTitle) {
+    setPrevTitle(title);
     setEditedTitle(title);
-  }, [title]);
+  }
 
   // 編集モードになったら、入力欄にフォーカス
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function TitleEditor(props: TitleEditorProps): JSX.Element {
     (e: ChangeEvent<HTMLInputElement>): void => {
       setEditedTitle(e.target.value);
     },
-    []
+    [],
   );
 
   const handleKeyDown = useCallback(
@@ -81,7 +83,7 @@ export default function TitleEditor(props: TitleEditorProps): JSX.Element {
         setIsEditing(false);
       }
     },
-    [handleSaveTitle, title]
+    [handleSaveTitle, title],
   );
 
   return isEditing ? (
