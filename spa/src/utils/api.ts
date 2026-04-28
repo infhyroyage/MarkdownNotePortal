@@ -74,6 +74,25 @@ export function getErrorMessage(
 }
 
 /**
+ * セッション切れ等でAPIが401を返したかどうかを判定する
+ * @param {unknown} error 発生したエラー
+ * @returns {boolean} 401 Unauthorized の場合は true
+ */
+export function isUnauthorizedApiError(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+/**
+ * Cognito ログイン画面へ誘導するため、ドキュメントルートへ遷移する
+ * （Lambda@Edge が未認証時に /login へリダイレクトする）
+ */
+export function redirectToLoginPage(): void {
+  queueMicrotask(() => {
+    window.location.replace("/");
+  });
+}
+
+/**
  * [GET] /memoにアクセスして、メモ一覧を取得する
  * @param {string} [search] 検索文字列(省略可能)
  * @returns {Promise<ListMemosResponse>} メモ一覧

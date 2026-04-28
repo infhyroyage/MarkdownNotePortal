@@ -6,7 +6,9 @@ import {
   deleteMemo,
   getErrorMessage,
   getMemo,
+  isUnauthorizedApiError,
   listMemos,
+  redirectToLoginPage,
   updateMemo,
 } from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
@@ -64,6 +66,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
       }
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to load memos"));
+      if (isUnauthorizedApiError(error)) {
+        redirectToLoginPage();
+      }
     } finally {
       setIsLoadingMemos(false);
     }
@@ -106,6 +111,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
         );
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to load memo"));
+        if (isUnauthorizedApiError(error)) {
+          redirectToLoginPage();
+        }
       } finally {
         setIsLoadingMemoDetail(false);
       }
@@ -137,6 +145,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
       } catch (error) {
         setSaveStatus("idle");
         setErrorMessage(getErrorMessage(error, "Failed to save memo"));
+        if (isUnauthorizedApiError(error)) {
+          redirectToLoginPage();
+        }
       }
     },
     [],
@@ -174,6 +185,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
       setSelectedMemoId(newMemo.memoId);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to create memo"));
+      if (isUnauthorizedApiError(error)) {
+        redirectToLoginPage();
+      }
     } finally {
       setIsCreatingMemo(false);
     }
@@ -201,6 +215,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
         });
       } catch (error) {
         setErrorMessage(getErrorMessage(error, "Failed to delete memo"));
+        if (isUnauthorizedApiError(error)) {
+          redirectToLoginPage();
+        }
       } finally {
         setIsDeletingMemo(false);
       }
