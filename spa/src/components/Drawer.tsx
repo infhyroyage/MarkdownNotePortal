@@ -78,6 +78,21 @@ export default function Drawer(props: DrawerProps): JSX.Element {
     onSearch(localSearchQuery);
   }, [localSearchQuery, onSearch]);
 
+  const handleSearchKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>): void => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        onSearch(localSearchQuery);
+      }
+    },
+    [localSearchQuery, onSearch]
+  );
+
+  const handleClearSearch = useCallback((): void => {
+    setLocalSearchQuery("");
+    onSearch("");
+  }, [onSearch]);
+
   // メモを最終更新日時の降順でソート
   const sortedMemos: Memo[] = useMemo(() => {
     return [...memos].sort((a: Memo, b: Memo) => {
@@ -110,14 +125,43 @@ export default function Drawer(props: DrawerProps): JSX.Element {
             />
           </div>
           <div className="p-2 border-b border-base-300">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="input input-bordered input-sm w-full"
-              value={localSearchQuery}
-              onChange={(e) => setLocalSearchQuery(e.target.value)}
-              onBlur={handleSearchBlur}
-            />
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="input input-bordered input-sm w-full pr-8"
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+                onBlur={handleSearchBlur}
+                onKeyDown={handleSearchKeyDown}
+              />
+              {localSearchQuery && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  className="btn btn-ghost btn-xs btn-square absolute right-1 top-1/2 -translate-y-1/2"
+                  onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.preventDefault();
+                  }}
+                  onClick={handleClearSearch}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto">
             <ul className="menu w-full p-0">
