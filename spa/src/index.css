@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@plugin "daisyui";
+/* @plugin "daisyui"; @tailwindcss/vite 4.2.4 では動作しない */
+@plugin "daisyui/index.js";
 @plugin "@tailwindcss/typography";
 
 :root {
