@@ -179,8 +179,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
                 isDragging ? "bg-primary" : "bg-base-content/20 hover:bg-primary"
               } ${
                 layoutMode === "horizontal"
-                  ? "w-1 cursor-col-resize"
-                  : "h-1 cursor-row-resize"
+                  ? "w-1 cursor-col-resize pointer-coarse:w-4 pointer-coarse:min-w-4"
+                  : "h-1 cursor-row-resize pointer-coarse:h-4 pointer-coarse:min-h-4"
               }`}
               onPointerDown={handlePointerDownBorderLine}
               onLostPointerCapture={(ev: ReactPointerEvent<HTMLDivElement>) => {
