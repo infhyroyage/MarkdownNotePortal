@@ -3,9 +3,11 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type JSX,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import type { WorkspaceProps } from "../types/props";
 import type { Memo } from "../types/state";
@@ -36,45 +38,55 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const dragSessionRef = useRef<{
+    pointerId: number;
+    el: HTMLDivElement;
+    onMove: (ev: PointerEvent) => void;
+    onEnd: (ev: PointerEvent) => void;
+  } | null>(null);
 
-  // ドラッグ＆ドロップでエディターのサイズ(画面のパーセンテージ)を動的に調整
-  useEffect(() => {
-    if (isDragging) {
-      const handleMouseMove = (e: MouseEvent): void => {
-        if (!isDragging) return;
+  const cleanupSeparatorDrag = useCallback(
+    (pointerId?: number): void => {
+      const session = dragSessionRef.current;
+      if (!session) return;
+      if (pointerId !== undefined && session.pointerId !== pointerId) return;
+      window.removeEventListener("pointermove", session.onMove);
+      window.removeEventListener("pointerup", session.onEnd);
+      window.removeEventListener("pointercancel", session.onEnd);
+      if (session.el.hasPointerCapture(session.pointerId)) {
+        session.el.releasePointerCapture(session.pointerId);
+      }
+      dragSessionRef.current = null;
+      setIsDragging(false);
+    },
+    [],
+  );
 
-        if (layoutMode === "horizontal") {
-          // 左右配置モード：横方向のリサイズ
-          const newWidth = (e.clientX / window.innerWidth) * 100;
-          // エディターの幅(画面幅のパーセンテージ)を最小20%、最大80%に制限
-          if (newWidth >= 20 && newWidth <= 80) {
-            setEditorWidthPercent(newWidth);
-          }
-        } else {
-          // 上下配置モード：縦方向のリサイズ
-          // ヘッダーの高さを取得して除外
-          const header = document.querySelector("header");
-          const headerHeight = header ? header.offsetHeight : 0;
-          const availableHeight = window.innerHeight - headerHeight;
-          const newHeight =
-            ((e.clientY - headerHeight) / availableHeight) * 100;
-          // エディターの高さ(利用可能な高さのパーセンテージ)を最小20%、最大80%に制限
-          if (newHeight >= 20 && newHeight <= 80) {
-            setEditorWidthPercent(newHeight);
-          }
+  const applyResizeFromClient = useCallback(
+    (clientX: number, clientY: number): void => {
+      if (layoutMode === "horizontal") {
+        const newWidth = (clientX / window.innerWidth) * 100;
+        if (newWidth >= 20 && newWidth <= 80) {
+          setEditorWidthPercent(newWidth);
         }
-      };
+      } else {
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.offsetHeight : 0;
+        const availableHeight = window.innerHeight - headerHeight;
+        const newHeight = ((clientY - headerHeight) / availableHeight) * 100;
+        if (newHeight >= 20 && newHeight <= 80) {
+          setEditorWidthPercent(newHeight);
+        }
+      }
+    },
+    [layoutMode],
+  );
 
-      const handleMouseUp = (): void => setIsDragging(false);
-
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging, layoutMode]);
+  useEffect(() => {
+    return () => {
+      cleanupSeparatorDrag();
+    };
+  }, [cleanupSeparatorDrag]);
 
   const handleMarkdownContentChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>): void => {
@@ -109,10 +121,34 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     [autoSaveTimer, saveMemo, selectedMemoId, setAutoSaveTimer, setMemos],
   );
 
-  // 境界線のドラッグ&ドロップ時のリサイズ処理
-  const handleMouseDownBorderLine = useCallback((): void => {
-    setIsDragging(true);
-  }, []);
+  // 境界線のドラッグ時のリサイズ（Pointer Events でマウス・タッチ・ペンを統一）
+  const handlePointerDownBorderLine = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>): void => {
+      if (dragSessionRef.current !== null) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
+      const el = e.currentTarget;
+      const pointerId = e.pointerId;
+      el.setPointerCapture(pointerId);
+      applyResizeFromClient(e.clientX, e.clientY);
+
+      const onMove = (ev: PointerEvent): void => {
+        if (ev.pointerId !== pointerId) return;
+        applyResizeFromClient(ev.clientX, ev.clientY);
+      };
+      const onEnd = (ev: PointerEvent): void => {
+        if (ev.pointerId !== pointerId) return;
+        cleanupSeparatorDrag(pointerId);
+      };
+
+      dragSessionRef.current = { pointerId, el, onMove, onEnd };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onEnd);
+      window.addEventListener("pointercancel", onEnd);
+      setIsDragging(true);
+    },
+    [applyResizeFromClient, cleanupSeparatorDrag],
+  );
 
   // 境界線のダブルクリック時のリセット処理
   const handleDoubleClickBorderLine = useCallback((): void => {
@@ -139,12 +175,17 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               widthPercent={editorWidthPercent}
             />
             <div
-              className={`bg-base-content/20 hover:bg-primary shrink-0 transition-colors ${
+              className={`shrink-0 touch-none select-none transition-colors ${
+                isDragging ? "bg-primary" : "bg-base-content/20 hover:bg-primary"
+              } ${
                 layoutMode === "horizontal"
                   ? "w-1 cursor-col-resize"
                   : "h-1 cursor-row-resize"
               }`}
-              onMouseDown={handleMouseDownBorderLine}
+              onPointerDown={handlePointerDownBorderLine}
+              onLostPointerCapture={(ev: ReactPointerEvent<HTMLDivElement>) => {
+                cleanupSeparatorDrag(ev.pointerId);
+              }}
               onDoubleClick={handleDoubleClickBorderLine}
               role="separator"
             />
