@@ -97,14 +97,14 @@ export default function TitleEditor(props: TitleEditorProps): JSX.Element {
       onChange={handleTitleChange}
       onKeyDown={handleKeyDown}
       autoComplete="off"
-      className="input input-bordered input-sm w-full max-w-md text-xl font-bold mx-4"
+      className="input input-bordered input-sm w-full min-w-0 max-w-full text-xl font-bold mx-4"
     />
   ) : (
     <h1
       ref={(node) => {
         containerRef.current = node;
       }}
-      className={`text-xl font-bold px-4 transition-colors ${
+      className={`min-w-0 w-full truncate text-xl font-bold px-4 transition-colors ${
         hasSelectedMemo ? "cursor-pointer hover:text-primary" : "cursor-default"
       }`}
       onClick={handleTitleClick}
