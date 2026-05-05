@@ -35,7 +35,7 @@ export default function Header(props: HeaderProps): JSX.Element {
           isDrawerOpen={isDrawerOpen}
         />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <TitleEditor
           title={title}
           hasSelectedMemo={hasSelectedMemo}
