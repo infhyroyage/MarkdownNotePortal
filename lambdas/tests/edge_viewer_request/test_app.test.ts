@@ -303,6 +303,7 @@ describe("edge_viewer_request handler", () => {
       );
       expect(accessTokenCookie).toBeDefined();
       expect(accessTokenCookie?.value).toContain(mockAccessToken);
+      expect(accessTokenCookie?.value).toContain("Max-Age=43200");
 
       // code_verifier Cookieが削除される
       const codeVerifierCookie = setCookies.find((c) =>
