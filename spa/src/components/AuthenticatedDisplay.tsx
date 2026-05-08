@@ -58,12 +58,20 @@ export default function AuthenticatedDisplay(): JSX.Element {
       }));
       setMemos(fetchedMemos);
 
-      // メモが存在する場合は最初のメモを選択
-      if (fetchedMemos.length > 0) {
-        setSelectedMemoId(fetchedMemos[0].id);
-      } else {
-        setSelectedMemoId(null);
-      }
+      // 一覧取得後は、既に選択中のメモが結果に含まれる場合はそのまま維持する。
+      // （検索入力の blur で一覧が再取得されたとき、クリックで選んだメモが先頭に上書きされるのを防ぐ）
+      setSelectedMemoId((currentId: string | null) => {
+        if (fetchedMemos.length === 0) {
+          return null;
+        }
+        if (
+          currentId !== null &&
+          fetchedMemos.some((m: Memo) => m.id === currentId)
+        ) {
+          return currentId;
+        }
+        return fetchedMemos[0].id;
+      });
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to load memos"));
       if (isUnauthorizedApiError(error)) {

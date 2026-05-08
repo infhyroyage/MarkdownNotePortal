@@ -75,8 +75,11 @@ export default function Drawer(props: DrawerProps): JSX.Element {
   }, []);
 
   const handleSearchBlur = useCallback((): void => {
-    onSearch(localSearchQuery);
-  }, [localSearchQuery, onSearch]);
+    // 親と同じクエリなら再検索しない（メモクリックで入力が blur したときの二重取得と選択のちらつきを防ぐ）
+    if (localSearchQuery !== searchQuery) {
+      onSearch(localSearchQuery);
+    }
+  }, [localSearchQuery, onSearch, searchQuery]);
 
   const handleSearchKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
