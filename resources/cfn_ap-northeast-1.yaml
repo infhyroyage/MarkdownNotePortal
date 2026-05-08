@@ -177,10 +177,10 @@ Resources:
         - !Sub https://${MkmemoportalCloudfront.DomainName}/
       SupportedIdentityProviders:
         - COGNITO
-      AccessTokenValidity: 60
+      AccessTokenValidity: 12
       IdTokenValidity: 60
       TokenValidityUnits:
-        AccessToken: minutes
+        AccessToken: hours
         IdToken: minutes
       ExplicitAuthFlows:
         - ALLOW_REFRESH_TOKEN_AUTH

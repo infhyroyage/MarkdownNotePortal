@@ -14,6 +14,12 @@ const COOKIE_NAME_ACCESS_TOKEN = "mkmemoportal_access_token";
 const COOKIE_NAME_CODE_VERIFIER = "mkmemoportal_code_verifier";
 
 /**
+ * アクセストークン Cookie の Max-Age（秒）
+ * Cognito User Pool Client の AccessTokenValidity（`resources/cfn_ap-northeast-1.yaml`）と整合させる
+ */
+const ACCESS_TOKEN_COOKIE_MAX_AGE_SECONDS = 12 * 60 * 60;
+
+/**
  * Parameter Storeのパラメータ名
  */
 const SSM_PARAM_COGNITO_CLIENT_ID = "/mkmemoportal/cognito/client_id";
@@ -388,7 +394,7 @@ export async function handler(
       // アクセストークンをCookieに設定し、code_verifierを削除してリダイレクト
       const setCookies = [
         buildSetCookie(COOKIE_NAME_ACCESS_TOKEN, accessToken, {
-          maxAge: 3600, // 1時間(Cognitoのトークン有効期限に合わせる)
+          maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE_SECONDS,
           path: "/",
           secure: true,
           sameSite: "Lax",
