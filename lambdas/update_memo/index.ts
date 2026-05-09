@@ -1,18 +1,18 @@
 import { GetItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "../layer/nodejs/errors.js";
 import { getDynamoDBClient, getUserId } from "../layer/nodejs/utils.js";
-import type { APIGatewayEvent, APIGatewayResponse } from "../types/api.js";
+import type { UpdateMemoRequest, UpdateMemoResponse } from "../types/api.js";
 import type {
-  UpdateMemoRequest,
-  UpdateMemoResponse,
-} from "../types/dynamodb.js";
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from "../types/api_gateway.js";
 /**
  * 指定した1件の保存済みのメモのタイトルと内容(Markdown文字列)を更新するLambda関数ハンドラー
  * @param {APIGatewayEvent} event API Gatewayイベント
  * @returns {APIGatewayResponse} API Gatewayレスポンス
  */
 export async function handler(
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
@@ -59,7 +59,7 @@ export async function handler(
           user_id: { S: userId },
           memo_id: { S: memoId },
         },
-      })
+      }),
     );
 
     if (!getResponse.Item) {
@@ -87,7 +87,7 @@ export async function handler(
           ":content": { S: content },
           ":update_at": { S: updateAt },
         },
-      })
+      }),
     );
 
     console.log(`Memo updated: user_id=${userId}, memo_id=${memoId}`);
@@ -126,7 +126,7 @@ export async function handler(
     console.error(
       `Unexpected error: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
     return {
       statusCode: 500,

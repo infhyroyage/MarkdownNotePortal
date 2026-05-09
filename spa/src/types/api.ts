@@ -1,27 +1,4 @@
 /**
- * メモ一覧取得のレスポンス
- */
-export interface ListMemosResponse {
-  /**
-   * メモ一覧
-   */
-  items: Array<{
-    /**
-     * メモのID
-     */
-    memoId: string;
-    /**
-     * メモのタイトル
-     */
-    title: string;
-    /**
-     * 最終更新日時
-     */
-    lastUpdatedAt: string;
-  }>;
-}
-
-/**
  * メモ作成のリクエスト
  */
 export interface CreateMemoRequest {
@@ -54,6 +31,26 @@ export interface CreateMemoResponse {
 }
 
 /**
+ * メモMarkdown整形のリクエスト
+ */
+export interface FormatMemoRequest {
+  /**
+   * 整形対象のMarkdown本文
+   */
+  content: string;
+}
+
+/**
+ * メモMarkdown整形のレスポンス
+ */
+export interface FormatMemoResponse {
+  /**
+   * 整形されたMarkdown本文
+   */
+  content: string;
+}
+
+/**
  * メモ取得のレスポンス
  */
 export interface GetMemoResponse {
@@ -69,6 +66,29 @@ export interface GetMemoResponse {
    * メモのコンテンツ
    */
   content: string;
+}
+
+/**
+ * メモ一覧取得のレスポンス
+ */
+export interface ListMemosResponse {
+  /**
+   * メモ一覧
+   */
+  items: Array<{
+    /**
+     * メモのID
+     */
+    memoId: string;
+    /**
+     * メモのタイトル
+     */
+    title: string;
+    /**
+     * 最終更新日時
+     */
+    lastUpdatedAt: string;
+  }>;
 }
 
 /**

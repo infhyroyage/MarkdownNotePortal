@@ -103,3 +103,18 @@ services:
     depends_on:
       dynamodb-local-create-table:
         condition: service_completed_successfully
+
+  # [POST] /format
+  format-memo:
+    image: public.ecr.aws/lambda/nodejs:24
+    command: ["format_memo/index.handler"]
+    restart: always
+    volumes:
+      - ./lambdas/dist:/var/task
+    ports:
+      - "9006:8080"
+    environment:
+      - IS_LOCAL=true
+    depends_on:
+      dynamodb-local-create-table:
+        condition: service_completed_successfully

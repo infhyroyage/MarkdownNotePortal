@@ -4,6 +4,7 @@ import type { LayoutMode, Memo, SaveStatus } from "../types/state";
 import {
   createMemo,
   deleteMemo,
+  formatMemo,
   getErrorMessage,
   getMemo,
   isUnauthorizedApiError,
@@ -58,8 +59,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       }));
       setMemos(fetchedMemos);
 
-      // 一覧取得後は、既に選択中のメモが結果に含まれる場合はそのまま維持する。
-      // （検索入力の blur で一覧が再取得されたとき、クリックで選んだメモが先頭に上書きされるのを防ぐ）
+      // メモの一覧を取得した後、既に選択中のメモが結果に含まれる場合はそのまま維持する
       setSelectedMemoId((currentId: string | null) => {
         if (fetchedMemos.length === 0) {
           return null;
@@ -96,7 +96,6 @@ export default function AuthenticatedDisplay(): JSX.Element {
       if (!selectedMemoId) return;
 
       // 既にメモのコンテンツを取得している場合はスキップ
-      // content が undefined でなければ取得済み。空文字列も取得済みとして扱う
       const existedMemo: Memo | undefined = memos.find(
         (memo: Memo) => memo.id === selectedMemoId,
       );
@@ -313,15 +312,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
     try {
       setIsFormatting(true);
 
-      // prettierを動的にインポートしてMarkdownをフォーマット
-      const prettier = await import("prettier");
-      const parserMarkdown = await import("prettier/plugins/markdown");
-
-      const formattedContent = await prettier.format(selectedMemo.content, {
-        parser: "markdown",
-        plugins: [parserMarkdown],
-        proseWrap: "preserve",
-      });
+      const { content: formattedContent } = await formatMemo(
+        selectedMemo.content,
+      );
 
       // フォーマットされたコンテンツで状態を更新
       setMemos((prevMemos: Memo[]) =>

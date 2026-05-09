@@ -1,26 +1,126 @@
+import { MemoListItem } from "./dynamodb";
+
 /**
- * API Gateway Event型定義
+ * メモ作成のリクエスト
  */
-export interface APIGatewayEvent {
-  body?: string;
-  pathParameters?: Record<string, string>;
-  queryStringParameters?: Record<string, string>;
-  requestContext?: {
-    authorizer?: {
-      jwt?: {
-        claims?: {
-          sub?: string;
-        };
-      };
-    };
-  };
+export interface CreateMemoRequest {
+  /**
+   * メモのタイトル
+   */
+  title: string;
+
+  /**
+   * メモのコンテンツ
+   */
+  content: string;
 }
 
 /**
- * API Gateway Response型定義
+ * メモ作成のレスポンス
  */
-export interface APIGatewayResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
+export interface CreateMemoResponse {
+  /**
+   * 作成されたメモのID
+   */
+  memoId: string;
+
+  /**
+   * 作成されたメモのタイトル
+   */
+  title: string;
+
+  /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
+}
+
+/**
+ * メモMarkdown整形のリクエスト
+ */
+export interface FormatMemoRequest {
+  /**
+   * 整形対象のMarkdown本文
+   */
+  content: string;
+}
+
+/**
+ * メモMarkdown整形のレスポンス
+ */
+export interface FormatMemoResponse {
+  /**
+   * 整形されたMarkdown本文
+   */
+  content: string;
+}
+
+/**
+ * メモ取得のレスポンス
+ */
+export interface GetMemoResponse {
+  /**
+   * メモのID
+   */
+  memoId: string;
+
+  /**
+   * メモのタイトル
+   */
+  title: string;
+
+  /**
+   * メモのコンテンツ
+   */
+  content: string;
+}
+
+/**
+ * メモ一覧取得のレスポンス
+ */
+export interface ListMemosResponse {
+  /**
+   * メモ一覧
+   */
+  items: MemoListItem[];
+}
+
+/**
+ * メモ更新のリクエスト
+ */
+export interface UpdateMemoRequest {
+  /**
+   * メモのタイトル
+   */
+  title: string;
+
+  /**
+   * メモのコンテンツ
+   */
+  content: string;
+}
+
+/**
+ * メモ更新のレスポンス
+ */
+export interface UpdateMemoResponse {
+  /**
+   * 更新されたメモのID
+   */
+  memoId: string;
+
+  /**
+   * 更新されたメモのタイトル
+   */
+  title: string;
+
+  /**
+   * 更新されたメモのコンテンツ
+   */
+  content: string;
+
+  /**
+   * 最終更新日時
+   */
+  lastUpdatedAt: string;
 }

@@ -1,14 +1,18 @@
 import { DeleteItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "@layer/errors.js";
 import { getDynamoDBClient, getUserId } from "../layer/nodejs/utils.js";
-import type { APIGatewayEvent, APIGatewayResponse } from "../types/api.js";
+import type {
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from "../types/api_gateway.js";
+
 /**
  * 指定した1件の保存済みメモを削除するLambda関数ハンドラー
  * @param {APIGatewayEvent} event API Gatewayイベント
  * @returns {APIGatewayResponse} API Gatewayレスポンス
  */
 export async function handler(
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
@@ -32,7 +36,7 @@ export async function handler(
           user_id: { S: userId },
           memo_id: { S: memoId },
         },
-      })
+      }),
     );
 
     if (!getResponse.Item) {
@@ -52,7 +56,7 @@ export async function handler(
           user_id: { S: userId },
           memo_id: { S: memoId },
         },
-      })
+      }),
     );
 
     console.log(`Memo deleted: user_id=${userId}, memo_id=${memoId}`);
@@ -75,7 +79,7 @@ export async function handler(
     console.error(
       `Unexpected error: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
     return {
       statusCode: 500,

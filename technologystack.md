@@ -22,6 +22,7 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
   - Amazon CloudWatch (ログ・モニタリング)
   - Amazon Cognito (ユーザープールによる認証機能の提供)
   - Amazon DynamoDB (保存したメモの管理)
+  - Amazon Bedrock (Markdown 本文の整形のための生成モデル呼出し)
   - Amazon S3 (フロントエンド・バックエンドのビルドアーティファクト格納)
   - AWS Backup (バックアップ管理)
   - AWS CloudFormation (スタック管理)
@@ -51,6 +52,7 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
 | `mkmemoportal-lambda-get-memo`            | AWS Lambda         | ap-northeast-1 | \[GET\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-list-memos`          | AWS Lambda         | ap-northeast-1 | \[GET\] /memo のバックエンド処理を行う Lambda 関数             |
 | `mkmemoportal-lambda-update-memo`         | AWS Lambda         | ap-northeast-1 | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
+| `mkmemoportal-lambda-format-memo`         | AWS Lambda         | ap-northeast-1 | \[POST\] /format のバックエンド処理を行う Lambda 関数          |
 | `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda@Edge    | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
 | `mkmemoportal-stack-ap-northeast-1`       | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
 | `mkmemoportal-stack-us-east-1`            | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
@@ -105,6 +107,11 @@ API Gateway で以下の API エンドポイントを管理する。
   - 概要: 指定した 1 件の保存済みのメモを削除する。
   - 成功レスポンス: `204 No Content`
   - 取得不可: `404 Not Found`
+- [POST] /format
+  - 概要: 指定した Markdown 本文を誤記修正・表への構造化などを整形する。
+  - リクエストボディ: `{ "content": string }`
+  - 成功レスポンス: `200 OK` `{ "content": string }`
+  - バリデーション: `content` は 1〜100000 文字の Markdown 文字列
 
 API Gateway には Cognito User Pool オーソライザーが設定されており、フロントエンドから付与したヘッダー `Authorization: Bearer <JWT>` の検証により、API の認可を強制する。
 リクエストは全てログインユーザー単位でスコープされ、バックエンドはトークンの `sub` を `user_id` として用いてデータの分離を保証する。レスポンスは `application/json`とする。

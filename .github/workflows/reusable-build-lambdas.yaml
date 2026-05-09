@@ -72,6 +72,7 @@ jobs:
           zip -r ../../get_memo.zip get_memo/index.js get_memo/package.json assets layer/nodejs package.json
           zip -r ../../list_memos.zip list_memos/index.js list_memos/package.json assets layer/nodejs package.json
           zip -r ../../update_memo.zip update_memo/index.js update_memo/package.json assets layer/nodejs package.json
+          zip -r ../../format_memo.zip format_memo/index.js format_memo/package.json assets layer/nodejs package.json
           zip -r ../../edge_viewer_request.zip edge_viewer_request/index.js edge_viewer_request/package.json assets package.json
           cd layer/nodejs && zip -r ../../../../layer.zip . && cd ../../../../
 
@@ -94,6 +95,7 @@ jobs:
           aws s3 cp get_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/get_memo.zip --region ap-northeast-1
           aws s3 cp list_memos.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/list_memos.zip --region ap-northeast-1
           aws s3 cp update_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/update_memo.zip --region ap-northeast-1
+          aws s3 cp format_memo.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/format_memo.zip --region ap-northeast-1
           aws s3 cp layer.zip s3://${{ inputs.S3_LAMBDA_BUCKET_NAME }}/layer.zip --region ap-northeast-1
 
       - name: Create S3 Bucket for Lambda@Edge if Not Exists

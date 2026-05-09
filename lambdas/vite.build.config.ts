@@ -8,6 +8,7 @@ const lambdaFunctions = [
   "get_memo",
   "list_memos",
   "update_memo",
+  "format_memo",
   "edge_viewer_request",
 ];
 
@@ -29,7 +30,7 @@ export default defineConfig({
           lambdaFunctions.map((fn) => [
             fn,
             resolve(__dirname, `${fn}/index.ts`),
-          ])
+          ]),
         ),
         // Lambda Layerのエントリーポイント
         "layer-utils": resolve(__dirname, "layer/nodejs/utils.ts"),
@@ -59,6 +60,7 @@ const __filename = fileURLToPath(import.meta.url);
       external: ["crypto"],
       plugins: [
         {
+          // Lambda関数のビルド後に、各Lambda関数のディレクトリにpackage.jsonを生成
           name: "generate-package-json",
           closeBundle() {
             [
@@ -68,6 +70,7 @@ const __filename = fileURLToPath(import.meta.url);
               "get_memo",
               "update_memo",
               "delete_memo",
+              "format_memo",
               "edge_viewer_request",
               "layer/nodejs",
             ].forEach((dir: string) => {
@@ -75,7 +78,7 @@ const __filename = fileURLToPath(import.meta.url);
                 __dirname,
                 "dist",
                 dir,
-                "package.json"
+                "package.json",
               );
               try {
                 writeFileSync(
@@ -85,14 +88,14 @@ const __filename = fileURLToPath(import.meta.url);
                       type: "module",
                     },
                     null,
-                    2
-                  )
+                    2,
+                  ),
                 );
                 console.log(`Created: ${targetPath}`);
               } catch (error) {
                 console.error(
                   `Failed to create ${targetPath}:`,
-                  (error as Error).message
+                  (error as Error).message,
                 );
               }
             });

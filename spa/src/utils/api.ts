@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import type {
   CreateMemoResponse,
+  FormatMemoResponse,
   GetMemoResponse,
   ListMemosResponse,
   UpdateMemoResponse,
@@ -64,13 +65,13 @@ function getRequestConfig(): AxiosRequestConfig {
  */
 export function getErrorMessage(
   error: unknown,
-  defaultMessage: string
+  defaultMessage: string,
 ): string {
   return axios.isAxiosError(error)
     ? error.response?.data?.message || defaultMessage
     : error instanceof Error
-    ? error.message
-    : defaultMessage;
+      ? error.message
+      : defaultMessage;
 }
 
 /**
@@ -114,7 +115,7 @@ export async function listMemos(search?: string): Promise<ListMemosResponse> {
  */
 export async function createMemo(
   title: string,
-  content: string
+  content: string,
 ): Promise<CreateMemoResponse> {
   const response = await axios.post<CreateMemoResponse>(
     "/memo",
@@ -122,7 +123,7 @@ export async function createMemo(
       title,
       content,
     },
-    getRequestConfig()
+    getRequestConfig(),
   );
   return response.data;
 }
@@ -135,7 +136,7 @@ export async function createMemo(
 export async function getMemo(memoId: string): Promise<GetMemoResponse> {
   const response = await axios.get<GetMemoResponse>(
     `/memo/${memoId}`,
-    getRequestConfig()
+    getRequestConfig(),
   );
   return response.data;
 }
@@ -150,7 +151,7 @@ export async function getMemo(memoId: string): Promise<GetMemoResponse> {
 export async function updateMemo(
   memoId: string,
   title: string,
-  content: string
+  content: string,
 ): Promise<UpdateMemoResponse> {
   const response = await axios.put<UpdateMemoResponse>(
     `/memo/${memoId}`,
@@ -158,7 +159,7 @@ export async function updateMemo(
       title,
       content,
     },
-    getRequestConfig()
+    getRequestConfig(),
   );
   return response.data;
 }
@@ -170,4 +171,18 @@ export async function updateMemo(
  */
 export async function deleteMemo(memoId: string): Promise<void> {
   await axios.delete(`/memo/${memoId}`, getRequestConfig());
+}
+
+/**
+ * [POST] /format にアクセスして、Markdown本文を整形する
+ * @param {string} content 整形対象のMarkdown
+ * @returns {Promise<FormatMemoResponse>} 整形結果
+ */
+export async function formatMemo(content: string): Promise<FormatMemoResponse> {
+  const response = await axios.post<FormatMemoResponse>(
+    "/format",
+    { content },
+    getRequestConfig(),
+  );
+  return response.data;
 }

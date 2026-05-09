@@ -1,7 +1,7 @@
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "@layer/errors.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { APIGatewayEvent } from "../../types/api.js";
+import type { APIGatewayEvent } from "../../types/api_gateway.js";
 
 // モックの作成
 const mockSend = vi.fn();
@@ -150,7 +150,7 @@ describe("list_memos handler", () => {
         input: expect.objectContaining({
           ProjectionExpression: "memo_id, title, content, create_at, update_at",
         }),
-      })
+      }),
     );
     const body = JSON.parse(response.body);
     expect(body.items).toHaveLength(1);
@@ -182,7 +182,7 @@ describe("list_memos handler", () => {
         input: expect.objectContaining({
           ProjectionExpression: "memo_id, title, create_at, update_at",
         }),
-      })
+      }),
     );
   });
 

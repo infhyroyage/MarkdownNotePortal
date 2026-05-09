@@ -34,6 +34,7 @@ const LAMBDA_PORTS: Record<string, number> = {
   "GET:/memo/": 9003,
   "PUT:/memo/": 9004,
   "DELETE:/memo/": 9005,
+  "POST:/format": 9006,
 };
 
 /**
@@ -76,7 +77,7 @@ const lambdaProxyMiddleware = (
 ) => {
   // Lambda関数で処理するパス以外は、Lambda関数にプロキシせず、次のミドルウェアにそのまま処理を渡す
   const urlString: string = req.url || "";
-  if (!urlString.startsWith("/memo")) {
+  if (!urlString.startsWith("/memo") && !urlString.startsWith("/format")) {
     return next();
   }
 
@@ -95,7 +96,9 @@ const lambdaProxyMiddleware = (
   let targetPort: number | null = null;
   const httpMethod: string = req.method || "";
   const pathMatch: RegExpMatchArray | null = path.match(/^\/memo\/([^/]+)$/);
-  if (path === "/memo") {
+  if (path === "/format") {
+    targetPort = LAMBDA_PORTS[`${httpMethod}:/format`] || null;
+  } else if (path === "/memo") {
     targetPort = LAMBDA_PORTS[`${httpMethod}:/memo`] || null;
   } else if (pathMatch) {
     targetPort = LAMBDA_PORTS[`${httpMethod}:/memo/`] || null;
@@ -181,7 +184,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // Lambda関数からvite開発サーバーへのレスポンスをプロキシするカスタムミドルウェアを追加
+    // Lambda関数からvite開発サーバーへのレスポンスをプロキシするカスタムミドルウェア
     {
       name: "lambda-proxy",
       configureServer(server: ViteDevServer) {

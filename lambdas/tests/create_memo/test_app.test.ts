@@ -2,7 +2,7 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "@layer/errors.js";
 import { randomUUID } from "crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { APIGatewayEvent } from "../../types/api.js";
+import type { APIGatewayEvent } from "../../types/api_gateway.js";
 
 // モックの作成
 const mockSend = vi.fn();
@@ -34,7 +34,7 @@ describe("create_memo handler", () => {
     mockGetUserId.mockReturnValue("test-user-id");
     mockSend.mockResolvedValue({});
     (randomUUID as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
-      "test-memo-id"
+      "test-memo-id",
     );
   });
 

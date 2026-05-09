@@ -13,7 +13,6 @@
     "@tailwindcss/typography": "^0.5.19",
     "axios": "^1.15.2",
     "daisyui": "^5.5.19",
-    "prettier": "^3.8.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-markdown": "^10.1.0",

@@ -1,7 +1,7 @@
 import { AuthenticationError } from "@layer/errors.js";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getDynamoDBClient, getUserId } from "../../layer/nodejs/utils.js";
-import type { APIGatewayEvent } from "../../types/api.js";
+import type { APIGatewayEvent } from "../../types/api_gateway.js";
 
 describe("utils", () => {
   describe("getDynamoDBClient", () => {

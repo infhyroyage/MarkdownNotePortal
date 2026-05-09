@@ -1,12 +1,12 @@
 import { QueryCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "../layer/nodejs/errors.js";
 import { getDynamoDBClient, getUserId } from "../layer/nodejs/utils.js";
-import type { APIGatewayEvent, APIGatewayResponse } from "../types/api.js";
+import type { ListMemosResponse } from "../types/api.js";
 import type {
-  DynamoDBItem,
-  ListMemosResponse,
-  MemoListItem,
-} from "../types/dynamodb.js";
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from "../types/api_gateway.js";
+import type { DynamoDBItem, MemoListItem } from "../types/dynamodb.js";
 
 /**
  * 保存済みのメモの一覧を返すLambda関数ハンドラー
@@ -14,7 +14,7 @@ import type {
  * @returns {APIGatewayResponse} API Gatewayレスポンス
  */
 export async function handler(
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
@@ -78,7 +78,7 @@ export async function handler(
         memoId,
         title,
         lastUpdatedAt,
-      })
+      }),
     );
 
     // 最終更新日時の降順でソート
@@ -89,7 +89,7 @@ export async function handler(
     });
 
     console.log(
-      `Memo list retrieved: user_id=${userId}, count=${items.length}`
+      `Memo list retrieved: user_id=${userId}, count=${items.length}`,
     );
 
     const result: ListMemosResponse = { items };
@@ -112,7 +112,7 @@ export async function handler(
     console.error(
       `Unexpected error: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
     return {
       statusCode: 500,

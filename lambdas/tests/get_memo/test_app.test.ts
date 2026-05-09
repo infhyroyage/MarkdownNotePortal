@@ -1,7 +1,7 @@
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "@layer/errors.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { APIGatewayEvent } from "../../types/api.js";
+import type { APIGatewayEvent } from "../../types/api_gateway.js";
 
 // モックの作成
 const mockSend = vi.fn();

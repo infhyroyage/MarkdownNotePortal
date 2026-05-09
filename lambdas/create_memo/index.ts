@@ -2,18 +2,19 @@ import { PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { AuthenticationError } from "@layer/errors.js";
 import { randomUUID } from "crypto";
 import { getDynamoDBClient, getUserId } from "../layer/nodejs/utils.js";
-import type { APIGatewayEvent, APIGatewayResponse } from "../types/api.js";
+import { CreateMemoRequest, CreateMemoResponse } from "../types/api.js";
 import type {
-  CreateMemoRequest,
-  CreateMemoResponse,
-} from "../types/dynamodb.js";
+  APIGatewayEvent,
+  APIGatewayResponse,
+} from "../types/api_gateway.js";
+
 /**
  * 1件のメモを保存するLambda関数ハンドラー
  * @param {APIGatewayEvent} event API Gatewayイベント
  * @returns {APIGatewayResponse} API Gatewayレスポンス
  */
 export async function handler(
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayResponse> {
   try {
     const userId = getUserId(event);
@@ -56,7 +57,7 @@ export async function handler(
           content: { S: content },
           create_at: { S: createAt },
         },
-      })
+      }),
     );
 
     console.log(`Memo created: user_id=${userId}, memo_id=${memoId}`);
@@ -94,7 +95,7 @@ export async function handler(
     console.error(
       `Unexpected error: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
     return {
       statusCode: 500,
