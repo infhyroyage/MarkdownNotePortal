@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Markdown Memo Portal in ap-northeast-1
 
 Parameters:
+  BedrockFoundationModelId:
+    Type: String
+    Description: Amazon Bedrock foundation model ID routed via the inference profile
   BedrockInferenceProfileId:
     Type: String
     Description: Amazon Bedrock inference profile ID
@@ -76,6 +79,7 @@ Resources:
                   - bedrock:InvokeModel
                 Resource:
                   - !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${BedrockInferenceProfileId}
+                  - !Sub arn:${AWS::Partition}:bedrock:*::foundation-model/${BedrockFoundationModelId}
 
   # S3 Bucket(SPA)
   MkmemoportalSpaBucket:
