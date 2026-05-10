@@ -192,7 +192,21 @@ GitHub Actions のワークフローが AWS CLI を実行して AWS リソース
 9. 「ポリシー名」に任意の IAM ポリシー名を入力し、「ポリシーの作成」ボタンを押下する。
 10. ロールの ARN(`arn:aws:iam::(AWSアカウントID):role/(IAMロール名)`)を手元に控える。
 
-### 4. GitHub Actions 用シークレット・変数設定
+### 4. Amazon Bedrock システム定義の推論プロファイル ID の取得
+
+[POST] /formatのREST APIでAmazon Bedrockの`InvokeModel` API を呼び出す際に必要な、クロスリージョンルーティング用に AWS があらかじめ提供しているシステム定義の推論プロファイル ID を取得する。
+
+1. AWS マネジメントコンソールにサインインし、`ap-northeast-1` リージョンで Amazon Bedrock コンソールを開く。
+2. Amazon Bedrock コンソールの左側のナビゲーションペインから「推論」>「推論プロファイル」を選択する。
+3. 「システム定義」タブの表に表示されるモデルのうち、利用したいモデルを1つ選択し、その「推論プロファイル ID」の列の値(`global.anthropic.claude-haiku-4-5-20251001-v1:0`など)を控える。
+
+> [!IMPORTANT]
+> 一部のモデルは、ベースモデル ID をそのまま `InvokeModel` APIで呼び出すオンデマンド呼び出しがサポートされていない。これらのモデルを利用する場合は、必ずシステム定義の推論プロファイル経由で呼び出す必要がある。
+
+> [!CAUTION]
+> Anthropic 社の Claude モデルなどは、初回利用時にユースケースの入力フォームが表示されるため、あらかじめ必要事項を入力して送信する必要がある。
+
+### 5. GitHub Actions 用シークレット・変数設定
 
 当リポジトリの Setting > Secrets And variables > Actions より、以下の GitHub Actions 用シークレット・変数をすべて設定する。
 
@@ -208,15 +222,13 @@ Secrets タブから「New repository secret」ボタンを押下して、下記
 
 Variables タブから「New repository variable」ボタンを押下して、下記の通り変数をすべて設定する。
 
-| 変数名                      | 変数値                                                       |
-| --------------------------- | ------------------------------------------------------------ |
-| S3_LAMBDA_BUCKET_NAME       | Lambda 関数のビルドアーティファクトを保存するバケット名      |
-| S3_LAMBDA_EDGE_BUCKET_NAME  | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
-| S3_SPA_BUCKET_NAME          | SPA のビルドアーティファクトを保存するバケット名             |
-| COGNITO_HOSTED_UI_SUBDOMAIN | Cognito Hosted UI のドメイン                                 |
-| BEDROCK_MODEL_ID            | Amazon Bedrock ファウンデーションモデルのモデル ID           |
-
-用意した AWS アカウントに対し、[technologystack.md](technologystack.md)に記載した AWS リソースをデプロイする。
+| 変数名                       | 変数値                                                       |
+| ---------------------------- | ------------------------------------------------------------ |
+| BEDROCK_INFERENCE_PROFILE_ID | Amazon Bedrock のシステム定義の推論プロファイル ID           |
+| COGNITO_HOSTED_UI_SUBDOMAIN  | Cognito Hosted UI のドメイン                                 |
+| S3_LAMBDA_BUCKET_NAME        | Lambda 関数のビルドアーティファクトを保存するバケット名      |
+| S3_LAMBDA_EDGE_BUCKET_NAME   | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
+| S3_SPA_BUCKET_NAME           | SPA のビルドアーティファクトを保存するバケット名             |
 
 1. 当リポジトリの Actions > 左側の Deploy All AWS Resources を押下する。
 2. Deploy All AWS Resources の workflow が無効化されている場合は、workflow を有効化する。

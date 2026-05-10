@@ -27,7 +27,10 @@ describe("format_memo handler", () => {
     });
     mockGetUserId.mockReturnValue("test-user-id");
     vi.stubEnv("IS_LOCAL", "false");
-    vi.stubEnv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-haiku-20241022-v1:0");
+    vi.stubEnv(
+      "BEDROCK_INFERENCE_PROFILE_ID",
+      "global.anthropic.claude-3-5-haiku-20241022-v1:0",
+    );
   });
 
   afterEach(() => {
@@ -263,9 +266,9 @@ describe("format_memo handler", () => {
   });
 
   // TC-A-10
-  it("BEDROCK_MODEL_ID が空文字でも InvokeModel は試みられ、応答 body が無い場合は500を返す", async () => {
-    // Given: モデル ID が空でも送信は行われ、Bedrock 応答に body が無い（不正応答）
-    vi.stubEnv("BEDROCK_MODEL_ID", "");
+  it("BEDROCK_INFERENCE_PROFILE_ID が空文字でも InvokeModel は試みられ、応答 body が無い場合は500を返す", async () => {
+    // Given: システム定義の推論プロファイル ID が空でも送信は行われ、Bedrock 応答に body が無い（不正応答）
+    vi.stubEnv("BEDROCK_INFERENCE_PROFILE_ID", "");
     mockSend.mockResolvedValueOnce({ body: undefined });
 
     const event: APIGatewayEvent = {

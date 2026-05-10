@@ -120,7 +120,7 @@ export async function handler(
     };
     const invokeResponse = await getBedrockClient().send(
       new InvokeModelCommand({
-        modelId: process.env.BEDROCK_MODEL_ID,
+        modelId: process.env.BEDROCK_INFERENCE_PROFILE_ID,
         contentType: "application/json",
         accept: "application/json",
         body: Buffer.from(JSON.stringify(payload)),
