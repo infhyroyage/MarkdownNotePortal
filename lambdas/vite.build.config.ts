@@ -1,4 +1,4 @@
-import { writeFileSync } from "fs";
+import { cpSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
@@ -57,10 +57,12 @@ const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
         `.trim(),
       },
-      external: ["crypto"],
+      // prettier はランタイム依存として外部化し、デプロイZIPに node_modules ごと同梱する
+      // (再バンドルすると prettier 内の重複インポートでビルドが失敗するため)
+      external: ["crypto", "prettier"],
       plugins: [
+        // Lambda関数のビルド後に、各Lambda関数のディレクトリにpackage.jsonを生成
         {
-          // Lambda関数のビルド後に、各Lambda関数のディレクトリにpackage.jsonを生成
           name: "generate-package-json",
           closeBundle() {
             [
@@ -99,6 +101,59 @@ const __filename = fileURLToPath(import.meta.url);
                 );
               }
             });
+          },
+        },
+        // format_memo のみ外部化した prettier を利用するため node_modules を同梱
+        {
+          name: "bundle-format-memo-runtime-deps",
+          closeBundle() {
+            const runtimeDeps = ["prettier"];
+            runtimeDeps.forEach((dep: string) => {
+              const src = resolve(__dirname, "node_modules", dep);
+              const dest = resolve(
+                __dirname,
+                "dist",
+                "format_memo",
+                "node_modules",
+                dep,
+              );
+              try {
+                cpSync(src, dest, { recursive: true, dereference: true });
+                console.log(`Copied: ${src} -> ${dest}`);
+              } catch (error) {
+                console.error(
+                  `Failed to copy ${dep} into format_memo:`,
+                  (error as Error).message,
+                );
+              }
+            });
+            const formatMemoPkgPath = resolve(
+              __dirname,
+              "dist",
+              "format_memo",
+              "package.json",
+            );
+            try {
+              writeFileSync(
+                formatMemoPkgPath,
+                JSON.stringify(
+                  {
+                    type: "module",
+                    dependencies: {
+                      prettier: "*",
+                    },
+                  },
+                  null,
+                  2,
+                ),
+              );
+              console.log(`Updated: ${formatMemoPkgPath}`);
+            } catch (error) {
+              console.error(
+                `Failed to update ${formatMemoPkgPath}:`,
+                (error as Error).message,
+              );
+            }
           },
         },
       ],

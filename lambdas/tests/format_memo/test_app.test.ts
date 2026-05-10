@@ -38,8 +38,8 @@ describe("format_memo handler", () => {
   });
 
   // TC-N-01
-  it("正常にBedrockでMarkdownを整形して返す", async () => {
-    // Given: 有効なMarkdown入力とBedrockの正常応答
+  it("正常にBedrockでMarkdownを整形した上で末尾改行などPrettier整形を加えて返す", async () => {
+    // Given: 有効なMarkdown入力とBedrockの正常応答(末尾改行なし)
     mockSend.mockResolvedValueOnce({
       body: new TextEncoder().encode(
         JSON.stringify({
@@ -54,34 +54,58 @@ describe("format_memo handler", () => {
     };
     const response = await handler(event);
 
-    // Then: 200 と整形結果、InvokeModel が1回呼ばれる
+    // Then: 200、InvokeModel が1回呼ばれ、Prettierにより末尾改行が付与される
     expect(response.statusCode).toBe(200);
     expect(mockSend).toHaveBeenCalledTimes(1);
     const body = JSON.parse(response.body);
-    expect(body.content).toBe("# 見出し\n\n整形済み");
+    expect(body.content).toBe("# 見出し\n\n整形済み\n");
   });
 
   // TC-N-02
-  it("IS_LOCAL=true のときはBedrockを呼ばず入力をそのまま返す", async () => {
-    // Given: ローカルモード
+  it("IS_LOCAL=true のときはBedrockを呼ばずに入力をPrettierで整形して返す", async () => {
+    // Given: ローカルモード、見出しの余計な空白と末尾改行なしの入力
     vi.stubEnv("IS_LOCAL", "true");
 
     // When
     const event: APIGatewayEvent = {
-      body: JSON.stringify({ content: "ローカル本文" }),
+      body: JSON.stringify({ content: "#  ローカル\n\n本文" }),
     };
     const response = await handler(event);
 
-    // Then
+    // Then: Bedrockは呼ばれず、Prettierが見出しの空白を1個に正規化し末尾改行を付与する
     expect(response.statusCode).toBe(200);
     expect(mockSend).not.toHaveBeenCalled();
     const body = JSON.parse(response.body);
-    expect(body.content).toBe("ローカル本文");
+    expect(body.content).toBe("# ローカル\n\n本文\n");
   });
 
   // TC-N-03
-  it("Bedrock出力がmarkdownコードフェンスで囲まれている場合は剥がして返す", async () => {
-    // Given
+  it("Bedrock出力の余計な空白行・見出し記号の表記ゆれをPrettierが正規化する", async () => {
+    // Given: 連続する空行や見出しの余計な空白を含む応答
+    const noisy = "#  Title\n\n\n\nfoo";
+    mockSend.mockResolvedValueOnce({
+      body: new TextEncoder().encode(
+        JSON.stringify({
+          content: [{ type: "text", text: noisy }],
+        }),
+      ),
+    });
+
+    // When
+    const event: APIGatewayEvent = {
+      body: JSON.stringify({ content: "入力" }),
+    };
+    const response = await handler(event);
+
+    // Then: 連続空行が1行に潰され、見出しの余計な空白が除去され、末尾改行が付与される
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body.content).toBe("# Title\n\nfoo\n");
+  });
+
+  // TC-N-04
+  it("Bedrock出力が全体をmarkdownコードフェンスで囲む場合は剥がしてからPrettier整形する", async () => {
+    // Given: システムプロンプト違反でフェンス付きの本文を返すBedrock応答
     const fenced = "```markdown\n# 見出し\n\n本文\n```";
     mockSend.mockResolvedValueOnce({
       body: new TextEncoder().encode(
@@ -97,10 +121,10 @@ describe("format_memo handler", () => {
     };
     const response = await handler(event);
 
-    // Then
+    // Then: フェンス内のMarkdownのみが返り、Prettierで末尾改行が付与される
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.body);
-    expect(body.content).toBe("# 見出し\n\n本文");
+    expect(body.content).toBe("# 見出し\n\n本文\n");
   });
 
   // TC-A-01
@@ -188,10 +212,10 @@ describe("format_memo handler", () => {
     // When
     const response = await handler(event);
 
-    // Then
+    // Then: Prettier整形で末尾改行が付与される
     expect(response.statusCode).toBe(200);
     expect(mockSend).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(response.body).content).toBe("ok");
+    expect(JSON.parse(response.body).content).toBe("ok\n");
   });
 
   // TC-A-06
@@ -315,19 +339,28 @@ describe("format_memo helpers", () => {
           { type: "text", text: "b" },
         ],
       }),
-    );
+    ) as Parameters<typeof extractAssistantTextFromBedrockBody>[0];
     expect(extractAssistantTextFromBedrockBody(raw)).toBe("ab");
   });
 
-  it("extractAssistantTextFromBedrockBody が body 欠落で null", async () => {
-    const { extractAssistantTextFromBedrockBody } =
-      await import("../../format_memo/index.js");
-    expect(extractAssistantTextFromBedrockBody(undefined)).toBeNull();
-  });
-
-  it("sanitizeFormattedMarkdown がフェンスなしをそのまま返す", async () => {
+  it("sanitizeFormattedMarkdown が全体フェンス(mdp)を剥がす", async () => {
     const { sanitizeFormattedMarkdown } =
       await import("../../format_memo/index.js");
-    expect(sanitizeFormattedMarkdown("  hello  ")).toBe("hello");
+    const s = "```markdown\n# a\n\nb\n```";
+    expect(sanitizeFormattedMarkdown(s)).toBe("# a\n\nb");
+  });
+
+  it("sanitizeFormattedMarkdown が言語名なしの全体フェンスを剥がす", async () => {
+    const { sanitizeFormattedMarkdown } =
+      await import("../../format_memo/index.js");
+    const s = "```\n# a\n```";
+    expect(sanitizeFormattedMarkdown(s)).toBe("# a");
+  });
+
+  it("sanitizeFormattedMarkdown が部分フェンスのみの本文は改変しない", async () => {
+    const { sanitizeFormattedMarkdown } =
+      await import("../../format_memo/index.js");
+    const s = "pre\n```\ncode\n```\npost";
+    expect(sanitizeFormattedMarkdown(s)).toBe("pre\n```\ncode\n```\npost");
   });
 });

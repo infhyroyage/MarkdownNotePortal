@@ -108,7 +108,7 @@ API Gateway で以下の API エンドポイントを管理する。
   - 成功レスポンス: `204 No Content`
   - 取得不可: `404 Not Found`
 - [POST] /format
-  - 概要: 指定した Markdown 本文を誤記修正・表への構造化などを整形する。
+  - 概要: Amazon Bedrock の生成モデルに渡して誤記修正・表への構造化などを行い、応答が単一の Markdown 用コードフェンスで全体を囲んでいる場合はその外側を取り除いたうえで、 Prettier で改行・空白・記号の表記ゆれを正規化することで、指定した Markdown 本文をフォーマットする。
   - リクエストボディ: `{ "content": string }`
   - 成功レスポンス: `200 OK` `{ "content": string }`
   - バリデーション: `content` は 1〜100000 文字の Markdown 文字列

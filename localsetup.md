@@ -32,7 +32,7 @@
 > DynamoDB テーブル`mkmemoportal-dynamodb`は、上記コマンド実行時に`docker/scripts/create_table.sh`を自動実行して作成されるため、明示的にテーブルを手動作成する必要はない。
 
 > [!NOTE]
-> ローカル環境とAWS環境とを互いに独立させるべく、 [POST] /format の Lambda 関数の Docker コンテナからは Amazon Bedrock を呼び出さずに、 Markdown 本文そのままエコーするようにしている。
+> ローカル環境はAWS環境と独立しているため、ローカル環境のみ [POST] /format の Lambda 関数の Docker コンテナから Amazon Bedrock の呼出し部分のみスキップしている。
 
 5. 4 とは別のターミナルで以下のコマンドを実行し、フロントエンドのディレクトリに移動して、Node.js の依存関係をインストールする:
 
