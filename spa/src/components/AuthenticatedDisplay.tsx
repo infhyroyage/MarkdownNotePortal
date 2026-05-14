@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LayoutMode, Memo, SaveStatus } from "../types/state";
 import {
   createMemo,
@@ -39,6 +39,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFormatting, setIsFormatting] = useState<boolean>(false);
+
+  const markdownEditorRef = useRef<HTMLTextAreaElement>(null);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -316,33 +318,46 @@ export default function AuthenticatedDisplay(): JSX.Element {
         selectedMemo.content,
       );
 
-      // フォーマットされたコンテンツで状態を更新
-      setMemos((prevMemos: Memo[]) =>
-        prevMemos.map((memo: Memo) =>
-          memo.id === selectedMemoId
-            ? { ...memo, content: formattedContent.trim() }
-            : memo,
-        ),
-      );
+      const trimmed = formattedContent.trim();
+      const ta = markdownEditorRef.current;
 
-      // 既存のタイマーをキャンセル
-      if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
+      const applyContentViaReactState = (): void => {
+        setMemos((prevMemos: Memo[]) =>
+          prevMemos.map((memo: Memo) =>
+            memo.id === selectedMemoId
+              ? { ...memo, content: trimmed }
+              : memo,
+          ),
+        );
+
+        if (autoSaveTimer) {
+          clearTimeout(autoSaveTimer);
+        }
+
+        const timer = setTimeout(() => {
+          setMemos((currentMemos: Memo[]) => {
+            const currentMemo = currentMemos.find(
+              (memo: Memo) => memo.id === selectedMemoId,
+            );
+            if (currentMemo && currentMemo.content !== undefined) {
+              saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
+            }
+            return currentMemos;
+          });
+        }, 3000);
+        setAutoSaveTimer(timer);
+      };
+
+      // insertText はブラウザの Undo 履歴に載る。React の state だけを更新すると Ctrl+Z / ⌘+Z が効かない。
+      if (ta !== null && typeof document.execCommand === "function") {
+        ta.focus();
+        ta.setSelectionRange(0, ta.value.length);
+        if (document.execCommand("insertText", false, trimmed)) {
+          return;
+        }
       }
 
-      // 3秒後に自動保存
-      const timer = setTimeout(() => {
-        setMemos((currentMemos: Memo[]) => {
-          const currentMemo = currentMemos.find(
-            (memo: Memo) => memo.id === selectedMemoId,
-          );
-          if (currentMemo && currentMemo.content !== undefined) {
-            saveMemo(selectedMemoId, currentMemo.title, currentMemo.content);
-          }
-          return currentMemos;
-        });
-      }, 3000);
-      setAutoSaveTimer(timer);
+      applyContentViaReactState();
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to format markdown"));
     } finally {
@@ -387,6 +402,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         layoutMode={layoutMode}
         isLoadingMemos={isLoadingMemos}
         isLoadingMemoDetail={isLoadingMemoDetail}
+        markdownEditorRef={markdownEditorRef}
         onClickNewMemoButton={handleAddMemo}
         saveMemo={saveMemo}
         selectedMemo={selectedMemo}
