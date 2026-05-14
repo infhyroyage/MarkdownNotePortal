@@ -3,7 +3,8 @@ import {
   type InvokeModelCommandOutput,
 } from "@aws-sdk/client-bedrock-runtime";
 import { AuthenticationError } from "@layer/errors.js";
-import { format as prettierFormat } from "prettier";
+import prettier from "prettier";
+import parserMarkdown from "prettier/plugins/markdown";
 import {
   CONTENT_MAX_LENGTH,
   getBedrockClient,
@@ -145,8 +146,10 @@ export async function handler(
     }
 
     // Prettierで整形(改行・記号などの表記ゆれを正規化)
-    const formatted = await prettierFormat(rawMarkdown, {
+    const formatted = await prettier.format(rawMarkdown, {
       parser: "markdown",
+      plugins: [parserMarkdown],
+      proseWrap: "preserve",
     });
 
     const result: FormatMemoResponse = { content: formatted };
