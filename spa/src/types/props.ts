@@ -1,4 +1,9 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import type {
+  ChangeEvent,
+  Dispatch,
+  RefObject,
+  SetStateAction,
+} from "react";
 import type { LayoutMode, Memo, SaveStatus } from "./state";
 
 /**
@@ -347,6 +352,11 @@ export interface WorkspaceProps {
    * メモ一覧を更新する関数
    */
   setMemos: Dispatch<SetStateAction<Memo[]>>;
+
+  /**
+   * Markdownエディター（textarea）への参照（フォーマット後のUndo用）
+   */
+  markdownEditorRef: RefObject<HTMLTextAreaElement | null>;
 }
 
 /**
@@ -367,6 +377,11 @@ export interface WorkspaceEditorProps {
    * Markdownコンテンツを変更する関数
    */
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+
+  /**
+   * textarea 要素への参照（親から execCommand 等で操作する場合に使用）
+   */
+  markdownEditorRef: RefObject<HTMLTextAreaElement | null>;
 
   /**
    * エディターのサイズ(画面のパーセンテージ)

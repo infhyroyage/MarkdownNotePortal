@@ -9,7 +9,8 @@ import type { WorkspaceEditorProps } from "../types/props";
 export default function WorkspaceEditor(
   props: WorkspaceEditorProps
 ): JSX.Element {
-  const { layoutMode, markdownContent, onChange, widthPercent } = props;
+  const { layoutMode, markdownContent, markdownEditorRef, onChange, widthPercent } =
+    props;
 
   return (
     <div
@@ -21,6 +22,7 @@ export default function WorkspaceEditor(
       }
     >
       <textarea
+        ref={markdownEditorRef}
         className="flex-1 w-full p-4 font-mono text-sm resize-none focus:outline-none"
         value={markdownContent}
         onChange={onChange}

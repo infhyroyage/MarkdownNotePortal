@@ -34,6 +34,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     selectedMemoId,
     setAutoSaveTimer,
     setMemos,
+    markdownEditorRef,
   } = props;
 
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
@@ -170,6 +171,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <>
             <WorkspaceEditor
               markdownContent={selectedMemo.content ?? ""}
+              markdownEditorRef={markdownEditorRef}
               onChange={handleMarkdownContentChange}
               layoutMode={layoutMode}
               widthPercent={editorWidthPercent}
