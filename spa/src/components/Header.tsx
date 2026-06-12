@@ -1,11 +1,8 @@
 import type { JSX } from "react";
 import type { HeaderProps } from "../types/props";
-import FormatButton from "./FormatButton";
 import HamburgerMenuButton from "./HamburgerMenuButton";
-import LayoutToggleButton from "./LayoutToggleButton";
+import HeaderMenu from "./HeaderMenu";
 import SaveStatusIcon from "./SaveStatusIcon";
-import SignOutButton from "./SignOutButton";
-import ThemeButton from "./ThemeButton";
 import TitleEditor from "./TitleEditor";
 
 /**
@@ -44,22 +41,17 @@ export default function Header(props: HeaderProps): JSX.Element {
       </div>
       <div className="flex-none flex items-center">
         {hasSelectedMemo && (
-          <>
-            <div className="flex-2 items-center px-3">
-              <SaveStatusIcon saveStatus={saveStatus} />
-            </div>
-            <FormatButton
-              onFormat={onFormatMarkdown}
-              isFormatting={isFormatting}
-            />
-          </>
+          <div className="flex-2 items-center px-3">
+            <SaveStatusIcon saveStatus={saveStatus} />
+          </div>
         )}
-        <LayoutToggleButton
+        <HeaderMenu
+          hasSelectedMemo={hasSelectedMemo}
+          isFormatting={isFormatting}
           layoutMode={layoutMode}
+          onFormat={onFormatMarkdown}
           onToggleLayout={onToggleLayout}
         />
-        <ThemeButton />
-        {import.meta.env.PROD && <SignOutButton />}
       </div>
     </header>
   );

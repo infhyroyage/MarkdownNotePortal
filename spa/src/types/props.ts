@@ -143,21 +143,6 @@ export interface ErrorAlertProps {
 }
 
 /**
- * フォーマットボタンを表示するコンポーネントのProps
- */
-export interface FormatButtonProps {
-  /**
-   * フォーマット中である場合はtrue、それ以外はfalse
-   */
-  isFormatting?: boolean;
-
-  /**
-   * フォーマットボタンをクリックした時の処理
-   */
-  onFormat: () => void;
-}
-
-/**
  * ハンバーガーメニューボタンを表示するコンポーネントのProps
  */
 export interface HamburgerMenuButtonProps {
@@ -228,13 +213,28 @@ export interface HeaderProps {
 }
 
 /**
- * レイアウト切り替えボタンコンポーネントのProps
+ * ヘッダーメニューを表示するコンポーネントのProps
  */
-export interface LayoutToggleButtonProps {
+export interface HeaderMenuProps {
+  /**
+   * 選択中のメモが存在するかどうか
+   */
+  hasSelectedMemo: boolean;
+
+  /**
+   * フォーマット中である場合はtrue、それ以外はfalse
+   */
+  isFormatting?: boolean;
+
   /**
    * 現在のレイアウトモード
    */
   layoutMode: LayoutMode;
+
+  /**
+   * フォーマットメニューをクリックした時の処理
+   */
+  onFormat: () => void;
 
   /**
    * レイアウトを切り替える関数
