@@ -13,6 +13,7 @@ import {
   updateMemo,
 } from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
+import { exportPreviewToPdf } from "../utils/pdf";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
 import Header from "./Header";
@@ -39,8 +40,10 @@ export default function AuthenticatedDisplay(): JSX.Element {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFormatting, setIsFormatting] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   const markdownEditorRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // 選択されたメモを取得
   const selectedMemo: Memo | undefined = useMemo<Memo | undefined>(
@@ -162,16 +165,19 @@ export default function AuthenticatedDisplay(): JSX.Element {
     [],
   );
 
+  // メモを選択する関数
   const handleSelectMemo = useCallback(
     (memoId: string): void => setSelectedMemoId(memoId),
     [],
   );
 
+  // ドロワーを開く/閉じる関数
   const handleToggleDrawer = useCallback(
     (): void => setIsDrawerOpen((prev) => !prev),
     [],
   );
 
+  // メモを作成する関数
   const handleAddMemo = useCallback(async (): Promise<void> => {
     try {
       setIsCreatingMemo(true);
@@ -202,6 +208,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
     }
   }, []);
 
+  // メモを削除する関数
   const handleDeleteMemo = useCallback(
     async (memoId: string): Promise<void> => {
       try {
@@ -234,6 +241,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
     [selectedMemoId],
   );
 
+  // タイトルを更新する関数
   const handleUpdateTitle = useCallback(
     (newTitle: string): void => {
       setMemos((prevMemos: Memo[]) =>
@@ -324,9 +332,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
       const applyContentViaReactState = (): void => {
         setMemos((prevMemos: Memo[]) =>
           prevMemos.map((memo: Memo) =>
-            memo.id === selectedMemoId
-              ? { ...memo, content: trimmed }
-              : memo,
+            memo.id === selectedMemoId ? { ...memo, content: trimmed } : memo,
           ),
         );
 
@@ -365,6 +371,26 @@ export default function AuthenticatedDisplay(): JSX.Element {
     }
   }, [selectedMemoId, selectedMemo, autoSaveTimer, saveMemo]);
 
+  // プレビューをPDFとしてエクスポートする関数
+  const handleExportPdf = useCallback(async (): Promise<void> => {
+    if (!selectedMemo || selectedMemo.content === undefined) return;
+
+    const previewElement = previewRef.current;
+    if (!previewElement) {
+      setErrorMessage("Preview is not available for export");
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      await exportPreviewToPdf(previewElement, selectedMemo.title);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Failed to export PDF"));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [selectedMemo]);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {errorMessage && (
@@ -381,6 +407,8 @@ export default function AuthenticatedDisplay(): JSX.Element {
         onToggleLayout={handleToggleLayout}
         onFormatMarkdown={handleFormatMarkdown}
         isFormatting={isFormatting}
+        onExportPdf={handleExportPdf}
+        isExporting={isExporting}
       />
       <Drawer
         memos={memos}
@@ -403,6 +431,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
         isLoadingMemos={isLoadingMemos}
         isLoadingMemoDetail={isLoadingMemoDetail}
         markdownEditorRef={markdownEditorRef}
+        previewRef={previewRef}
         onClickNewMemoButton={handleAddMemo}
         saveMemo={saveMemo}
         selectedMemo={selectedMemo}

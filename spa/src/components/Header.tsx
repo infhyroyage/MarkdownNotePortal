@@ -15,8 +15,10 @@ export default function Header(props: HeaderProps): JSX.Element {
     hasSelectedMemo,
     isDrawerOpen,
     isFormatting = false,
+    isExporting = false,
     layoutMode,
     onFormatMarkdown,
+    onExportPdf,
     onToggleDrawer,
     onToggleLayout,
     onUpdateTitle,
@@ -48,8 +50,10 @@ export default function Header(props: HeaderProps): JSX.Element {
         <HeaderMenu
           hasSelectedMemo={hasSelectedMemo}
           isFormatting={isFormatting}
+          isExporting={isExporting}
           layoutMode={layoutMode}
           onFormat={onFormatMarkdown}
+          onExportPdf={onExportPdf}
           onToggleLayout={onToggleLayout}
         />
       </div>

@@ -1,9 +1,4 @@
-import type {
-  ChangeEvent,
-  Dispatch,
-  RefObject,
-  SetStateAction,
-} from "react";
+import type { ChangeEvent, Dispatch, RefObject, SetStateAction } from "react";
 import type { LayoutMode, Memo, SaveStatus } from "./state";
 
 /**
@@ -187,6 +182,16 @@ export interface HeaderProps {
   onFormatMarkdown: () => void;
 
   /**
+   * PDFエクスポート中である場合はtrue、それ以外はfalse
+   */
+  isExporting?: boolean;
+
+  /**
+   * プレビューをPDFとしてエクスポートする関数
+   */
+  onExportPdf: () => void;
+
+  /**
    * レイアウトを切り替える関数
    */
   onToggleLayout: () => void;
@@ -232,9 +237,19 @@ export interface HeaderMenuProps {
   layoutMode: LayoutMode;
 
   /**
+   * PDFエクスポート中である場合はtrue、それ以外はfalse
+   */
+  isExporting?: boolean;
+
+  /**
    * フォーマットメニューをクリックした時の処理
    */
   onFormat: () => void;
+
+  /**
+   * PDFエクスポートメニューをクリックした時の処理
+   */
+  onExportPdf: () => void;
 
   /**
    * レイアウトを切り替える関数
@@ -357,6 +372,11 @@ export interface WorkspaceProps {
    * Markdownエディター（textarea）への参照（フォーマット後のUndo用）
    */
   markdownEditorRef: RefObject<HTMLTextAreaElement | null>;
+
+  /**
+   * Markdownプレビュー（PDFエクスポート用）への参照
+   */
+  previewRef: RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -402,6 +422,11 @@ export interface WorkspacePreviewProps {
    * Markdownコンテンツ
    */
   markdownContent: string;
+
+  /**
+   * Markdownプレビュー（PDFエクスポート用）への参照
+   */
+  previewRef: RefObject<HTMLDivElement | null>;
 
   /**
    * プレビューのサイズ(画面のパーセンテージ)

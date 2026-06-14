@@ -1,13 +1,13 @@
 import { useEffect, type JSX } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import useTheme from "../hooks/useTheme";
 import type { WorkspacePreviewProps } from "../types/props";
 
 // シンタックスハイライトのテーマCSSをURLとしてインポート
-import githubLightTheme from "highlight.js/styles/github.css?url";
 import githubDarkTheme from "highlight.js/styles/github-dark.css?url";
+import githubLightTheme from "highlight.js/styles/github.css?url";
 
 /**
  * ワークスペースの右側にあるMarkdownプレビューを表示するコンポーネント
@@ -15,9 +15,9 @@ import githubDarkTheme from "highlight.js/styles/github-dark.css?url";
  * @returns {JSX.Element} ワークスペースの右側にあるMarkdownプレビューを表示するコンポーネント
  */
 export default function WorkspacePreview(
-  props: WorkspacePreviewProps
+  props: WorkspacePreviewProps,
 ): JSX.Element {
-  const { layoutMode, markdownContent, widthPercent } = props;
+  const { layoutMode, markdownContent, previewRef, widthPercent } = props;
   const { theme } = useTheme();
 
   // テーマに応じてシンタックスハイライトのCSSを動的に切り替え
@@ -46,7 +46,10 @@ export default function WorkspacePreview(
       }
     >
       <div className="flex-1 overflow-auto">
-        <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4">
+        <div
+          ref={previewRef}
+          className="prose prose-sm md:prose-base lg:prose-lg max-w-none p-4"
+        >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeHighlight]}

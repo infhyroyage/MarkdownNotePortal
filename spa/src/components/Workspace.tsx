@@ -36,6 +36,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     setAutoSaveTimer,
     setMemos,
     markdownEditorRef,
+    previewRef,
   } = props;
 
   const [editorWidthPercent, setEditorWidthPercent] = useState<number>(50);
@@ -220,6 +221,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
               <WorkspacePreview
                 markdownContent={selectedMemo.content ?? ""}
                 layoutMode={layoutMode}
+                previewRef={previewRef}
                 widthPercent={100 - editorWidthPercent}
               />
             </Suspense>
