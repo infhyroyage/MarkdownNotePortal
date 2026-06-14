@@ -366,7 +366,7 @@ export default function AuthenticatedDisplay(): JSX.Element {
   }, [selectedMemoId, selectedMemo, autoSaveTimer, saveMemo]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       {errorMessage && (
         <ErrorAlert message={errorMessage} onClose={handleCloseError} />
       )}

@@ -19,6 +19,12 @@ export default function HeaderMenu(props: HeaderMenuProps): JSX.Element {
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeMenu = useCallback(() => {
+    setIsOpen(false);
+    toggleButtonRef.current?.blur();
+  }, []);
 
   // メニュー外のクリックとEscapeキーでメニューを閉じる
   useEffect(() => {
@@ -26,44 +32,52 @@ export default function HeaderMenu(props: HeaderMenuProps): JSX.Element {
       return;
     }
 
+    // 以下の操作でメニューを閉じるようにイベントリスナーを設定する
+    // * メニュー外クリックイベント
+    // * Escapeキー入力イベント
     const onClickOutside = (event: MouseEvent) => {
       const dropdown = dropdownRef.current;
       if (dropdown && !dropdown.contains(event.target as Node)) {
-        setIsOpen(false);
+        closeMenu();
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        closeMenu();
       }
     };
-
     document.addEventListener("click", onClickOutside);
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("click", onClickOutside);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [isOpen]);
+  }, [closeMenu, isOpen]);
 
   const onToggleMenu = useCallback(() => {
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev) => {
+      if (prev) {
+        toggleButtonRef.current?.blur();
+        return false;
+      }
+      return true;
+    });
   }, []);
 
   const onClickFormat = useCallback(() => {
-    setIsOpen(false);
+    closeMenu();
     onFormat();
-  }, [onFormat]);
+  }, [closeMenu, onFormat]);
 
   const onClickToggleLayout = useCallback(() => {
-    setIsOpen(false);
+    closeMenu();
     onToggleLayout();
-  }, [onToggleLayout]);
+  }, [closeMenu, onToggleLayout]);
 
   const onClickToggleTheme = useCallback(() => {
-    setIsOpen(false);
+    closeMenu();
     toggleTheme();
-  }, [toggleTheme]);
+  }, [closeMenu, toggleTheme]);
 
   // ログアウトメニュー押下時に、Lambda@Edgeのログアウト処理にリダイレクト
   const onClickLogout = useCallback(() => {
@@ -73,9 +87,10 @@ export default function HeaderMenu(props: HeaderMenuProps): JSX.Element {
   return (
     <div
       ref={dropdownRef}
-      className={`dropdown dropdown-end${isOpen ? " dropdown-open" : ""}`}
+      className={`dropdown dropdown-end dropdown-bottom${isOpen ? " dropdown-open" : " dropdown-close"}`}
     >
       <button
+        ref={toggleButtonRef}
         type="button"
         className="btn btn-ghost btn-sm btn-square"
         aria-label="Open menu"
@@ -98,11 +113,7 @@ export default function HeaderMenu(props: HeaderMenuProps): JSX.Element {
           />
         </svg>
       </button>
-      <ul
-        className={`menu text-lg dropdown-content bg-base-100 rounded-box z-20 mt-3 w-64 p-2 shadow${
-          isOpen ? "" : " hidden"
-        }`}
-      >
+      <ul className="menu text-md dropdown-content bg-base-100 rounded-box z-20 inset-e-0 top-full mt-1 w-max p-2 shadow [&_li>*]:w-auto [&_li>*]:whitespace-nowrap">
         {hasSelectedMemo && (
           <li>
             <button
