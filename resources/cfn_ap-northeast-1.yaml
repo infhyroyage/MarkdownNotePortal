@@ -2,12 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Markdown Memo Portal in ap-northeast-1
 
 Parameters:
-  BedrockFoundationModelId:
-    Type: String
-    Description: Amazon Bedrock foundation model ID routed via the inference profile
-  BedrockInferenceProfileId:
-    Type: String
-    Description: Amazon Bedrock inference profile ID
   CognitoHostedUISubDomain:
     Type: String
     Description: Subdomain for Cognito Hosted UI
@@ -70,16 +64,6 @@ Resources:
                   - dynamodb:Query
                   - dynamodb:Scan
                 Resource: !GetAtt MkmemoportalDynamodb.Arn
-        - PolicyName: mkmemoportal-bedrock-access
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - bedrock:InvokeModel
-                Resource:
-                  - !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${BedrockInferenceProfileId}
-                  - !Sub arn:${AWS::Partition}:bedrock:*::foundation-model/${BedrockFoundationModelId}
 
   # S3 Bucket(SPA)
   MkmemoportalSpaBucket:
@@ -388,11 +372,8 @@ Resources:
       Code:
         S3Bucket: !Ref S3LambdaBucketName
         S3Key: format_memo.zip
-      Timeout: 30
+      Timeout: 10
       MemorySize: 256
-      Environment:
-        Variables:
-          BEDROCK_INFERENCE_PROFILE_ID: !Ref BedrockInferenceProfileId
       Layers:
         - !Ref MkmemoportalLambdaLayer
 

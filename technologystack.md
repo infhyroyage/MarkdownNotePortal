@@ -22,7 +22,6 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
   - Amazon CloudWatch (ログ・モニタリング)
   - Amazon Cognito (ユーザープールによる認証機能の提供)
   - Amazon DynamoDB (保存したメモの管理)
-  - Amazon Bedrock (Markdown 本文の整形のための生成モデル呼出し)
   - Amazon S3 (フロントエンド・バックエンドのビルドアーティファクト格納)
   - AWS Backup (バックアップ管理)
   - AWS CloudFormation (スタック管理)
@@ -108,7 +107,7 @@ API Gateway で以下の API エンドポイントを管理する。
   - 成功レスポンス: `204 No Content`
   - 取得不可: `404 Not Found`
 - [POST] /format
-  - 概要: Amazon Bedrock の生成モデルに渡して誤記修正・表への構造化などを行い、応答が単一の Markdown 用コードフェンスで全体を囲んでいる場合はその外側を取り除いたうえで、 Prettier で改行・空白・記号の表記ゆれを正規化することで、指定した Markdown 本文をフォーマットする。
+  - 概要: Prettier で改行・空白・記号の表記ゆれを正規化することで、指定した Markdown 本文をフォーマットする。
   - リクエストボディ: `{ "content": string }`
   - 成功レスポンス: `200 OK` `{ "content": string }`
   - バリデーション: `content` は 1〜100000 文字の Markdown 文字列
