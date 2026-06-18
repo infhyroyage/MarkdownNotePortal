@@ -99,7 +99,7 @@ export default function HeaderMenu(props: HeaderMenuProps): JSX.Element {
       <button
         ref={toggleButtonRef}
         type="button"
-        className="btn btn-ghost btn-sm btn-square"
+        className="btn btn-square btn-ghost"
         aria-label="Open menu"
         aria-haspopup="menu"
         aria-expanded={isOpen}
