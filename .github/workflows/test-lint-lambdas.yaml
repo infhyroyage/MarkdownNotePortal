@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  test:
+  test-lambdas:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
           cd lambdas
           npm run test
 
-  lint:
+  lint-lambdas:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
