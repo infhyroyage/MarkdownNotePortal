@@ -13,6 +13,7 @@ import {
   updateMemo,
 } from "../utils/api";
 import { DEFAULT_MEMO_CONTENT, DEFAULT_MEMO_TITLE } from "../utils/const";
+import { getDefaultLayoutMode } from "../utils/layout";
 import { exportPreviewToPdf } from "../utils/pdf";
 import Drawer from "./Drawer";
 import ErrorAlert from "./ErrorAlert";
@@ -37,7 +38,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
     null,
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(
+    getDefaultLayoutMode,
+  );
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFormatting, setIsFormatting] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
