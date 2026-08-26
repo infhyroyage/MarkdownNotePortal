@@ -13,6 +13,10 @@
 4. 以下のツールを事前にインストールしておく:
    - Git
    - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+   - Node.js v24 (AWS CDK の合成・削除時に `resources/` 配下で `npx cdk` を実行するため)
+
+> [!NOTE]
+> AWS CDK のデプロイは GitHub Actions 上の CLI 認証情報 (`CliCredentialsStackSynthesizer`) で CloudFormation を更新する。CDK Toolkit スタック (`cdk bootstrap`) は不要である。
 5. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする。
 
 ### 2. GitHub Actions 用の IAM OIDC プロバイダーの作成
@@ -307,12 +311,23 @@ aws cloudformation describe-stacks \
    aws s3 rm s3://{SPAのビルドアーティファクトを保存するバケット名} --recursive
    ```
 
-5. 3 のターミナルで以下のコマンドを実行し、CloudFormation テンプレートでデプロイしたスタックを削除する:
+5. 3 のターミナルで以下のコマンドを実行し、AWS CDK でデプロイしたスタックを削除する:
 
    ```bash
-   aws cloudformation delete-stack --stack-name mkmemoportal-stack-ap-northeast-1 --region ap-northeast-1
-   aws cloudformation delete-stack --stack-name mkmemoportal-stack-us-east-1 --region us-east-1
+   pushd resources
+   npx cdk destroy mkmemoportal-stack-ap-northeast-1 --force \
+     --context cognitoHostedUISubDomain={Cognito Hosted UI のドメイン} \
+     --context s3LambdaBucketName={Lambda関数のビルドアーティファクトを保存するバケット名} \
+     --context s3SpaBucketName={SPAのビルドアーティファクトを保存するバケット名} \
+     --context wafWebAclArn=unused \
+     --context lambdaEdgeViewerRequestVersionArn=unused
+   npx cdk destroy mkmemoportal-stack-us-east-1 --force \
+     --context s3LambdaEdgeBucketName={Lambda@Edge関数のビルドアーティファクトを保存するバケット名}
+   popd
    ```
+
+   > [!NOTE]
+   > `cdk destroy` はコンテキスト値をスタック合成に使う。削除時は既存スタックを対象にするため、バケット名・ドメインは構築時と同じ値を指定する。WAF ARN と Lambda@Edge バージョン ARN は削除判定には使わないが、スタック合成のためにダミー値を渡す。
 
 6. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:
 

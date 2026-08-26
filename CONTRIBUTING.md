@@ -5,9 +5,10 @@
 本システムの開発には、以下のツールとテクノロジーを使用する:
 
 - Node.js v24 (TypeScript ランタイム)
-- TypeScript (Lambda 関数の実装言語)
+- TypeScript (Lambda 関数および AWS CDK の実装言語)
 - React (フロントエンドフレームワーク)
 - Vite (ビルドツール・フロントエンドの開発サーバー)
+- AWS CDK (Infrastructure as Code)
 - ESLint (Typescript コードの静的解析)
 - Tailwind CSS + daisyUI (UI フレームワーク)
 - Vitest (ユニットテストフレームワーク)
@@ -17,10 +18,10 @@
 
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
-- ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、フロントエンド・バックエンドの AWS リソースを統合的に定義する、以下の CloudFormation テンプレートファイルを使用する。
-  - **`resources/cfn_ap-northeast-1.yaml`**: AWS WAF/Lambda@Edge 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
-  - **`resources/cfn_us-east-1.yaml`**: AWS WAF/Lambda@Edge を us-east-1 リージョンで定義
-- GitHub Actions と連携して CloudFormation スタックの構築・更新を行い、AWS リソースの継続的デプロイを行う。この GitHub Actions ワークフローは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
+- ほとんどのインフラストラクチャは Infrastructure as Code (IaC) で管理し、手動構成は行わない。本システムでは、フロントエンド・バックエンドの AWS リソースを統合的に定義する、以下の AWS CDK スタックを使用する。
+  - **`resources/ap_northeast_1/index.ts`**: AWS WAF/Lambda@Edge 以外のすべての AWS リソースを ap-northeast-1 リージョンで定義
+  - **`resources/us_east_1/index.ts`**: AWS WAF/Lambda@Edge を us-east-1 リージョンで定義
+- GitHub Actions と連携して AWS CDK スタックの構築・更新を行い、AWS リソースの継続的デプロイを行う。この GitHub Actions ワークフローは、GitHub リポジトリの main ブランチへの commit をトリガーとして実行される。
 - AWS Lambda 関数間で共通する処理は Lambda レイヤーとして lambdas/layer に実装し、コードの重複を避ける。
 - AWS Lambda 関数の型定義は lambdas/types に集約し、型安全性を確保する。
 - AWS Lambda 関数のユニットテストは lambdas/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。AWS Lambda 関数のユニットテストは、以下のコマンドで実行する:
@@ -31,6 +32,15 @@
   ```bash
   cd lambdas && npm run lint
   ```
+- AWS CDK の型定義は resources/types に集約し、型安全性を確保する。
+- AWS CDK のユニットテストは resources/tests に実装し、カバレッジ率 80%以上をみたすようにして、コード品質を担保する。AWS CDK のユニットテストは、以下のコマンドで実行する:
+  ```bash
+  cd resources && npm run test
+  ```
+- AWS CDK は、必ず ESLint の警告・エラーをすべて解消するように、コード品質を担保する。AWS CDK の ESLint の静的解析は、以下のコマンドで実行する:
+  ```bash
+  cd resources && npm run lint
+  ```
 - SPA の型定義は spa/src/types に集約し、型安全性を確保する。
 - SPA は、必ず ESLint の警告・エラーをすべて解消するように、コード品質を担保する。SPA の ESLint の静的解析は、以下のコマンドで実行する:
   ```bash
@@ -39,9 +49,10 @@
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
   - **`.github/workflows/build-and-deploy-lambdas.yaml`**: AWS Lambda 関数のテスト・ビルド・デプロイ
   - **`.github/workflows/build-and-deploy-spa.yaml`**: SPA のビルド・デプロイ
-  - **`.github/workflows/deploy-resources.yaml`**: CloudFormation スタックでの AWS リソースのデプロイ、AWS Lambda 関数のテスト・ビルド・デプロイ、SPA のビルド・デプロイ
+  - **`.github/workflows/deploy-resources.yaml`**: AWS CDK スタックでの AWS リソースのデプロイ、AWS Lambda 関数のテスト・ビルド・デプロイ、SPA のビルド・デプロイ
   - **`.github/workflows/lint-spa.yaml`**: Pull Request 発行時の SPA の ESLint 実行
   - **`.github/workflows/test-lint-lambdas.yaml`**: Pull Request 発行時の AWS Lambda 関数のユニットテスト・ESLint 実行
+  - **`.github/workflows/test-lint-resources.yaml`**: Pull Request 発行時の AWS CDK のユニットテスト・ESLint 実行
 
 ## プルリクエストの要件
 
@@ -59,6 +70,14 @@
   ```bash
   cd spa && npm run lint
   ```
+- [ ] 以下のコマンドを実行して、AWS CDK のすべてのユニットテストが成功し、カバレッジを 80% 以上にする:
+  ```bash
+  cd resources && npm test
+  ```
+- [ ] 以下のコマンドを実行して、AWS CDK の ESLint の警告・エラーをすべて解消する:
+  ```bash
+  cd resources && npm run lint
+  ```
 - [ ] ターゲットを main ブランチに設定している。
 
 ## 依存関係管理
@@ -68,6 +87,11 @@
 - Node.js パッケージ (Lambda 関数)
   - **実行スケジュール**: 毎週木曜日 10:00 (Asia/Tokyo)
   - **対象ファイル**: `lambdas/package.json`
+  - **更新方式**: プルリクエストによる自動提案
+  - **レビュー担当**: 指定されたリポジトリ管理者
+- Node.js パッケージ (AWS CDK)
+  - **実行スケジュール**: 毎週木曜日 10:15 (Asia/Tokyo)
+  - **対象ファイル**: `resources/package.json`
   - **更新方式**: プルリクエストによる自動提案
   - **レビュー担当**: 指定されたリポジトリ管理者
 - Node.js パッケージ (SPA)

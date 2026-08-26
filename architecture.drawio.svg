@@ -60,7 +60,7 @@
                         <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 362px; margin-left: 855px;">
                             <div style="box-sizing: border-box; font-size: 0; text-align: center; color: #232F3E; ">
                                 <div style="display: inline-block; font-size: 12px; font-family: &quot;Helvetica&quot;; color: light-dark(#232F3E, #bdc7d4); line-height: 1.2; pointer-events: all; font-weight: bold; white-space: nowrap; ">
-                                    CloudFormation
+                                    AWS CDK
                                     <div>
                                         (mkmemoportal-stack-ap-northeast-1)
                                     </div>
@@ -69,7 +69,7 @@
                         </div>
                     </foreignObject>
                     <text x="855" y="374" fill="#232F3E" font-family="&quot;Helvetica&quot;" font-size="12px" text-anchor="middle" font-weight="bold">
-                        CloudFor...
+                        AWS CDK
                     </text>
                 </switch>
             </g>
@@ -372,7 +372,7 @@
                         <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 727px; margin-left: 855px;">
                             <div style="box-sizing: border-box; font-size: 0; text-align: center; color: #232F3E; ">
                                 <div style="display: inline-block; font-size: 12px; font-family: &quot;Helvetica&quot;; color: light-dark(#232F3E, #bdc7d4); line-height: 1.2; pointer-events: all; font-weight: bold; white-space: nowrap; ">
-                                    CloudFormation
+                                    AWS CDK
                                     <div>
                                         (mkmemoportal-stack-us-east-1)
                                     </div>
@@ -381,7 +381,7 @@
                         </div>
                     </foreignObject>
                     <text x="855" y="739" fill="#232F3E" font-family="&quot;Helvetica&quot;" font-size="12px" text-anchor="middle" font-weight="bold">
-                        CloudFor...
+                        AWS CDK
                     </text>
                 </switch>
             </g>

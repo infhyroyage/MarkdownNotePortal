@@ -24,14 +24,14 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
   - Amazon DynamoDB (保存したメモの管理)
   - Amazon S3 (フロントエンド・バックエンドのビルドアーティファクト格納)
   - AWS Backup (バックアップ管理)
-  - AWS CloudFormation (スタック管理)
+  - AWS CDK (Infrastructure as Code)
   - AWS IAM (権限管理)
   - AWS Lambda (バックエンドのロジック実装)
   - AWS Lambda@Edge (CloudFront エッジロケーションでのリクエスト処理)
   - AWS Shield (Web アプリケーションの DDoS 攻撃を防御)
   - AWS WAF (Web アプリケーション用ファイアウォール)
 - GitHub (コードリポジトリ)
-- GitHub Actions (CloudFormation スタックの CI/CD パイプライン)
+- GitHub Actions (AWS CDK スタックの CI/CD パイプライン)
 
 ### 2.2 AWS リソース構成
 
@@ -53,8 +53,8 @@ Cognito Hosted UI で構成されたログインページ(ルート)でログイ
 | `mkmemoportal-lambda-update-memo`         | AWS Lambda         | ap-northeast-1 | \[PUT\] /memo/{memoId} のバックエンド処理を行う Lambda 関数    |
 | `mkmemoportal-lambda-format-memo`         | AWS Lambda         | ap-northeast-1 | \[POST\] /format のバックエンド処理を行う Lambda 関数          |
 | `mkmemoportal-lambda-edge-viewer-request` | AWS Lambda@Edge    | us-east-1      | CloudFront ビューワーリクエストを処理する Lambda@Edge 関数     |
-| `mkmemoportal-stack-ap-northeast-1`       | AWS CloudFormation | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
-| `mkmemoportal-stack-us-east-1`            | AWS CloudFormation | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
+| `mkmemoportal-stack-ap-northeast-1`       | AWS CDK            | ap-northeast-1 | ap-northeast-1 リージョンでの AWS リソースを管理するスタック   |
+| `mkmemoportal-stack-us-east-1`            | AWS CDK            | us-east-1      | us-east-1 リージョンでの AWS リソースを管理するスタック        |
 | `mkmemoportal-waf`                        | AWS WAF            | us-east-1      | CloudFront ディストリビューションにアタッチする Web ACL        |
 
 ### 2.3 AWS アーキテクチャー図

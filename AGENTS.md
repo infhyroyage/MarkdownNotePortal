@@ -22,7 +22,7 @@ MarkdownNotePortal — Markdown形式でメモを管理するWebアプリケー�
 - **DynamoDB Local の権限問題**: `docker/dynamodb/` ディレクトリに書き込み権限が必要。初回起動時に `mkdir -p docker/dynamodb && chmod 777 docker/dynamodb` を実行すること。権限が不足すると DynamoDB Local が SQLite エラーで起動に失敗する。
 - **Lambda ビルドが必須**: Docker Compose で Lambda コンテナを起動する前に `cd lambdas && npm run build` が必要（`lambdas/dist/` をボリュームマウントしているため）。ビルドは Node 24 で実行すること。
 - **ローカル認証は無効**: ローカル環境では Cognito 認証がバイパスされ、`Authorization` ヘッダーの検証も行わない。
-- **パッケージマネージャー**: npm を使用（`package-lock.json` が `lambdas/` と `spa/` の両方に存在）。
+- **パッケージマネージャー**: npm を使用（`package-lock.json` が `lambdas/` と `spa/` と `resources/` に存在）。
 
 ### Lint・テスト・ビルドコマンド
 
@@ -31,5 +31,8 @@ MarkdownNotePortal — Markdown形式でメモを管理するWebアプリケー�
 - `cd lambdas && npm run lint` — Lambda関数のESLint
 - `cd lambdas && npm run test` — Lambda関数のVitest（カバレッジ80%以上が必要）
 - `cd lambdas && npm run build` — Lambda関数のビルド（Viteベース）
+- `cd resources && npm run lint` — AWS CDKのESLint
+- `cd resources && npm run test` — AWS CDKのVitest（カバレッジ80%以上が必要）
+- `cd resources && npm run build` — AWS CDKの合成 (`cdk synth`)
 - `cd spa && npm run lint` — SPAのESLint
 - `cd spa && npm run dev` — Vite開発サーバー（ポート5173）
