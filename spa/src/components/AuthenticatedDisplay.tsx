@@ -37,7 +37,11 @@ export default function AuthenticatedDisplay(): JSX.Element {
     null,
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("horizontal");
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() =>
+    window.matchMedia("(orientation: landscape)").matches
+      ? "horizontal"
+      : "vertical",
+  );
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isFormatting, setIsFormatting] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
