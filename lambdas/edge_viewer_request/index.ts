@@ -15,7 +15,7 @@ const COOKIE_NAME_CODE_VERIFIER = "mkmemoportal_code_verifier";
 
 /**
  * アクセストークン Cookie の Max-Age（秒）
- * Cognito User Pool Client の AccessTokenValidity（`resources/cfn_ap-northeast-1.yaml`）と整合させる
+ * Cognito User Pool Client の AccessTokenValidity（`resources/ap_northeast_1/index.ts`）と整合させる
  */
 const ACCESS_TOKEN_COOKIE_MAX_AGE_SECONDS = 12 * 60 * 60;
 

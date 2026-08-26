@@ -1,0 +1,20 @@
+{
+  "app": "npx tsx index.ts",
+  "output": "cdk.out",
+  "versionReporting": false,
+  "pathMetadata": false,
+  "assetMetadata": false,
+  "notices": false,
+  "watch": {
+    "include": ["**"],
+    "exclude": [
+      "README.md",
+      "cdk*.json",
+      "**/*.d.ts",
+      "tests",
+      "coverage",
+      "node_modules",
+      "cdk.out"
+    ]
+  }
+}
