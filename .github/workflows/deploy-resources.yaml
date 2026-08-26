@@ -12,6 +12,9 @@ permissions:
   id-token: write # Required for requesting the OIDC JWT
   contents: read # Required for actions/checkout
 
+env:
+  NODE_VERSION: "24.13.0"
+
 jobs:
   build-lambdas:
     uses: ./.github/workflows/reusable-build-lambdas.yaml
@@ -28,6 +31,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: resources/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: resources
+        run: npm ci
+
       - name: Configure AWS Credentials for us-east-1
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -35,14 +49,11 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy Stack in us-east-1
+        working-directory: resources
         run: |
-          aws cloudformation deploy \
-            --template-file resources/cfn_us-east-1.yaml \
-            --stack-name mkmemoportal-stack-us-east-1 \
-            --region us-east-1 \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides \
-              S3LambdaEdgeBucketName=${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
+          npx cdk deploy mkmemoportal-stack-us-east-1 \
+            --require-approval never \
+            --context s3LambdaEdgeBucketName=${{ vars.S3_LAMBDA_EDGE_BUCKET_NAME }}
 
       - name: Describe Stack Events on Failure
         if: failure()
@@ -64,6 +75,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Setup Node.js ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: resources/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: resources
+        run: npm ci
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -71,6 +93,7 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: Deploy Stack in ap-northeast-1
+        working-directory: resources
         run: |
           WAF_WEB_ACL_ARN=$(aws cloudformation describe-stacks \
             --stack-name mkmemoportal-stack-us-east-1 \
@@ -82,17 +105,13 @@ jobs:
             --region us-east-1 \
             --query 'Stacks[0].Outputs[?OutputKey==`LambdaEdgeViewerRequestVersionArn`].OutputValue' \
             --output text)
-          aws cloudformation deploy \
-            --template-file resources/cfn_ap-northeast-1.yaml \
-            --stack-name mkmemoportal-stack-ap-northeast-1 \
-            --region ap-northeast-1 \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides \
-              CognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }} \
-              S3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }} \
-              S3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }} \
-              WafWebAclArn=${WAF_WEB_ACL_ARN} \
-              LambdaEdgeViewerRequestVersionArn=${LAMBDA_EDGE_VERSION_ARN}
+          npx cdk deploy mkmemoportal-stack-ap-northeast-1 \
+            --require-approval never \
+            --context cognitoHostedUISubDomain=${{ vars.COGNITO_HOSTED_UI_SUBDOMAIN }} \
+            --context s3LambdaBucketName=${{ vars.S3_LAMBDA_BUCKET_NAME }} \
+            --context s3SpaBucketName=${{ vars.S3_SPA_BUCKET_NAME }} \
+            --context wafWebAclArn=${WAF_WEB_ACL_ARN} \
+            --context lambdaEdgeViewerRequestVersionArn=${LAMBDA_EDGE_VERSION_ARN}
 
       - name: Describe Stack Events on Failure (ap-northeast-1)
         if: failure()

@@ -20,6 +20,20 @@ updates:
     labels: []
 
   - package-ecosystem: "npm"
+    directory: "/resources"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "10:15"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "infhyroyage"
+    ignore:
+      - dependency-name: "@types/node"
+      - dependency-name: "typescript"
+    labels: []
+
+  - package-ecosystem: "npm"
     directory: "/spa"
     schedule:
       interval: "weekly"

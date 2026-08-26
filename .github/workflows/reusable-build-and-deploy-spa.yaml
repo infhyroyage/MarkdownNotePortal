@@ -41,7 +41,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ARN_IAM_ROLE_GITHUB_ACTIONS }}
           aws-region: ap-northeast-1
 
-      - name: Get CloudFormation Outputs
+      - name: Get Stack Outputs
         id: cfn-outputs
         run: |
           API_ENDPOINT=$(aws cloudformation describe-stacks \
