@@ -13,7 +13,7 @@
     "@aws-sdk/client-dynamodb": "^3.1106.0",
     "@aws-sdk/client-ssm": "^3.1106.0",
     "prettier": "^3.9.6",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
