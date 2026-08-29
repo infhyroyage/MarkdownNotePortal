@@ -7,13 +7,25 @@ import {
 } from "./types/props.js";
 import { UsEast1Stack } from "./us_east_1/index.js";
 
+/**
+ * コンテキストに指定されたキーが存在するかどうかを判定する
+ * @param {cdk.App} app アプリケーション
+ * @param {string[]} keys キーの配列
+ * @returns {boolean} コンテキストに指定されたキーが存在する場合は true、存在しない場合は false
+ */
 function hasAnyContext(app: cdk.App, keys: string[]): boolean {
   return keys.some((key) => app.node.tryGetContext(key) !== undefined);
 }
 
+/**
+ * アプリケーションを作成する
+ * @param {cdk.App} existingApp 既存のアプリケーション
+ * @returns {cdk.App} アプリケーション
+ */
 export function createApp(existingApp?: cdk.App): cdk.App {
   const app = existingApp ?? new cdk.App();
 
+  // us-east-1 リージョンのスタックの作成
   if (hasAnyContext(app, [CONTEXT_KEYS.s3LambdaEdgeBucketName])) {
     new UsEast1Stack(app, US_EAST_1_STACK_ID, {
       env: { region: "us-east-1" },
@@ -23,6 +35,7 @@ export function createApp(existingApp?: cdk.App): cdk.App {
     });
   }
 
+  // ap-northeast-1 リージョンのスタックの作成
   if (
     hasAnyContext(app, [
       CONTEXT_KEYS.cognitoHostedUISubDomain,

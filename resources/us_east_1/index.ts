@@ -8,7 +8,16 @@ import type { UsEast1StackProps } from "../types/props.js";
 import { setLogicalId } from "../utils/cfn.js";
 import { requireS3BucketName } from "../utils/validate.js";
 
+/**
+ * us-east-1 リージョンのスタック
+ */
 export class UsEast1Stack extends cdk.Stack {
+  /**
+   * コンストラクタ
+   * @param {Construct} scope スコープ
+   * @param {string} id スタック ID
+   * @param {UsEast1StackProps} props us-east-1 リージョンのスタックプロパティ
+   */
   constructor(scope: Construct, id: string, props: UsEast1StackProps) {
     super(scope, id, {
       ...props,
@@ -17,17 +26,20 @@ export class UsEast1Stack extends cdk.Stack {
         props.synthesizer ?? new cdk.CliCredentialsStackSynthesizer(),
     });
 
+    // Lambda@Edge 関数のビルドアーティファクトを保存するバケット名の取得
     const s3LambdaEdgeBucketName = requireS3BucketName(
       props.s3LambdaEdgeBucketName,
       "s3LambdaEdgeBucketName",
     );
 
+    // WAF ロググループ
     const wafLogGroup = new logs.CfnLogGroup(this, "MkmemoportalWafLogGroup", {
       logGroupName: "aws-waf-logs-mkmemoportal",
       retentionInDays: 90,
     });
     setLogicalId(wafLogGroup, "MkmemoportalWafLogGroup");
 
+    // WAF Web ACL
     const waf = new wafv2.CfnWebACL(this, "MkmemoportalWaf", {
       name: "mkmemoportal-waf",
       scope: "CLOUDFRONT",
@@ -59,6 +71,7 @@ export class UsEast1Stack extends cdk.Stack {
     });
     setLogicalId(waf, "MkmemoportalWaf");
 
+    // WAF ログ設定
     const wafLogging = new wafv2.CfnLoggingConfiguration(
       this,
       "MkmemoportalWafLoggingConfiguration",
@@ -69,6 +82,7 @@ export class UsEast1Stack extends cdk.Stack {
     );
     setLogicalId(wafLogging, "MkmemoportalWafLoggingConfiguration");
 
+    // Lambda@Edge 関数の IAM ロール
     const lambdaEdgeRole = new iam.CfnRole(
       this,
       "MkmemoportalIAMRoleLambdaEdge",
@@ -112,6 +126,7 @@ export class UsEast1Stack extends cdk.Stack {
     );
     setLogicalId(lambdaEdgeRole, "MkmemoportalIAMRoleLambdaEdge");
 
+    // Lambda@Edge Viewer Request 関数
     const lambdaEdgeFunction = new lambda.CfnFunction(
       this,
       "MkmemoportalLambdaEdgeViewerRequest",
@@ -128,11 +143,9 @@ export class UsEast1Stack extends cdk.Stack {
         memorySize: 128,
       },
     );
-    setLogicalId(
-      lambdaEdgeFunction,
-      "MkmemoportalLambdaEdgeViewerRequest",
-    );
+    setLogicalId(lambdaEdgeFunction, "MkmemoportalLambdaEdgeViewerRequest");
 
+    // Lambda@Edge Viewer Request バージョン
     const lambdaEdgeVersion = new lambda.CfnVersion(
       this,
       "MkmemoportalLambdaEdgeViewerRequestVersion",
@@ -146,6 +159,7 @@ export class UsEast1Stack extends cdk.Stack {
       "MkmemoportalLambdaEdgeViewerRequestVersion",
     );
 
+    // WAF Web ACL ARNの出力
     const wafWebAclArnOutput = new cdk.CfnOutput(this, "WafWebAclArn", {
       description: "WAF Web ACL ARN in us-east-1",
       value: waf.attrArn,
@@ -153,6 +167,7 @@ export class UsEast1Stack extends cdk.Stack {
     });
     setLogicalId(wafWebAclArnOutput, "WafWebAclArn");
 
+    // Lambda@Edge Viewer Request バージョン ARNの出力
     const lambdaEdgeVersionArnOutput = new cdk.CfnOutput(
       this,
       "LambdaEdgeViewerRequestVersionArn",

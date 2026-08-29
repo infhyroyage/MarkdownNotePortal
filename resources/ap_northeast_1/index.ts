@@ -16,6 +16,9 @@ import {
   requireS3BucketName,
 } from "../utils/validate.js";
 
+/**
+ * Lambda 関数の定義
+ */
 interface ApiLambdaDefinition {
   logicalId: string;
   functionName: string;
@@ -27,6 +30,9 @@ interface ApiLambdaDefinition {
   routeKey: string;
 }
 
+/**
+ * Lambda 関数の定義の配列
+ */
 const API_LAMBDAS: ApiLambdaDefinition[] = [
   {
     logicalId: "CreateMemoFunction",
@@ -90,7 +96,16 @@ const API_LAMBDAS: ApiLambdaDefinition[] = [
   },
 ];
 
+/**
+ * ap-northeast-1 リージョンのスタック
+ */
 export class ApNortheast1Stack extends cdk.Stack {
+  /**
+   * コンストラクタ
+   * @param {Construct} scope スコープ
+   * @param {string} id スタック ID
+   * @param {ApNortheast1StackProps} props ap-northeast-1 リージョンのスタックプロパティ
+   */
   constructor(scope: Construct, id: string, props: ApNortheast1StackProps) {
     super(scope, id, {
       ...props,
@@ -99,27 +114,37 @@ export class ApNortheast1Stack extends cdk.Stack {
         props.synthesizer ?? new cdk.CliCredentialsStackSynthesizer(),
     });
 
+    // Cognito Hosted UI のドメインの取得
     const cognitoHostedUISubDomain = requireNonEmptyString(
       props.cognitoHostedUISubDomain,
       "cognitoHostedUISubDomain",
     );
+
+    // Lambda 関数のビルドアーティファクトを保存するバケット名の取得
     const s3LambdaBucketName = requireS3BucketName(
       props.s3LambdaBucketName,
       "s3LambdaBucketName",
     );
+
+    // SPA のビルドアーティファクトを保存するバケット名の取得
     const s3SpaBucketName = requireS3BucketName(
       props.s3SpaBucketName,
       "s3SpaBucketName",
     );
+
+    // WAF Web ACL の ARN の取得
     const wafWebAclArn = requireNonEmptyString(
       props.wafWebAclArn,
       "wafWebAclArn",
     );
+
+    // Lambda@Edge Viewer Request バージョンの ARN の取得
     const lambdaEdgeViewerRequestVersionArn = requireNonEmptyString(
       props.lambdaEdgeViewerRequestVersionArn,
       "lambdaEdgeViewerRequestVersionArn",
     );
 
+    // AWS Backup の IAM ロール
     const backupRole = new iam.CfnRole(this, "MkmemoportalBackupRole", {
       roleName: "mkmemoportal-iam-role-backup",
       assumeRolePolicyDocument: {
@@ -139,6 +164,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(backupRole, "MkmemoportalBackupRole");
 
+    // DynamoDB テーブル
     const table = new dynamodb.CfnTable(this, "MkmemoportalDynamodb", {
       tableName: "mkmemoportal-dynamodb",
       billingMode: "PAY_PER_REQUEST",
@@ -153,6 +179,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(table, "MkmemoportalDynamodb");
 
+    // Lambda 関数の IAM ロール
     const lambdaRole = new iam.CfnRole(this, "MkmemoportalIAMRoleLambda", {
       roleName: "mkmemoportal-iam-role-lambda",
       assumeRolePolicyDocument: {
@@ -193,6 +220,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(lambdaRole, "MkmemoportalIAMRoleLambda");
 
+    // SPA のビルドアーティファクトを保存するバケット
     const spaBucket = new s3.CfnBucket(this, "MkmemoportalSpaBucket", {
       bucketName: s3SpaBucketName,
       publicAccessBlockConfiguration: {
@@ -205,6 +233,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(spaBucket, "MkmemoportalSpaBucket");
 
+    // AWS Backup バックアップボールト
     const backupVault = new backup.CfnBackupVault(
       this,
       "MkmemoportalBackupVault",
@@ -214,23 +243,29 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(backupVault, "MkmemoportalBackupVault");
 
-    const backupPlan = new backup.CfnBackupPlan(this, "MkmemoportalBackupPlan", {
-      backupPlan: {
-        backupPlanName: "mkmemoportal-backup-plan",
-        backupPlanRule: [
-          {
-            ruleName: "DailyBackupRule",
-            targetBackupVault: backupVault.ref,
-            scheduleExpression: "cron(0 18 * * ? *)",
-            lifecycle: { deleteAfterDays: 3 },
-            startWindowMinutes: 60,
-            completionWindowMinutes: 180,
-          },
-        ],
+    // AWS Backup バックアッププラン
+    const backupPlan = new backup.CfnBackupPlan(
+      this,
+      "MkmemoportalBackupPlan",
+      {
+        backupPlan: {
+          backupPlanName: "mkmemoportal-backup-plan",
+          backupPlanRule: [
+            {
+              ruleName: "DailyBackupRule",
+              targetBackupVault: backupVault.ref,
+              scheduleExpression: "cron(0 18 * * ? *)",
+              lifecycle: { deleteAfterDays: 3 },
+              startWindowMinutes: 60,
+              completionWindowMinutes: 180,
+            },
+          ],
+        },
       },
-    });
+    );
     setLogicalId(backupPlan, "MkmemoportalBackupPlan");
 
+    // AWS Backup バックアップセレクション
     const backupSelection = new backup.CfnBackupSelection(
       this,
       "MkmemoportalBackupSelection",
@@ -245,6 +280,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(backupSelection, "MkmemoportalBackupSelection");
 
+    // CloudFront OAC
     const oac = new cloudfront.CfnOriginAccessControl(
       this,
       "MkmemoportalCloudfrontOAC",
@@ -259,6 +295,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(oac, "MkmemoportalCloudfrontOAC");
 
+    // CloudFront ディストリビューション
     const distribution = new cloudfront.CfnDistribution(
       this,
       "MkmemoportalCloudfront",
@@ -324,6 +361,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(distribution, "MkmemoportalCloudfront");
 
+    // SPA のビルドアーティファクトを保存するバケットのバケットポリシー
     const spaBucketPolicy = new s3.CfnBucketPolicy(
       this,
       "MkmemoportalSpaBucketPolicy",
@@ -351,6 +389,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(spaBucketPolicy, "MkmemoportalSpaBucketPolicy");
 
+    // Cognito ユーザープール
     const userPool = new cognito.CfnUserPool(this, "MkmemoportalCognito", {
       userPoolName: "mkmemoportal-cognito",
       adminCreateUserConfig: {
@@ -371,6 +410,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(userPool, "MkmemoportalCognito");
 
+    // Cognito ユーザープールクライアント
     const userPoolClient = new cognito.CfnUserPoolClient(
       this,
       "MkmemoportalCognitoClient",
@@ -404,6 +444,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(userPoolClient, "MkmemoportalCognitoClient");
 
+    // Cognito ユーザープールドメイン
     const userPoolDomain = new cognito.CfnUserPoolDomain(
       this,
       "MkmemoportalCognitoDomain",
@@ -414,6 +455,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(userPoolDomain, "MkmemoportalCognitoDomain");
 
+    // Cognito ユーザープールクライアント ID
     const ssmCognitoClientId = new ssm.CfnParameter(
       this,
       "MkmemoportalSsmCognitoClientId",
@@ -426,6 +468,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(ssmCognitoClientId, "MkmemoportalSsmCognitoClientId");
 
+    // Cognito ユーザープールドメイン
     const ssmCognitoDomain = new ssm.CfnParameter(
       this,
       "MkmemoportalSsmCognitoDomain",
@@ -440,6 +483,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(ssmCognitoDomain, "MkmemoportalSsmCognitoDomain");
 
+    // CloudFront ドメイン
     const ssmCloudfrontDomain = new ssm.CfnParameter(
       this,
       "MkmemoportalSsmCloudfrontDomain",
@@ -452,6 +496,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(ssmCloudfrontDomain, "MkmemoportalSsmCloudfrontDomain");
 
+    // Lambda レイヤー
     const lambdaLayer = new lambda.CfnLayerVersion(
       this,
       "MkmemoportalLambdaLayer",
@@ -466,6 +511,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(lambdaLayer, "MkmemoportalLambdaLayer");
 
+    // API Gateway
     const api = new apigatewayv2.CfnApi(this, "MkmemoportalApig", {
       name: "mkmemoportal-apig",
       protocolType: "HTTP",
@@ -482,6 +528,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(api, "MkmemoportalApig");
 
+    // API Gateway ステージ
     const apiStage = new apigatewayv2.CfnStage(this, "MkmemoportalApigStage", {
       apiId: api.ref,
       stageName: "$default",
@@ -489,6 +536,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(apiStage, "MkmemoportalApigStage");
 
+    // API Gateway 認証
     const authorizer = new apigatewayv2.CfnAuthorizer(
       this,
       "MkmemoportalApigAuthorizer",
@@ -508,6 +556,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(authorizer, "MkmemoportalApigAuthorizer");
 
+    // Lambda 関数
     for (const definition of API_LAMBDAS) {
       const fn = new lambda.CfnFunction(this, definition.logicalId, {
         functionName: definition.functionName,
@@ -566,12 +615,14 @@ export class ApNortheast1Stack extends cdk.Stack {
       setLogicalId(permission, definition.permissionLogicalId);
     }
 
+    // API Gateway エンドポイント
     const apiEndpointOutput = new cdk.CfnOutput(this, "ApiEndpoint", {
       description: "API Gateway endpoint URL for mkmemoportal-apig",
       value: api.attrApiEndpoint,
     });
     setLogicalId(apiEndpointOutput, "ApiEndpoint");
 
+    // CloudFront ディストリビューション IDの出力
     const cloudFrontDistributionIdOutput = new cdk.CfnOutput(
       this,
       "CloudFrontDistributionId",
@@ -582,12 +633,14 @@ export class ApNortheast1Stack extends cdk.Stack {
     );
     setLogicalId(cloudFrontDistributionIdOutput, "CloudFrontDistributionId");
 
+    // Cognito ユーザープールクライアント IDの出力
     const cognitoClientIdOutput = new cdk.CfnOutput(this, "CognitoClientId", {
       description: "Cognito User Pool Client ID",
       value: userPoolClient.ref,
     });
     setLogicalId(cognitoClientIdOutput, "CognitoClientId");
 
+    // Cognito ユーザープールドメインの出力
     const cognitoDomainOutput = new cdk.CfnOutput(this, "CognitoDomain", {
       description: "Cognito Hosted UI Domain",
       value: cdk.Fn.sub("${Domain}.auth.${AWS::Region}.amazoncognito.com", {
@@ -596,6 +649,7 @@ export class ApNortheast1Stack extends cdk.Stack {
     });
     setLogicalId(cognitoDomainOutput, "CognitoDomain");
 
+    // Markdown Memo Portal URLの出力
     const markdownMemoPortalUrlOutput = new cdk.CfnOutput(
       this,
       "MarkdownMemoPortalUrl",

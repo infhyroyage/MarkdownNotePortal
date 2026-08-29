@@ -85,7 +85,7 @@ export function isUnauthorizedApiError(error: unknown): boolean {
 
 /**
  * Cognito ログイン画面へ誘導するため、ドキュメントルートへ遷移する
- * （Lambda@Edge が未認証時に /login へリダイレクトする）
+ * (Lambda@Edge が未認証時に /login へリダイレクトする)
  */
 export function redirectToLoginPage(): void {
   queueMicrotask(() => {

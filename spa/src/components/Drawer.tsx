@@ -75,7 +75,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
   }, []);
 
   const handleSearchBlur = useCallback((): void => {
-    // 親と同じクエリなら再検索しない（メモクリックで入力が blur したときの二重取得と選択のちらつきを防ぐ）
+    // 親と同じクエリなら再検索しない(メモクリックで入力が blur したときの二重取得と選択のちらつきを防ぐ)
     if (localSearchQuery !== searchQuery) {
       onSearch(localSearchQuery);
     }
@@ -88,7 +88,7 @@ export default function Drawer(props: DrawerProps): JSX.Element {
         onSearch(localSearchQuery);
       }
     },
-    [localSearchQuery, onSearch]
+    [localSearchQuery, onSearch],
   );
 
   const handleClearSearch = useCallback((): void => {
