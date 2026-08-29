@@ -6,6 +6,11 @@ lambdas/node_modules
 lambdas/coverage
 lambdas/dist
 
+# Resources (AWS CDK)
+resources/node_modules
+resources/coverage
+resources/cdk.out
+
 # SPA
 spa/*.tsbuildinfo
 spa/.env

@@ -14,8 +14,8 @@ const COOKIE_NAME_ACCESS_TOKEN = "mkmemoportal_access_token";
 const COOKIE_NAME_CODE_VERIFIER = "mkmemoportal_code_verifier";
 
 /**
- * アクセストークン Cookie の Max-Age（秒）
- * Cognito User Pool Client の AccessTokenValidity（`resources/cfn_ap-northeast-1.yaml`）と整合させる
+ * アクセストークン Cookie の Max-Age(秒)
+ * Cognito User Pool Client の AccessTokenValidity(`resources/ap_northeast_1/index.ts`)と整合させる
  */
 const ACCESS_TOKEN_COOKIE_MAX_AGE_SECONDS = 12 * 60 * 60;
 
@@ -60,7 +60,7 @@ async function getConfig(): Promise<CognitoConfig> {
 
   const getParamValue = (name: string): string => {
     const param = params.find(
-      (p: { Name?: string; Value?: string }) => p.Name === name
+      (p: { Name?: string; Value?: string }) => p.Name === name,
     );
     if (!param || !param.Value) {
       throw new Error(`Parameter ${name} not found`);
@@ -111,7 +111,7 @@ function generateCodeVerifier(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, (byte) => ("0" + byte.toString(16)).slice(-2)).join(
-    ""
+    "",
   );
 }
 
@@ -147,8 +147,8 @@ function isAccessTokenValid(accessToken: string): boolean {
         atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
           .split("")
           .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      )
+          .join(""),
+      ),
     );
 
     // 有効期限をチェック
@@ -201,7 +201,7 @@ function buildLogoutUrl(config: CognitoConfig): string {
 async function exchangeCodeForToken(
   config: CognitoConfig,
   code: string,
-  codeVerifier: string
+  codeVerifier: string,
 ): Promise<string> {
   const tokenUrl = `https://${config.domain}/oauth2/token`;
   const body = new URLSearchParams({
@@ -244,7 +244,7 @@ function buildSetCookie(
     secure?: boolean;
     sameSite?: "Strict" | "Lax" | "None";
     expires?: Date;
-  } = {}
+  } = {},
 ): string {
   const parts = [`${name}=${value}`];
 
@@ -275,7 +275,7 @@ function buildSetCookie(
  */
 function buildRedirectResponse(
   location: string,
-  setCookies: string[] = []
+  setCookies: string[] = [],
 ): CloudFrontResponse {
   const headers: CloudFrontHeaders = {
     location: [{ key: "Location", value: location }],
@@ -324,7 +324,7 @@ function parseQueryString(querystring: string): Record<string, string> {
  * @returns {CloudFrontRequestResult} CloudFrontリクエスト結果
  */
 export async function handler(
-  event: CloudFrontRequestEvent
+  event: CloudFrontRequestEvent,
 ): Promise<CloudFrontRequestResult> {
   const request: CloudFrontRequest = event.Records[0].cf.request;
 
@@ -378,7 +378,7 @@ export async function handler(
             path: "/",
             secure: true,
             sameSite: "Lax",
-          }
+          },
         );
 
         return buildRedirectResponse(loginUrl, [setCookie]);
@@ -388,7 +388,7 @@ export async function handler(
       const accessToken = await exchangeCodeForToken(
         config,
         authCode,
-        codeVerifier
+        codeVerifier,
       );
 
       // アクセストークンをCookieに設定し、code_verifierを削除してリダイレクト
@@ -410,7 +410,7 @@ export async function handler(
       // codeパラメータを削除してリダイレクト
       return buildRedirectResponse(
         `https://${config.cloudfrontDomain}/`,
-        setCookies
+        setCookies,
       );
     }
 
@@ -444,12 +444,16 @@ export async function handler(
       const codeChallenge = await generateCodeChallenge(codeVerifier);
       const loginUrl = buildLoginUrl(cachedConfig, codeChallenge);
 
-      const setCookie = buildSetCookie(COOKIE_NAME_CODE_VERIFIER, codeVerifier, {
-        maxAge: 300,
-        path: "/",
-        secure: true,
-        sameSite: "Lax",
-      });
+      const setCookie = buildSetCookie(
+        COOKIE_NAME_CODE_VERIFIER,
+        codeVerifier,
+        {
+          maxAge: 300,
+          path: "/",
+          secure: true,
+          sameSite: "Lax",
+        },
+      );
 
       return buildRedirectResponse(loginUrl, [setCookie]);
     }

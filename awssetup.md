@@ -11,8 +11,9 @@
    - SPA のビルドアーティファクトを保存するバケット
 3. Cognito Hosted UI でのログイン用に使用するユーザーのメールアドレス・パスワードをすべて決定する。
 4. 以下のツールを事前にインストールしておく:
-   - Git
    - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+   - Git
+   - Node.js v24
 5. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする。
 
 ### 2. GitHub Actions 用の IAM OIDC プロバイダーの作成
@@ -208,12 +209,12 @@ Secrets タブから「New repository secret」ボタンを押下して、下記
 
 Variables タブから「New repository variable」ボタンを押下して、下記の通り変数をすべて設定する。
 
-| 変数名                       | 変数値                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| COGNITO_HOSTED_UI_SUBDOMAIN  | Cognito Hosted UI のドメイン                                 |
-| S3_LAMBDA_BUCKET_NAME        | Lambda 関数のビルドアーティファクトを保存するバケット名      |
-| S3_LAMBDA_EDGE_BUCKET_NAME   | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
-| S3_SPA_BUCKET_NAME           | SPA のビルドアーティファクトを保存するバケット名             |
+| 変数名                      | 変数値                                                       |
+| --------------------------- | ------------------------------------------------------------ |
+| COGNITO_HOSTED_UI_SUBDOMAIN | Cognito Hosted UI のドメイン                                 |
+| S3_LAMBDA_BUCKET_NAME       | Lambda 関数のビルドアーティファクトを保存するバケット名      |
+| S3_LAMBDA_EDGE_BUCKET_NAME  | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
+| S3_SPA_BUCKET_NAME          | SPA のビルドアーティファクトを保存するバケット名             |
 
 1. 当リポジトリの Actions > 左側の Deploy All AWS Resources を押下する。
 2. Deploy All AWS Resources の workflow が無効化されている場合は、workflow を有効化する。
@@ -307,12 +308,23 @@ aws cloudformation describe-stacks \
    aws s3 rm s3://{SPAのビルドアーティファクトを保存するバケット名} --recursive
    ```
 
-5. 3 のターミナルで以下のコマンドを実行し、CloudFormation テンプレートでデプロイしたスタックを削除する:
+5. 3 のターミナルで以下のコマンドを実行し、AWS CDK でデプロイしたスタックを削除する:
 
    ```bash
-   aws cloudformation delete-stack --stack-name mkmemoportal-stack-ap-northeast-1 --region ap-northeast-1
-   aws cloudformation delete-stack --stack-name mkmemoportal-stack-us-east-1 --region us-east-1
+   pushd resources
+   npx cdk destroy mkmemoportal-stack-ap-northeast-1 --force \
+     --context cognitoHostedUISubDomain={Cognito Hosted UI のドメイン} \
+     --context s3LambdaBucketName={Lambda関数のビルドアーティファクトを保存するバケット名} \
+     --context s3SpaBucketName={SPAのビルドアーティファクトを保存するバケット名} \
+     --context wafWebAclArn=unused \
+     --context lambdaEdgeViewerRequestVersionArn=unused
+   npx cdk destroy mkmemoportal-stack-us-east-1 --force \
+     --context s3LambdaEdgeBucketName={Lambda@Edge関数のビルドアーティファクトを保存するバケット名}
+   popd
    ```
+
+   > [!NOTE]
+   > `cdk destroy` は `--context` で渡すコンテキスト値をスタック合成に使っている。コンテキスト値のうち、バケット名・ドメインは削除判定に使うため構築時と同じ値を指定しているが、WAF ARN と Lambda@Edge バージョン ARN は削除判定には使わないためスタック合成のためにダミー値である`unused`を指定している。
 
 6. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:
 

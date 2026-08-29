@@ -369,12 +369,12 @@ export interface WorkspaceProps {
   setMemos: Dispatch<SetStateAction<Memo[]>>;
 
   /**
-   * Markdownエディター（textarea）への参照（フォーマット後のUndo用）
+   * Markdownエディター(textarea)への参照(フォーマット後のUndo用)
    */
   markdownEditorRef: RefObject<HTMLTextAreaElement | null>;
 
   /**
-   * Markdownプレビュー（PDFエクスポート用）への参照
+   * Markdownプレビュー(PDFエクスポート用)への参照
    */
   previewRef: RefObject<HTMLDivElement | null>;
 }
@@ -399,7 +399,7 @@ export interface WorkspaceEditorProps {
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 
   /**
-   * textarea 要素への参照（親から execCommand 等で操作する場合に使用）
+   * textarea 要素への参照(親から execCommand 等で操作する場合に使用)
    */
   markdownEditorRef: RefObject<HTMLTextAreaElement | null>;
 
@@ -424,7 +424,7 @@ export interface WorkspacePreviewProps {
   markdownContent: string;
 
   /**
-   * Markdownプレビュー（PDFエクスポート用）への参照
+   * Markdownプレビュー(PDFエクスポート用)への参照
    */
   previewRef: RefObject<HTMLDivElement | null>;
 
