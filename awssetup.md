@@ -352,9 +352,6 @@ aws cloudformation describe-stacks \
    popd
    ```
 
-   > [!NOTE]
-   > `cdk destroy` は `--context` で渡すコンテキスト値をスタック合成に使っている。`mkmemoportal-stack-us-east-1` の合成に必要なのは `s3LambdaEdgeBucketName` のみで、デプロイ時と同じバケット名を指定する。`mkmemoportal-stack-ap-northeast-1` は 5 つのコンテキストが必要で、バケット名・ドメインは削除判定に使うため構築時と同じ値を指定し、WAF ARN と Lambda@Edge バージョン ARN は削除判定には使わないためスタック合成用のダミー値 `unused` を指定する。
-
 6. 3 のターミナルで以下のコマンドを実行し、AWS CDK bootstrap 用スタック `CDKToolkit` を削除したあと、スタックが保持した staging 用 S3 バケットと ECR リポジトリを削除する:
 
    ```bash
