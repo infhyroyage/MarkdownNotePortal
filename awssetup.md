@@ -216,11 +216,40 @@ Variables タブから「New repository variable」ボタンを押下して、�
 | S3_LAMBDA_EDGE_BUCKET_NAME  | Lambda@Edge 関数のビルドアーティファクトを保存するバケット名 |
 | S3_SPA_BUCKET_NAME          | SPA のビルドアーティファクトを保存するバケット名             |
 
+### 5. AWS CDK の bootstrap
+
+> [!NOTE]
+> `us-east-1` と `ap-northeast-1` の各リージョンで、 `cdk bootstrap` が事前実行済みの場合、本手順はスキップすること。
+
+以下のコマンドを実行し、`us-east-1` と `ap-northeast-1` の各リージョンで bootstrap する。これにより、 AWS CDK で生成した CloudFormation テンプレートを AWS CDK の staging バケットへ公開されるようになる。
+
+```bash
+pushd resources
+npm ci
+npx cdk bootstrap aws://{AWSアカウントID}/us-east-1 \
+  --context s3LambdaEdgeBucketName=unused \
+  --context cognitoHostedUISubDomain=unused \
+  --context s3LambdaBucketName=unused \
+  --context s3SpaBucketName=unused \
+  --context wafWebAclArn=unused \
+  --context lambdaEdgeViewerRequestVersionArn=unused
+npx cdk bootstrap aws://{AWSアカウントID}/ap-northeast-1 \
+  --context s3LambdaEdgeBucketName=unused \
+  --context cognitoHostedUISubDomain=unused \
+  --context s3LambdaBucketName=unused \
+  --context s3SpaBucketName=unused \
+  --context wafWebAclArn=unused \
+  --context lambdaEdgeViewerRequestVersionArn=unused
+popd
+```
+
+### 6. GitHub Actions による AWS リソースのデプロイ
+
 1. 当リポジトリの Actions > 左側の Deploy All AWS Resources を押下する。
 2. Deploy All AWS Resources の workflow が無効化されている場合は、workflow を有効化する。
 3. 右上の「Re-run jobs」から「Re-run all jobs」を押下し、確認ダイアログ内の「Re-run jobs」ボタンを押下する。
 
-### 5. Amazon Cognito ユーザープールへのサインアップ
+### 7. Amazon Cognito ユーザープールへのサインアップ
 
 デプロイした Amazon Cognito ユーザープールに対し、以下のコマンドを実行して、Cognito Hosted UI でのログイン用ユーザーを作成する:
 
@@ -241,7 +270,7 @@ aws cognito-idp admin-set-user-password \
   --permanent
 ```
 
-### 6. Web アプリケーションへのアクセス
+### 8. Web アプリケーションへのアクセス
 
 以下のコマンドを実行して Web アプリケーションの URL を入手し、任意のブラウザを起動して、入手した URL をアドレスバーに入力してアクセスする:
 
@@ -324,9 +353,30 @@ aws cloudformation describe-stacks \
    ```
 
    > [!NOTE]
-   > `cdk destroy` は `--context` で渡すコンテキスト値をスタック合成に使っている。コンテキスト値のうち、バケット名・ドメインは削除判定に使うため構築時と同じ値を指定しているが、WAF ARN と Lambda@Edge バージョン ARN は削除判定には使わないためスタック合成のためにダミー値である`unused`を指定している。
+   > `cdk destroy` は `--context` で渡すコンテキスト値をスタック合成に使っている。`mkmemoportal-stack-us-east-1` の合成に必要なのは `s3LambdaEdgeBucketName` のみで、デプロイ時と同じバケット名を指定する。`mkmemoportal-stack-ap-northeast-1` は 5 つのコンテキストが必要で、バケット名・ドメインは削除判定に使うため構築時と同じ値を指定し、WAF ARN と Lambda@Edge バージョン ARN は削除判定には使わないためスタック合成用のダミー値 `unused` を指定する。
 
-6. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:
+6. 3 のターミナルで以下のコマンドを実行し、AWS CDK bootstrap 用スタック `CDKToolkit` を削除したあと、スタックが保持した staging 用 S3 バケットと ECR リポジトリを削除する:
+
+   ```bash
+   aws cloudformation delete-stack --stack-name CDKToolkit --region us-east-1
+   aws cloudformation delete-stack --stack-name CDKToolkit --region ap-northeast-1
+   aws cloudformation wait stack-delete-complete --stack-name CDKToolkit --region us-east-1
+   aws cloudformation wait stack-delete-complete --stack-name CDKToolkit --region ap-northeast-1
+   aws s3 rm s3://cdk-hnb659fds-assets-{AWSアカウントID}-us-east-1 --recursive
+   aws s3 rm s3://cdk-hnb659fds-assets-{AWSアカウントID}-ap-northeast-1 --recursive
+   aws s3 rb s3://cdk-hnb659fds-assets-{AWSアカウントID}-us-east-1
+   aws s3 rb s3://cdk-hnb659fds-assets-{AWSアカウントID}-ap-northeast-1
+   aws ecr delete-repository \
+     --repository-name cdk-hnb659fds-container-assets-{AWSアカウントID}-us-east-1 \
+     --region us-east-1 \
+     --force
+   aws ecr delete-repository \
+     --repository-name cdk-hnb659fds-container-assets-{AWSアカウントID}-ap-northeast-1 \
+     --region ap-northeast-1 \
+     --force
+   ```
+
+7. 3 のターミナルで以下のコマンドを実行し、Lambda 関数のビルドアーティファクトを保存するバケット名を削除する:
 
    ```bash
    aws s3 rb s3://{Lambda関数のビルドアーティファクトを保存するバケット名}
