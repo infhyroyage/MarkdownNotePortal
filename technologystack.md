@@ -71,6 +71,7 @@ Amazon Cognito ユーザープールを用いて、以下の方式により認�
 
 - Cognito Hosted UI を用いた Authorization Code (PKCE) フローでのサインイン方式を採用する。
 - Cognito Hosted UI・SPA でのセルフサインアップは無効化し、サインアップは初期セットアップ時に管理者が手動登録する運用とする。
+- ログイン時の多要素認証(MFA)を必須とし、第2要素は TOTP(認証アプリ)を使用する。Cognito Hosted UI が初回の認証アプリ登録と以降の TOTP 入力を処理する。
 - ログインページは Cognito Hosted UI を採用し、ログイン成功後に CloudFront から配信された SPA のルートページにコールバックする。
 - 認証処理は CloudFront のビューワーリクエストに関連付けた Lambda@Edge で、AWS Systems Manager Parameter Store からパラメーターを取得しながら実行する。
 - ログイン成功時に取得するアクセストークンはブラウザの Cookie で管理し、アクセストークンの有効期限は 12 時間とする。

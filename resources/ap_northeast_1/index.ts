@@ -404,6 +404,8 @@ export class ApNortheast1Stack extends cdk.Stack {
       ],
       usernameAttributes: ["email"],
       autoVerifiedAttributes: ["email"],
+      mfaConfiguration: "ON",
+      enabledMfas: ["SOFTWARE_TOKEN_MFA"],
       userPoolAddOns: {
         advancedSecurityMode: "ENFORCED",
       },
