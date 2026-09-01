@@ -9,7 +9,7 @@
    - Lambda 関数のビルドアーティファクトを保存するバケット
    - Lambda@Edge 関数のビルドアーティファクトを保存するバケット
    - SPA のビルドアーティファクトを保存するバケット
-3. Cognito Hosted UI でのログイン用に使用するユーザーのメールアドレス・パスワードをすべて決定する。
+3. Cognito Hosted UI でのログイン用に使用するユーザーのメールアドレス・パスワードをすべて決定し、 TOTP 対応の認証アプリ(Google Authenticator など)を用意する。
 4. 以下のツールを事前にインストールしておく:
    - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
    - Git
@@ -270,9 +270,11 @@ aws cognito-idp admin-set-user-password \
   --permanent
 ```
 
+Amazon Cognito ユーザープールは MFA 必須(TOTP)である。ログイン用ユーザー作成時点では認証アプリは未登録であり、初回ログイン時に Cognito Hosted UI 上で認証アプリを登録する。
+
 ### 8. Web アプリケーションへのアクセス
 
-以下のコマンドを実行して Web アプリケーションの URL を入手し、任意のブラウザを起動して、入手した URL をアドレスバーに入力してアクセスする:
+以下のコマンドを実行して Web アプリケーションの URL を入手し、任意のブラウザを起動して、入手した URL をアドレスバーに入力後、認証アプリのワンタイムコードを入力してアクセスする:
 
 ```bash
 aws cloudformation describe-stacks \

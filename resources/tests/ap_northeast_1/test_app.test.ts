@@ -70,9 +70,10 @@ const AP_NORTHEAST_1_OUTPUTS = [
   "MarkdownMemoPortalUrl",
 ];
 
-function synthesize(
-  props: Partial<ApNortheast1StackProps> = {},
-): { stack: ApNortheast1Stack; template: Template } {
+function synthesize(props: Partial<ApNortheast1StackProps> = {}): {
+  stack: ApNortheast1Stack;
+  template: Template;
+} {
   const app = new cdk.App();
   const stack = new ApNortheast1Stack(app, "TestApNortheast1Stack", {
     ...VALID_PROPS,
@@ -152,15 +153,25 @@ describe("ApNortheast1Stack", () => {
   it("Cognito ユーザープールを管理者作成のみにする", () => {
     // Given: 有効な props
     // When: スタックを合成する
-    // Then: email 必須・AdvancedSecurity ENFORCED
+    // Then: email 必須・TOTP MFA 必須・AdvancedSecurity ENFORCED
+    // MFA は CDK 定数のため props から OFF/OPTIONAL/空配列は注入できない
     const { template } = synthesize();
     template.hasResourceProperties("AWS::Cognito::UserPool", {
       UserPoolName: "mkmemoportal-cognito",
       AdminCreateUserConfig: { AllowAdminCreateUserOnly: true },
       UsernameAttributes: ["email"],
       AutoVerifiedAttributes: ["email"],
+      MfaConfiguration: "ON",
+      EnabledMfas: ["SOFTWARE_TOKEN_MFA"],
       UserPoolAddOns: { AdvancedSecurityMode: "ENFORCED" },
     });
+    const userPools = template.findResources("AWS::Cognito::UserPool");
+    const userPoolProps = Object.values(userPools)[0]?.Properties as
+      | Record<string, unknown>
+      | undefined;
+    expect(userPoolProps?.EnabledMfas).toEqual(["SOFTWARE_TOKEN_MFA"]);
+    expect(userPoolProps).not.toHaveProperty("SmsConfiguration");
+    expect(userPoolProps).not.toHaveProperty("EmailConfiguration");
   });
 
   it("Cognito クライアントのトークン有効期限を設定する", () => {
