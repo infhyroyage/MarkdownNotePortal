@@ -22,7 +22,7 @@
     "aws-cdk": "^2.1100.1",
     "eslint": "^10.8.0",
     "globals": "^17.9.0",
-    "tsx": "^4.23.5",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"
