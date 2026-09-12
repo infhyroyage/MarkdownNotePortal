@@ -4,7 +4,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  globalIgnores(["cdk.out", "coverage"]),
+  globalIgnores(["cdk.out", "coverage", ".vitest"]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

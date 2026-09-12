@@ -4,8 +4,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@types": path.resolve(__dirname, "./types"),
-      "@layer": path.resolve(__dirname, "./layer/nodejs"),
+      "@types": path.resolve(import.meta.dirname, "./types"),
+      "@layer": path.resolve(import.meta.dirname, "./layer/nodejs"),
     },
   },
   test: {
@@ -22,6 +22,7 @@ export default defineConfig({
         "**/*.config.ts",
         "**/dist/**",
         "**/coverage/**",
+        "**/.vitest/**",
         "**/types/**",
       ],
       thresholds: {

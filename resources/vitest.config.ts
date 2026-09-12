@@ -4,8 +4,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "@types": path.resolve(__dirname, "./types"),
-      "@utils": path.resolve(__dirname, "./utils"),
+      "@types": path.resolve(import.meta.dirname, "./types"),
+      "@utils": path.resolve(import.meta.dirname, "./utils"),
     },
   },
   test: {
@@ -22,6 +22,7 @@ export default defineConfig({
         "**/*.config.ts",
         "**/cdk.out/**",
         "**/coverage/**",
+        "**/.vitest/**",
         "**/types/**",
       ],
       thresholds: {

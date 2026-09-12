@@ -4,11 +4,13 @@ docker/dynamodb/
 # Lambda
 lambdas/node_modules
 lambdas/coverage
+lambdas/.vitest
 lambdas/dist
 
 # Resources (AWS CDK)
 resources/node_modules
 resources/coverage
+resources/.vitest
 resources/cdk.out
 
 # SPA
