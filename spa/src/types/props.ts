@@ -380,6 +380,21 @@ export interface WorkspaceProps {
 }
 
 /**
+ * ワークスペースの境界線を表示するコンポーネントのProps
+ */
+export interface WorkspaceBorderLineProps {
+  /**
+   * レイアウトモード
+   */
+  layoutMode: LayoutMode;
+
+  /**
+   * ワークスペースの左側にあるMarkdownエディターのサイズ(画面のパーセンテージ)を設定する関数
+   */
+  setEditorWidthPercent: Dispatch<SetStateAction<number>>;
+}
+
+/**
  * ワークスペースの左側にあるMarkdownエディターを表示するコンポーネントのProps
  */
 export interface WorkspaceEditorProps {
