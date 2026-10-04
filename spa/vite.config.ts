@@ -194,7 +194,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   // 大きなサイズのライブラリ(React Router、axios、daisyui)を個別チャンクに分割
