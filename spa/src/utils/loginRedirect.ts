@@ -44,13 +44,6 @@ export interface LoginRedirectController {
 }
 
 /**
- * テスト間で遷移フラグを初期化する
- */
-export function resetLoginRedirectForTests(): void {
-  loginRedirectStarted = false;
-}
-
-/**
  * 期限切れ Cookie を削除する Set-Cookie 文字列を生成する
  * Lambda@Edge が付与する Path / Secure / SameSite と揃えないと削除できない
  * @param {unknown} name Cookie 名
