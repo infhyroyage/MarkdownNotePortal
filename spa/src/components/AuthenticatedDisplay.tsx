@@ -370,6 +370,9 @@ export default function AuthenticatedDisplay(): JSX.Element {
       applyContentViaReactState();
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Failed to format markdown"));
+      if (isUnauthorizedApiError(error)) {
+        redirectToLoginPage();
+      }
     } finally {
       setIsFormatting(false);
     }

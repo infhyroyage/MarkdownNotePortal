@@ -6,6 +6,12 @@
 export const COOKIE_NAME_ACCESS_TOKEN: string = "mkmemoportal_access_token";
 
 /**
+ * PKCE の code_verifier を保存する Cookie 名
+ * Lambda@Edge で設定される Cookie と同じ名前
+ */
+export const COOKIE_NAME_CODE_VERIFIER: string = "mkmemoportal_code_verifier";
+
+/**
  * メモのコンテンツの初期値
  */
 export const DEFAULT_MEMO_CONTENT: string = `# Welcome to Markdown Editor

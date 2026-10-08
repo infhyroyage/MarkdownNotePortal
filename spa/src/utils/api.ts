@@ -84,14 +84,10 @@ export function isUnauthorizedApiError(error: unknown): boolean {
 }
 
 /**
- * Cognito ログイン画面へ誘導するため、ドキュメントルートへ遷移する
- * (Lambda@Edge が未認証時に /login へリダイレクトする)
+ * セッション切れ時にログイン画面へ遷移する
+ * ログイン後画面(`/`)へ戻ると同じ画面の再読み込みが続くため、ログアウト経由でログインへ送る
  */
-export function redirectToLoginPage(): void {
-  queueMicrotask(() => {
-    window.location.replace("/");
-  });
-}
+export { redirectToLoginPage } from "./loginRedirect";
 
 /**
  * [GET] /memoにアクセスして、メモ一覧を取得する
