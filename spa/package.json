@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.20",
-    "axios": "^1.21.0",
+    "axios": "^1.21.1",
     "daisyui": "^5.7.50",
     "html2canvas-pro": "^2.6.4",
     "jspdf": "^4.2.1",
